@@ -42,6 +42,16 @@
     .qa-btn__sub{font-size:.62rem;opacity:.45;display:block;margin-top:.15rem;}
 
     /* ── Search & Filter ── */
+    
+    .stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem;padding:.75rem 1rem;}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.85rem 1rem;}
+    .stat-card__num{font-family:var(--serif);font-size:1.6rem;font-weight:700;line-height:1;display:block;}
+    .stat-card__num.orange{color:var(--accent);}
+    .stat-card__num.green{color:var(--accent2);}
+    .stat-card__label{font-size:.65rem;letter-spacing:.12em;opacity:.45;margin-top:.25rem;display:block;}
+
+    /* Filter */
+    .filter-panel{padding:0 1rem .5rem;display:flex;flex-direction:column;gap:.6rem;}
     .search-bar{padding:.5rem 1rem .4rem;display:flex;flex-direction:column;gap:.45rem;}
     .search-wrap{position:relative;}
     .search-icon{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);opacity:.4;font-size:.9rem;pointer-events:none;}
@@ -152,7 +162,23 @@
       body{padding-bottom:0;}
       .bottom-nav{display:none;}
     }
-  </style>
+  
+    .driving-tips{margin-top:1rem;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+    .driving-tips__header{display:flex;align-items:center;justify-content:space-between;padding:.7rem .9rem;cursor:pointer;font-size:.82rem;font-weight:700;letter-spacing:.08em;background:var(--surface2);-webkit-tap-highlight-color:transparent;}
+    .tips-toggle-icon{font-size:.75rem;opacity:.5;transition:transform .3s;}
+    .driving-tips.open .tips-toggle-icon{transform:rotate(90deg);}
+    .driving-tips__body{display:none;padding:.75rem .9rem;}
+    .driving-tips.open .driving-tips__body{display:block;}
+    .tip-section{margin-bottom:.9rem;}
+    .tip-section__title{font-size:.78rem;font-weight:700;letter-spacing:.08em;margin-bottom:.4rem;color:var(--accent);}
+    .tip-list{list-style:none;display:flex;flex-direction:column;gap:.35rem;}
+    .tip-list li{font-size:.76rem;line-height:1.65;color:var(--muted);padding-left:.9rem;position:relative;}
+    .tip-list li::before{content:"—";position:absolute;left:0;opacity:.35;}
+    .tip-list li strong{color:var(--text);}
+    .tip-section--highlight{background:rgba(168,197,176,.07);border-radius:8px;padding:.65rem .75rem;}
+
+    /* Card grid */
+    </style>
 
   <!-- Firebase SDK -->
   <script type="module">
@@ -206,6 +232,14 @@
 </div>
 
 <!-- ══ 搜尋與篩選 ══ -->
+
+<div class="stats-row">
+  <div class="stat-card"><span class="stat-card__num orange" id="stat-shown">0</span><span class="stat-card__label">顯示筆數</span></div>
+  <div class="stat-card"><span class="stat-card__num" id="stat-stay">0</span><span class="stat-card__label">住宿筆數</span></div>
+  <div class="stat-card"><span class="stat-card__num green" id="stat-region">0</span><span class="stat-card__label">地區數</span></div>
+  <div class="stat-card"><span class="stat-card__num" id="stat-cat">0</span><span class="stat-card__label">類別數</span></div>
+</div>
+
 <div class="search-bar">
   <div class="search-wrap">
     <span class="search-icon">🔍</span>
@@ -311,6 +345,468 @@
     <span class="sync-badge" id="rental-sync-status"></span>
   </div>
 </div>
+
+<!-- 日本自駕注意事項 -->
+    <div class="driving-tips" id="driving-tips">
+      <div class="driving-tips__header" id="tips-toggle">
+        <span>🗾 日本自駕注意事項</span>
+        <span class="tips-toggle-icon">▸</span>
+      </div>
+      <div class="driving-tips__body">
+        <div class="tip-section">
+          <div class="tip-section__title">📄 出發前必備文件</div>
+          <ul class="tip-list">
+            <li>台灣駕照 + <strong>日本語譯本</strong>（台灣監理站辦理，需 2–3 工作天）</li>
+            <li>護照正本</li>
+            <li>租車確認書（印出或手機截圖）</li>
+            <li>國際信用卡（租車押金用，部分需 Visa/Master）</li>
+          </ul>
+        </div>
+        <div class="tip-section">
+          <div class="tip-section__title">🛣️ 行駛規則</div>
+          <ul class="tip-list">
+            <li><strong>靠左行駛</strong>，方向盤在右側（與台灣相反）</li>
+            <li>市區限速 <strong>40–60 km/h</strong>，郊區 <strong>60–80 km/h</strong>，高速 <strong>100 km/h</strong></li>
+            <li>「止まれ」標誌必須<strong>完全停車</strong>，不可滾動通過</li>
+            <li>轉彎時讓行人優先，斑馬線前必須停車</li>
+            <li>右轉需等對向來車完全通過</li>
+            <li>高速公路進出口在<strong>左側</strong></li>
+          </ul>
+        </div>
+        <div class="tip-section">
+          <div class="tip-section__title">🅿️ 停車</div>
+          <ul class="tip-list">
+            <li>多為<strong>自動繳費機</strong>，準備日幣硬幣或 IC 卡</li>
+            <li>路邊黃線禁停，白線可短暫停車（依標示）</li>
+            <li>推薦 <strong>Times Park</strong> 或 <strong>Navitime</strong> App 找停車場</li>
+            <li>觀光地停車場假日容易客滿，建議早去</li>
+          </ul>
+        </div>
+        <div class="tip-section">
+          <div class="tip-section__title">⛽ 加油</div>
+          <ul class="tip-list">
+            <li>一般車輛加 <strong>レギュラー（Regular）</strong></li>
+            <li>自助加油：選油種 → 插卡/投現 → 拿油槍 → 加完按「返金」</li>
+            <li>取車時確認油箱類型（汽油 or 柴油）</li>
+          </ul>
+        </div>
+        <div class="tip-section">
+          <div class="tip-section__title">🛣️ 高速公路 ETC</div>
+          <ul class="tip-list">
+            <li>租車時建議加租 <strong>ETC 車載機</strong>（日本 ETC ≠ 台灣 ETC）</li>
+            <li>沒有 ETC 走一般車道，準備日幣現金</li>
+            <li>九州熊本→福岡約 ¥2,000–2,800</li>
+            <li><strong>ドラぷら（Dra-pla）</strong> App 可查過路費</li>
+          </ul>
+        </div>
+        <div class="tip-section">
+          <div class="tip-section__title">📱 導航</div>
+          <ul class="tip-list">
+            <li>推薦 <strong>Google Maps</strong>（需行動數據）</li>
+            <li><strong>Navitime Japan</strong> 可離線，適合山區路段</li>
+            <li>輸入目的地建議用<strong>電話號碼</strong>或<strong>郵遞區號</strong></li>
+          </ul>
+        </div>
+        <div class="tip-section">
+          <div class="tip-section__title">🚨 緊急狀況</div>
+          <ul class="tip-list">
+            <li>報警：<strong>110</strong> / 救護車火災：<strong>119</strong></li>
+            <li>JAF 道路救援：<strong>0570-00-8139</strong></li>
+            <li>發生事故先拍照，不移動車輛，等警察到場</li>
+            <li>取車時確認租車公司緊急聯絡電話並存入手機</li>
+          </ul>
+        </div>
+        <div class="tip-section">
+          <div class="tip-section__title">🚫 嚴禁事項</div>
+          <ul class="tip-list">
+            <li><strong>飲酒駕車</strong>：血液酒精 0.03% 以上即違法</li>
+            <li><strong>手持手機</strong>：罰款 ¥18,000，記點</li>
+            <li><strong>超速 30 km/h 以上</strong>：可能被逮捕</li>
+            <li>全車乘客都必須繫安全帶（含後座）</li>
+          </ul>
+        </div>
+        <div class="tip-section tip-section--highlight">
+          <div class="tip-section__title">📍 本次行程租車重點</div>
+          <ul class="tip-list">
+            <li>熊本機場取車 → 阿蘇、天草、芦北方向行駛</li>
+            <li>天草公路多山路彎道，單線道會車需禮讓</li>
+            <li>福岡市區停車費高，建議停郊區轉地鐵</li>
+            <li>異地還車（熊本取→福岡還）需確認是否收異地費</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Card list -->
+<div class="section-heading">
+  <h2>景點 / 餐廳 / 住宿</h2>
+  <span id="result-label">載入中…</span>
+</div>
+<div class="card-grid" id="card-grid"></div>
+
+<!-- 行程表入口 -->
+<a href="itinerary.html" style="display:flex;align-items:center;justify-content:space-between;margin:.25rem 1rem .5rem;padding:.9rem 1rem;background:linear-gradient(135deg,rgba(184,175,255,.12),rgba(232,115,74,.08));border:1px solid rgba(184,175,255,.3);border-radius:var(--r);text-decoration:none;color:var(--text);-webkit-tap-highlight-color:transparent;">
+  <div>
+    <div style="font-family:var(--serif);font-size:.95rem;font-weight:700;">🗓 每日行程表</div>
+    <div style="font-size:.72rem;opacity:.5;margin-top:.2rem;">AI 自動排程 · 手動編輯 · 即時同步</div>
+  </div>
+  <span style="font-size:1.2rem;opacity:.5;">→</span>
+</a>
+
+<!-- Add place -->
+<div class="add-section" id="add-section">
+  <div class="add-section__header" id="add-toggle">
+    <span class="add-section__title">＋ 新增地點</span>
+    <span class="add-toggle-icon">▾</span>
+  </div>
+  <div class="add-section__body">
+    <form id="add-place-form">
+      <div class="add-field"><label>地區 *</label><input id="add-region" type="text" placeholder="例：福岡" required></div>
+      <div class="add-field"><label>類別 *</label>
+        <select id="add-category" required>
+          <option value="">選擇類別</option>
+          <option>景點</option><option>餐廳</option><option>住宿</option><option>購物</option><option>其他</option>
+        </select>
+      </div>
+      <div class="add-field"><label>子類別</label><input id="add-sub" type="text" placeholder="例：拉麵店、神社、溫泉飯店"></div>
+      <div class="add-field"><label>名稱 *</label><input id="add-name" type="text" placeholder="景點或店家名稱" required></div>
+      <div class="add-field"><label>營業時間</label><input id="add-hours" type="text" placeholder="例：09:00–17:00，週三休"></div>
+      <div class="add-field"><label>備註</label><textarea id="add-note" rows="2" placeholder="地址、電話、交通方式…"></textarea></div>
+      <button type="submit" class="btn-add-place" id="btn-add-place">新增地點</button>
+      <span class="sync-badge" id="add-sync-status"></span>
+    </form>
+    <button class="btn-export" id="btn-export-csv">📥 匯出 CSV</button>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <a href="travel.html" class="bottom-nav__item"><span>🏠</span><span>首頁</span></a>
+  <a href="index.html" class="bottom-nav__item active"><span>🔍</span><span>總覽</span></a>
+  <a href="fukuoka.html" class="bottom-nav__item"><span>🌆</span><span>福岡</span></a>
+  <a href="itinerary.html" class="bottom-nav__item"><span>🗓</span><span>行程</span></a>
+</nav>
+
+<script>
+// ════════════════════════════════════════
+//  資料（從 trips.json 載入 + Firebase 雲端新增）
+// ════════════════════════════════════════
+let PLACES = [];
+let CLOUD_PLACES = [];
+let favOnly = false;
+let searchQ = '';
+let filterRegion = '';
+let filterCat = '';
+
+function allPlaces(){ return [...PLACES, ...CLOUD_PLACES]; }
+
+// ── Intersection Observer for card reveal ──
+const revObs = new IntersectionObserver(entries=>{
+  entries.forEach(({isIntersecting,target},i)=>{
+    if(!isIntersecting)return;
+    setTimeout(()=>target.classList.add('visible'),i*30);
+    revObs.unobserve(target);
+  });
+},{threshold:.04,rootMargin:'0px 0px -6px 0px'});
+
+// ── Favs (localStorage per device) ──
+function getFavs(){ return JSON.parse(localStorage.getItem('kyushu_favs')||'[]'); }
+function toggleFav(id){
+  const s=getFavs(),i=s.indexOf(id);
+  i>-1?s.splice(i,1):s.push(id);
+  localStorage.setItem('kyushu_favs',JSON.stringify(s));
+  return i>-1?'☆':'⭐';
+}
+
+// ── Render cards ──
+function buildCard(p){
+  const el=document.createElement('article');
+  el.className='card'; el.dataset.id=p.id;
+  const q=encodeURIComponent(p.name+' '+p.region+' Japan');
+  const FISH=['釣','路亞','釣具'];
+  const tags=(p.tags||[]).map(t=>`<span class="tag${FISH.some(k=>t.includes(k))?' tag--fishing':''}">${t}</span>`).join('');
+  const fav=getFavs().includes(p.id);
+  el.innerHTML=`
+    <div class="card__top">
+      <div class="card__left">
+        <div class="card__meta">
+          <span class="card__region">${p.region}</span>
+          <span class="card__sub">${p.subcategory||p.category}</span>
+        </div>
+        <div class="card__name">${p.name}</div>
+        ${p.hours?`<div style="font-size:.68rem;color:var(--accent2);margin-top:.15rem;">🕐 ${p.hours}</div>`:''}
+      </div>
+      <div class="card__actions">
+        <button class="fav-btn${fav?' is-fav':''}" data-fav="${p.id}">${fav?'⭐':'☆'}</button>
+        <a class="maps-btn" href="https://www.google.com/maps/search/?api=1&query=${q}" target="_blank" rel="noopener">🗺 Maps</a>
+      </div>
+    </div>
+    <div class="card__note-wrap">
+      <button class="card__note-toggle">▸ 展開備註</button>
+      <p class="card__note">${p.note||''}</p>
+    </div>
+    <div class="card__tags">${tags}</div>`;
+  if(p.note) el.classList.add('has-note');
+  return el;
+}
+
+function renderCards(){
+  const grid=document.getElementById('card-grid');
+  const favs=getFavs();
+  let list=allPlaces().filter(p=>{
+    if(favOnly && !favs.includes(p.id)) return false;
+    if(filterRegion && p.region!==filterRegion) return false;
+    if(filterCat && p.category!==filterCat) return false;
+    if(searchQ){
+      const q=searchQ.toLowerCase();
+      return (p.name||'').toLowerCase().includes(q)||(p.note||'').toLowerCase().includes(q);
+    }
+    return true;
+  });
+  grid.innerHTML='';
+  if(!list.length){grid.innerHTML='<p class="empty">無符合結果</p>';return;}
+  list.forEach(p=>{const c=buildCard(p);grid.appendChild(c);revObs.observe(c);});
+  // stats
+  document.getElementById('stat-shown').textContent=list.length;
+  document.getElementById('stat-stay').textContent=list.filter(p=>p.category==='住宿').length;
+    document.getElementById('stat-shown').textContent=list.length;
+  document.getElementById('stat-stay').textContent=list.filter(p=>p.category==='住宿').length;
+  document.getElementById('result-label').textContent=`${list.length} 筆`;
+}
+
+function buildFilters(){
+  const all=allPlaces();
+  const regions=[...new Set(all.map(p=>p.region))].sort();
+  const cats=[...new Set(all.map(p=>p.category))].sort();
+  const rSel=document.getElementById('region-select');
+  const cSel=document.getElementById('cat-select');
+  rSel.innerHTML='<option value="">全部地區</option>'+regions.map(r=>`<option>${r}</option>`).join('');
+  cSel.innerHTML='<option value="">全部類別</option>'+cats.map(c=>`<option>${c}</option>`).join('');
+  // region tags
+  const tagWrap=document.getElementById('region-tags');
+  tagWrap.innerHTML='';
+  ['全部',...regions].forEach(r=>{
+    const btn=document.createElement('button');
+    btn.className='region-tag'+(r==='全部'?' active':'');
+    btn.textContent=r; btn.dataset.r=r;
+    tagWrap.appendChild(btn);
+  });
+  document.getElementById('stat-region').textContent=regions.length;
+  document.getElementById('stat-cat').textContent=cats.length;
+}
+
+// ── Events ──
+document.getElementById('search-input').addEventListener('input',e=>{
+  searchQ=e.target.value; renderCards();
+});
+document.getElementById('region-select').addEventListener('change',e=>{
+  filterRegion=e.target.value;
+  document.querySelectorAll('.region-tag').forEach(t=>t.classList.toggle('active',t.dataset.r===(filterRegion||'全部')));
+  renderCards();
+});
+document.getElementById('cat-select').addEventListener('change',e=>{filterCat=e.target.value;renderCards();});
+document.getElementById('region-tags').addEventListener('click',e=>{
+  const btn=e.target.closest('.region-tag');if(!btn)return;
+  filterRegion=btn.dataset.r==='全部'?'':btn.dataset.r;
+  document.getElementById('region-select').value=filterRegion;
+  document.querySelectorAll('.region-tag').forEach(t=>t.classList.toggle('active',t===btn));
+  renderCards();
+});
+document.getElementById('card-grid').addEventListener('click',e=>{
+  const fav=e.target.closest('[data-fav]');
+  if(fav){
+    const result=toggleFav(+fav.dataset.fav);
+    fav.textContent=result;
+    fav.classList.toggle('is-fav', result==='⭐');
+    if(favOnly)renderCards();
+    return;
+  }
+  const tog=e.target.closest('.card__note-toggle')||e.target.closest('.card__name');
+  if(tog){const c=tog.closest('.card');const o=c.classList.toggle('note-open');const t=c.querySelector('.card__note-toggle');if(t)t.textContent=o?'▾ 收合備註':'▸ 展開備註';}
+});
+document.getElementById('fav-only-btn').addEventListener('click',function(){
+  favOnly=!favOnly;this.classList.toggle('active',favOnly);this.textContent=favOnly?'⭐':'☆';renderCards();
+});
+document.getElementById('theme-btn').addEventListener('click',()=>{
+  const t=document.documentElement.dataset.theme==='dark'?'light':'dark';
+  document.documentElement.dataset.theme=t;
+  document.getElementById('theme-btn').textContent=t==='dark'?'🌙':'☀️';
+});
+document.getElementById('cost-toggle').addEventListener('click',()=>document.getElementById('cost-block').classList.toggle('open'));
+document.getElementById('rental-toggle').addEventListener('click',()=>document.getElementById('rental-block').classList.toggle('open'));
+document.getElementById('tips-toggle').addEventListener('click',()=>document.getElementById('driving-tips').classList.toggle('open'));
+document.getElementById('add-toggle').addEventListener('click',()=>document.getElementById('add-section').classList.toggle('open'));
+
+// ── Export CSV ──
+document.getElementById('btn-export-csv').addEventListener('click',()=>{
+  const header='id,region,category,subcategory,name,note,twd';
+  const rows=allPlaces().map(p=>[p.id,p.region,p.category,p.subcategory||'',`"${(p.name||'').replace(/"/g,'""')}"`,`"${(p.note||'').replace(/"/g,'""')}"`,p.twd||''].join(','));
+  const blob=new Blob([header+'\n'+rows.join('\n')],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='kyushu_places.csv';a.click();
+});
+
+// ── Load base_places from Firebase ──
+function loadBasePlaces(){
+  const basRef=window.__ref(window.__db,'base_places');
+  window.__onValue(basRef,snap=>{
+    const data=snap.val();
+    if(data){
+      PLACES=Object.values(data);
+      buildFilters();
+      renderCards();
+    } else {
+      document.getElementById('card-grid').innerHTML='<p class="empty">⚠️ Firebase 尚無資料，請先執行 import-to-firebase.html</p>';
+    }
+  });
+}
+waitFirebase(loadBasePlaces);
+
+// ════════════════════════════════════════
+//  Firebase 功能
+// ════════════════════════════════════════
+function waitFirebase(cb){
+  if(window.__firebaseReady){cb();return;}
+  window.addEventListener('firebase-ready',cb,{once:true});
+}
+
+// ── 費用帳本 ──
+function initCostFirebase(){
+  const db=window.__db;
+  const costRef=window.__ref(db,'cost_entries');
+  const entriesEl=document.getElementById('cost-entries');
+  const summaryEl=document.getElementById('cost-summary');
+  const personEl=document.getElementById('person-input');
+  const statusEl=document.getElementById('cost-sync-status');
+  let entries={};
+
+  function renderSummary(){
+    const n=Math.max(1,parseInt(personEl.value)||1);
+    const total=Object.values(entries).reduce((s,e)=>s+(parseFloat(e.amt)||0),0);
+    summaryEl.innerHTML=`<div class="cost-total"><div><div class="cost-total__label">住宿合計</div><div class="cost-per">每人約 TWD ${Math.ceil(total/n).toLocaleString()}</div></div><span class="cost-total__num">TWD ${total.toLocaleString()}</span></div>`;
+  }
+  function renderEntries(){
+    entriesEl.innerHTML='';
+    Object.entries(entries).forEach(([key,entry])=>{
+      const row=document.createElement('div');
+      row.className='cost-entry';row.dataset.key=key;
+      row.innerHTML=`<input type="text" class="cost-name" placeholder="例：AMP FLAT 福岡" value="${entry.name||''}"><input type="number" class="cost-amt" placeholder="0" value="${entry.amt||''}" min="0" step="1"><button class="cost-entry__del">✕</button>`;
+      entriesEl.appendChild(row);
+    });
+    renderSummary();
+  }
+  window.__onValue(costRef,snap=>{
+    entries=snap.val()||{};
+    renderEntries();
+    if(statusEl)statusEl.textContent='✅ 已同步';
+  });
+  let dbt;
+  entriesEl.addEventListener('input',e=>{
+    const row=e.target.closest('.cost-entry');if(!row)return;
+    const key=row.dataset.key;
+    clearTimeout(dbt);
+    dbt=setTimeout(()=>{
+      const name=row.querySelector('.cost-name').value;
+      const amt=parseFloat(row.querySelector('.cost-amt').value)||0;
+      window.__set(window.__ref(db,`cost_entries/${key}`),{name,amt});
+      if(statusEl)statusEl.textContent='☁️ 儲存中…';
+    },600);
+  });
+  entriesEl.addEventListener('click',e=>{
+    const del=e.target.closest('.cost-entry__del');if(!del)return;
+    window.__remove(window.__ref(db,`cost_entries/${del.closest('.cost-entry').dataset.key}`));
+  });
+  document.getElementById('btn-add-cost').addEventListener('click',()=>{
+    window.__push(costRef,{name:'',amt:0});
+  });
+  personEl.addEventListener('input',renderSummary);
+}
+
+// ── 租車資訊 ──
+function initRentalFirebase(){
+  const db=window.__db;
+  const rentalRef=window.__ref(db,'rental_info');
+  const statusEl=document.getElementById('rental-sync-status');
+  const savedEl=document.getElementById('rental-saved');
+
+  function renderRental(data){
+    if(!data||!Object.keys(data).length){savedEl.innerHTML='<p style="font-size:.75rem;opacity:.35;padding:.5rem 0;">尚未儲存租車資訊</p>';return;}
+    savedEl.innerHTML='';
+    Object.entries(data).forEach(([key,r])=>{
+      const card=document.createElement('div');card.className='rental-card';
+      card.innerHTML=`
+        ${r.company?`<div class="rental-card__row"><span class="rental-card__label">租車公司</span><span class="rental-card__val">${r.company}</span></div>`:''}
+        ${r.cartype?`<div class="rental-card__row"><span class="rental-card__label">車型</span><span class="rental-card__val">${r.cartype}</span></div>`:''}
+        ${r.pickupDate?`<div class="rental-card__row"><span class="rental-card__label">取車</span><span class="rental-card__val">${r.pickupDate} ${r.pickupLoc||''}</span></div>`:''}
+        ${r.returnDate?`<div class="rental-card__row"><span class="rental-card__label">還車</span><span class="rental-card__val">${r.returnDate} ${r.returnLoc||''}</span></div>`:''}
+        ${r.cost?`<div class="rental-card__row"><span class="rental-card__label">費用</span><span class="rental-card__val" style="color:var(--accent);font-weight:700;">TWD ${Number(r.cost).toLocaleString()}</span></div>`:''}
+        ${r.booking?`<div class="rental-card__row"><span class="rental-card__label">訂單編號</span><span class="rental-card__val">${r.booking}</span></div>`:''}
+        ${r.note?`<div class="rental-card__row"><span class="rental-card__label">備註</span><span class="rental-card__val">${r.note}</span></div>`:''}
+        <button class="rental-card__del" data-key="${key}">✕ 刪除此筆</button>`;
+      savedEl.appendChild(card);
+    });
+  }
+  window.__onValue(rentalRef,snap=>{renderRental(snap.val());if(statusEl)statusEl.textContent='✅ 已同步';});
+  savedEl.addEventListener('click',e=>{
+    const del=e.target.closest('[data-key]');if(!del)return;
+    window.__remove(window.__ref(db,`rental_info/${del.dataset.key}`));
+  });
+  document.getElementById('btn-save-rental').addEventListener('click',()=>{
+    const r={
+      company:document.getElementById('r-company').value.trim(),
+      cartype:document.getElementById('r-cartype').value.trim(),
+      pickupDate:document.getElementById('r-pickup-date').value,
+      pickupLoc:document.getElementById('r-pickup-loc').value.trim(),
+      returnDate:document.getElementById('r-return-date').value,
+      returnLoc:document.getElementById('r-return-loc').value.trim(),
+      cost:parseFloat(document.getElementById('r-cost').value)||0,
+      booking:document.getElementById('r-booking').value.trim(),
+      note:document.getElementById('r-note').value.trim(),
+      createdAt:new Date().toISOString()
+    };
+    if(!r.company&&!r.cartype){alert('請至少填寫租車公司或車型');return;}
+    window.__push(rentalRef,r);
+    document.querySelectorAll('#rental-form-wrap input,#rental-form-wrap textarea').forEach(el=>el.value='');
+    if(statusEl)statusEl.textContent='☁️ 儲存中…';
+  });
+}
+
+// ── 新增地點 ──
+function initAddPlaceFirebase(){
+  const db=window.__db;
+  const addRef=window.__ref(db,'custom_places');
+  const statusEl=document.getElementById('add-sync-status');
+  window.__onValue(addRef,snap=>{
+    CLOUD_PLACES=snap.val()?Object.values(snap.val()):[];
+    buildFilters();renderCards();
+  });
+  document.getElementById('add-place-form').addEventListener('submit',e=>{
+    e.preventDefault();
+    const region=document.getElementById('add-region').value.trim();
+    const category=document.getElementById('add-category').value;
+    const sub=document.getElementById('add-sub').value.trim();
+    const name=document.getElementById('add-name').value.trim();
+    const note=document.getElementById('add-note').value.trim();
+    if(!region||!category||!name)return;
+    const hours=document.getElementById('add-hours').value.trim();
+    window.__push(addRef,{id:Date.now(),region,category,subcategory:sub||category,name,hours,note,twd:null,tags:[region],fav:false,photo:null,createdAt:new Date().toISOString()});
+    e.target.reset();
+    const btn=document.getElementById('btn-add-place');
+    btn.textContent='✅ 已新增並同步！';
+    setTimeout(()=>btn.textContent='新增地點',2000);
+  });
+}
+
+// ── 啟動 Firebase ──
+waitFirebase(()=>{
+  initCostFirebase();
+  initRentalFirebase();
+  initAddPlaceFirebase();
+});
+</script>
+</body>
+</html
+
 
 <!-- ══ 地點卡片 ══ -->
 <div class="cards-header">
@@ -725,6 +1221,11 @@ waitFirebase(()=>{
   window.__onValue(window.__ref(db,'rental_info'),snap=>{
     if(snap.val()) loadRentalUI(snap.val());
   });
+
+
+  document.getElementById('tips-toggle').addEventListener('click',()=>document.getElementById('driving-tips').classList.toggle('open'));
+document.getElementById('add-toggle').addEventListener('click',()=>document.getElementById('add-section').classList.toggle('open'));
+
 });
 </script>
 </body>
