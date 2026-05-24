@@ -141,15 +141,7 @@
       .bottom-nav{display:none;}
       body{padding-bottom:0;}
     }
-  
-    .region-picker{display:flex;align-items:center;gap:.55rem;padding:.55rem 1rem;border-bottom:1px solid var(--border);background:var(--surface2);}
-    .region-picker__label{font-size:.7rem;opacity:.45;white-space:nowrap;letter-spacing:.08em;}
-    .region-picker__select{flex:1;padding:.55rem .75rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:.8rem;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .65rem center;padding-right:2rem;background-color:var(--surface);}
-    [data-theme="dark"] .region-picker__select{color:#E8E8E8;}
-    [data-theme="light"] .region-picker__select{color:#1A1A1A;}
-    .region-picker__select option{color:#1A1A1A;background:#FFF;}
-
-</style>
+  </style>
 
   <!-- Firebase SDK -->
   <script type="module">
@@ -186,19 +178,10 @@
 <!-- 日期 Tabs -->
 <div class="date-tabs" id="date-tabs"></div>
 
-
-<!-- 城市選擇 -->
-<div class="region-picker">
-  <span class="region-picker__label">📍 今日城市</span>
-  <select class="region-picker__select" id="day-region-select">
-    <option value="">請選擇城市</option>
-  </select>
-</div>
-
 <!-- AI 排程區 -->
 <div class="ai-bar">
   <div class="ai-bar__title">✨ AI 智慧排程</div>
-  <div class="ai-bar__desc" id="ai-bar-desc">從最愛清單 ⭐ 自動排出最佳行程，考量營業時間、地理位置與交通時間。</div>
+  <div class="ai-bar__desc">從最愛清單 ⭐ 自動排出最佳行程，考量營業時間、地理位置與交通時間。</div>
   <div class="ai-bar__actions">
     <button class="btn-ai btn-ai--primary" id="btn-auto-schedule">🪄 自動排這天</button>
     <button class="btn-ai btn-ai--secondary" id="btn-auto-all">排全程</button>
@@ -316,7 +299,6 @@ const DURATION_DEFAULT = {
   '住宿':0,'釣點':240,'釣具店':30,'購物':60,'其他':30
 };
 
-const ALL_REGIONS = ['別府','大分','熊本','阿蘇','福岡','北九州','移動日'];
 let currentDay = 0;
 let allBasePlaces = [];
 let allCustomPlaces = [];
@@ -329,25 +311,10 @@ function getFavs(){ return JSON.parse(localStorage.getItem('kyushu_favs')||'[]')
 
 
 function getDayRegion(date){
-  const d = date || TRIP_DAYS[currentDay].date;
-  const manual = dayRegionMap[d];
-  if(manual!==undefined && manual!==null) return manual;
-  const day = TRIP_DAYS.find(x=>x.date===d);
+  const targetDate = date || TRIP_DAYS[currentDay].date;
+  if(Object.prototype.hasOwnProperty.call(dayRegionMap, targetDate)) return dayRegionMap[targetDate] || '';
+  const day = TRIP_DAYS.find(d=>d.date===targetDate);
   return day?.region || '';
-}
-
-function buildDayRegionSelect(){
-  const sel = document.getElementById('day-region-select');
-  if(!sel) return;
-  const current = getDayRegion();
-  sel.innerHTML = '<option value="">請選擇城市</option>';
-  ALL_REGIONS.forEach(r=>{
-    const opt = document.createElement('option');
-    opt.value = r;
-    opt.textContent = r;
-    if(r===current) opt.selected = true;
-    sel.appendChild(opt);
-  });
 }
 
 // ── Date Tabs ──
@@ -357,9 +324,8 @@ function buildTabs(){
   TRIP_DAYS.forEach((d,i)=>{
     const btn = document.createElement('button');
     btn.className = 'date-tab' + (i===currentDay?' active':'');
-    const regionLabel = getDayRegion(d.date) || d.sub;
-    btn.innerHTML = `<span class="date-tab__day">${d.label}</span><span class="date-tab__label">${regionLabel}</span>`;
-    btn.addEventListener('click',()=>{ currentDay=i; buildTabs(); buildDayRegionSelect(); renderDay(); });
+    btn.innerHTML = `<span class="date-tab__day">${d.label}</span><span class="date-tab__label">${d.sub}</span>`;
+    btn.addEventListener('click',()=>{ currentDay=i; buildTabs(); renderDay(); });
     wrap.appendChild(btn);
   });
 }
@@ -510,51 +476,66 @@ function autoScheduleDay(){
   const favs = getFavs();
   const region = getDayRegion(day.date);
 
+  function extractHours(note){
+    const m = (note||'').match(/(\d{1,2}:\d{2})[–\-~～至到](\d{1,2}:\d{2})/);
+    return m ? `${m[1]}–${m[2]}` : '';
+  }
+
+  // 蒐集同城市其他日期已用過的景點/餐廳名稱，避免 10/3~10/6 福岡每天都排一樣
+  const usedNames = new Set();
+  TRIP_DAYS.forEach(d=>{
+    if(d.date===day.date) return;
+    const dRegion = getDayRegion(d.date);
+    if(region && dRegion===region && itineraryData[d.date]){
+      itineraryData[d.date].forEach(item=>{
+        if(item.type==='spot' || item.type==='meal') usedNames.add(item.name);
+      });
+    }
+  });
+
   // 撈最愛的景點（優先該地區）
   let candidates = allPlaces().filter(p=>favs.includes(p.id)&&p.category!=='住宿');
   if(region) candidates = candidates.filter(p=>p.region===region);
-  if(!candidates.length) candidates = allPlaces().filter(p=>favs.includes(p.id)&&p.category!=='住宿').slice(0,6);
+
+  // 先排除同城市其他日期已經用過的項目
+  let freshCandidates = candidates.filter(p=>!usedNames.has(p.name));
+  // 如果新項目不足，才回退把舊的補進來
+  let pool = freshCandidates.length ? freshCandidates.concat(candidates.filter(p=>usedNames.has(p.name))) : candidates;
+
+  if(!pool.length) pool = allPlaces().filter(p=>favs.includes(p.id)&&p.category!=='住宿').slice(0,6);
 
   // 排序：餐廳穿插，景點為主
-  const meals = candidates.filter(p=>p.category==='餐廳');
-  const spots = candidates.filter(p=>p.category!=='餐廳');
+  const meals = pool.filter(p=>p.category==='餐廳');
+  const spots = pool.filter(p=>p.category!=='餐廳');
 
   let schedule = [];
-  let currentMin = 8*60; // 08:00 開始
+  let currentMin = 8*60;
 
   function addItem(p, type){
     const dur = DURATION_DEFAULT[p.subcategory]||DURATION_DEFAULT[p.category]||60;
     const start = `${String(Math.floor(currentMin/60)).padStart(2,'0')}:${String(currentMin%60).padStart(2,'0')}`;
     currentMin += dur;
     const end = `${String(Math.floor(currentMin/60)).padStart(2,'0')}:${String(currentMin%60).padStart(2,'0')}`;
-    schedule.push({type, name:p.name, start, end, hours:extractHours(p.note||''), cost:'', note:p.note||'', transitMode:'🚗 開車', transitMin:15});
-    // 加交通
+    schedule.push({
+      type, name:p.name, start, end,
+      hours:extractHours(p.note||''), cost:'', note:p.note||'',
+      region:p.region||'', category:p.category||'', subcategory:p.subcategory||'',
+      transitMode:'🚗 開車', transitMin:15
+    });
     currentMin += 15;
     if(currentMin >= 22*60) return false;
     return true;
   }
 
-  function extractHours(note){
-    const m = note.match(/(\d{1,2}:\d{2})[–\-~～至到](\d{1,2}:\d{2})/);
-    return m ? `${m[1]}–${m[2]}` : '';
-  }
-
-  // 早餐 08:00
-  currentMin = 8*60;
-  // 上午景點
   let si=0;
   for(;si<Math.min(2,spots.length);si++){ if(!addItem(spots[si],'spot'))break; }
-  // 午餐 ~12:00
   if(meals.length>0 && currentMin<13*60){ currentMin=Math.max(currentMin,12*60); addItem(meals[0],'meal'); }
-  // 下午景點
   for(;si<Math.min(4,spots.length);si++){ if(!addItem(spots[si],'spot'))break; }
-  // 晚餐 ~18:00
   if(meals.length>1 && currentMin<19*60){ currentMin=Math.max(currentMin,18*60); addItem(meals[1],'meal'); }
-  // 住宿
+
   const stayPlace = allPlaces().find(p=>p.category==='住宿'&&(region?p.region===region:true));
   if(stayPlace){ currentMin=Math.max(currentMin,20*60); addItem(stayPlace,'stay'); }
 
-  // 寫入 Firebase
   const date = day.date;
   const ref = window.__ref(window.__db,`itinerary/${date}`);
   window.__remove(ref).then(()=>{
@@ -617,21 +598,6 @@ document.getElementById('btn-clear-day').addEventListener('click',()=>{
   window.__remove(window.__ref(window.__db,`itinerary/${date}`));
 });
 
-
-document.getElementById('day-region-select').addEventListener('change',e=>{
-  const date = TRIP_DAYS[currentDay].date;
-  const val = e.target.value;
-  dayRegionMap[date] = val;
-  if(window.__db){
-    window.__set(window.__ref(window.__db,`day_regions/${date}`), val || null);
-  }
-  const desc = document.getElementById('ai-bar-desc');
-  if(desc){
-    desc.textContent = val ? `目前城市：${val}，AI 會優先依此城市排程。` : '從最愛清單 ⭐ 自動排出最佳行程，考量營業時間、地理位置與交通時間。';
-  }
-  buildTabs();
-});
-
 // ── Theme ──
 document.getElementById('theme-btn').addEventListener('click',()=>{
   const t=document.documentElement.dataset.theme==='dark'?'light':'dark';
@@ -644,6 +610,7 @@ function waitFirebase(cb){ if(window.__firebaseReady){cb();return;} window.addEv
 
 waitFirebase(()=>{
   const db=window.__db;
+  window.__onValue(window.__ref(db,'day_regions'),snap=>{ dayRegionMap = snap.val() || {}; buildTabs(); renderDay(); });
   // 載入景點資料
   window.__onValue(window.__ref(db,'base_places'),snap=>{
     allBasePlaces=snap.val()?Object.values(snap.val()):[];
@@ -662,7 +629,6 @@ waitFirebase(()=>{
     renderDay();
   });
   buildTabs();
-  buildDayRegionSelect();
   renderDay();
 });
 </script>
