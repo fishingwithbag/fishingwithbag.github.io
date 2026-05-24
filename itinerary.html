@@ -141,7 +141,15 @@
       .bottom-nav{display:none;}
       body{padding-bottom:0;}
     }
-  </style>
+  
+    .region-picker{display:flex;align-items:center;gap:.55rem;padding:.55rem 1rem;border-bottom:1px solid var(--border);background:var(--surface2);}
+    .region-picker__label{font-size:.7rem;opacity:.45;white-space:nowrap;letter-spacing:.08em;}
+    .region-picker__select{flex:1;padding:.55rem .75rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:.8rem;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .65rem center;padding-right:2rem;background-color:var(--surface);}
+    [data-theme="dark"] .region-picker__select{color:#E8E8E8;}
+    [data-theme="light"] .region-picker__select{color:#1A1A1A;}
+    .region-picker__select option{color:#1A1A1A;background:#FFF;}
+
+</style>
 
   <!-- Firebase SDK -->
   <script type="module">
@@ -178,10 +186,19 @@
 <!-- 日期 Tabs -->
 <div class="date-tabs" id="date-tabs"></div>
 
+
+<!-- 城市選擇 -->
+<div class="region-picker">
+  <span class="region-picker__label">📍 今日城市</span>
+  <select class="region-picker__select" id="day-region-select">
+    <option value="">請選擇城市</option>
+  </select>
+</div>
+
 <!-- AI 排程區 -->
 <div class="ai-bar">
   <div class="ai-bar__title">✨ AI 智慧排程</div>
-  <div class="ai-bar__desc">從最愛清單 ⭐ 自動排出最佳行程，考量營業時間、地理位置與交通時間。</div>
+  <div class="ai-bar__desc" id="ai-bar-desc">從最愛清單 ⭐ 自動排出最佳行程，考量營業時間、地理位置與交通時間。</div>
   <div class="ai-bar__actions">
     <button class="btn-ai btn-ai--primary" id="btn-auto-schedule">🪄 自動排這天</button>
     <button class="btn-ai btn-ai--secondary" id="btn-auto-all">排全程</button>
@@ -226,11 +243,11 @@
     <div class="modal-grid">
       <div class="modal-field">
         <label>開始時間</label>
-        <input id="m-start" type="time" value="09:00" step="300" inputmode="numeric" lang="en-GB">
+        <input id="m-start" type="text" inputmode="numeric" pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$" placeholder="09:00" maxlength="5" value="09:00">
       </div>
       <div class="modal-field">
         <label>結束時間</label>
-        <input id="m-end" type="time" value="10:30" step="300" inputmode="numeric" lang="en-GB">
+        <input id="m-end" type="text" inputmode="numeric" pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$" placeholder="10:30" maxlength="5" value="10:30">
       </div>
     </div>
     <div class="modal-grid">
@@ -299,18 +316,43 @@ const DURATION_DEFAULT = {
   '住宿':0,'釣點':240,'釣具店':30,'購物':60,'其他':30
 };
 
+const ALL_REGIONS = ['別府','大分','熊本','阿蘇','福岡','北九州','長崎','佐賀','移動日'];
 let currentDay = 0;
 let allBasePlaces = [];
 let allCustomPlaces = [];
-let itineraryData = {}; // { 'YYYY-MM-DD': [items] }
+let itineraryData = {};
+let dayRegionMap = {};
 let editingKey = null;
 
 function allPlaces(){ return [...allBasePlaces, ...allCustomPlaces]; }
 function getFavs(){ return JSON.parse(localStorage.getItem('kyushu_favs')||'[]'); }
 
 
+function getDayRegion(date){
+  const targetDate = date || TRIP_DAYS[currentDay].date;
+  if(Object.prototype.hasOwnProperty.call(dayRegionMap, targetDate)) return dayRegionMap[targetDate] || '';
+  const d = TRIP_DAYS.find(x=>x.date===targetDate);
+  return d?.region || '';
+}
+function buildDayRegionSelect(){
+  const sel = document.getElementById('day-region-select');
+  if(!sel) return;
+  const current = getDayRegion();
+  sel.innerHTML = '<option value="">請選擇城市</option>';
+  ALL_REGIONS.forEach(r=>{
+    const opt = document.createElement('option');
+    opt.value = r; opt.textContent = r;
+    if(r===current) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+function updateAiDesc(){
+  const desc = document.getElementById('ai-bar-desc');
+  if(!desc) return;
+  const val = getDayRegion();
+  desc.textContent = val ? `目前城市：${val}，AI 會優先依此城市排程。` : '從最愛清單 ⭐ 自動排出最佳行程，考量營業時間、地理位置與交通時間。';
+}
 function normalizeName(s){ return (s||'').trim().toLowerCase(); }
-
 function guessItemType(place){
   if(!place) return 'spot';
   if(place.category==='餐廳') return 'meal';
@@ -318,15 +360,13 @@ function guessItemType(place){
   if(place.category==='其他') return 'other';
   return 'spot';
 }
-
 function getPlaceDuration(place){
   return DURATION_DEFAULT[place?.subcategory]||DURATION_DEFAULT[place?.category]||60;
 }
-
 function setEndByStartAndPlace(){
   const name = document.getElementById('m-name')?.value || '';
   const start = document.getElementById('m-start')?.value || '';
-  if(!start) return;
+  if(!start || !/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(start)) return;
   const place = allPlaces().find(p=>normalizeName(p.name)===normalizeName(name));
   const dur = getPlaceDuration(place);
   const [h,m] = start.split(':').map(Number);
@@ -335,7 +375,6 @@ function setEndByStartAndPlace(){
   const em = String(endMin%60).padStart(2,'0');
   document.getElementById('m-end').value = `${eh}:${em}`;
 }
-
 function buildPlaceSuggestions(){
   const dl = document.getElementById('place-suggestions');
   if(!dl) return;
@@ -343,36 +382,37 @@ function buildPlaceSuggestions(){
   allPlaces().forEach(p=>{ if(p.name && !map.has(p.name)) map.set(p.name,p); });
   dl.innerHTML = [...map.keys()].sort((a,b)=>a.localeCompare(b,'zh-Hant')).map(n=>`<option value="${n.replace(/"/g,'&quot;')}"></option>`).join('');
 }
-
 function autofillPlaceFields(){
   const name = document.getElementById('m-name')?.value || '';
   const target = normalizeName(name);
   if(!target) return;
-
-  const date = TRIP_DAYS[currentDay].date;
-  const region = typeof getDayRegion==='function' ? getDayRegion(date) : (TRIP_DAYS[currentDay].region||'');
-
+  const region = getDayRegion();
   const matches = allPlaces().filter(p=>normalizeName(p.name)===target);
   if(!matches.length) return;
-
-  const exactRegion = matches.find(p=>region && p.region===region);
-  const first = exactRegion || matches[0];
+  const first = matches.find(p=>region && p.region===region) || matches[0];
   if(!first) return;
-
   document.getElementById('m-type').value = guessItemType(first);
-  if(first.hours || first.note){
-    const currentHours = document.getElementById('m-hours').value.trim();
-    if(!currentHours) document.getElementById('m-hours').value = first.hours || '';
-  }
-  if(first.note){
-    const currentNote = document.getElementById('m-note').value.trim();
-    if(!currentNote) document.getElementById('m-note').value = first.note || '';
-  }
-  if(first.cost){
-    const currentCost = document.getElementById('m-cost').value;
-    if(!currentCost) document.getElementById('m-cost').value = parseInt(first.cost)||0;
-  }
+  const curHours = document.getElementById('m-hours').value.trim();
+  if(!curHours && first.hours) document.getElementById('m-hours').value = first.hours;
+  const curNote = document.getElementById('m-note').value.trim();
+  if(!curNote && first.note) document.getElementById('m-note').value = first.note;
+  const curCost = document.getElementById('m-cost').value;
+  if(!curCost && first.cost) document.getElementById('m-cost').value = parseInt(first.cost)||0;
   setEndByStartAndPlace();
+}
+function setupTimeInput(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.addEventListener('input', e=>{
+    let v = e.target.value.replace(/[^0-9]/g,'');
+    if(v.length >= 3) v = v.slice(0,2) + ':' + v.slice(2,4);
+    e.target.value = v;
+  });
+  el.addEventListener('blur', e=>{
+    const v = e.target.value;
+    const ok = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(v);
+    e.target.style.borderColor = ok ? '' : '#ff6b6b';
+  });
 }
 
 // ── Date Tabs ──
@@ -382,8 +422,9 @@ function buildTabs(){
   TRIP_DAYS.forEach((d,i)=>{
     const btn = document.createElement('button');
     btn.className = 'date-tab' + (i===currentDay?' active':'');
-    btn.innerHTML = `<span class="date-tab__day">${d.label}</span><span class="date-tab__label">${d.sub}</span>`;
-    btn.addEventListener('click',()=>{ currentDay=i; buildTabs(); renderDay(); });
+    const label = getDayRegion(d.date) || d.sub;
+    btn.innerHTML = `<span class="date-tab__day">${d.label}</span><span class="date-tab__label">${label}</span>`;
+    btn.addEventListener('click',()=>{ currentDay=i; buildTabs(); buildDayRegionSelect(); updateAiDesc(); renderDay(); });
     wrap.appendChild(btn);
   });
 }
@@ -511,6 +552,8 @@ function renderDay(){
       const item=(itineraryData[date]||[]).find(i=>i._key===key);
       if(!item)return;
       buildPlaceSuggestions();
+      setupTimeInput('m-start');
+      setupTimeInput('m-end');
       editingKey=key;
       document.getElementById('m-type').value=item.type||'spot';
       document.getElementById('m-name').value=item.name||'';
@@ -530,56 +573,47 @@ function renderDay(){
 function autoScheduleDay(){
   const btn=document.getElementById('btn-auto-schedule');
   btn.disabled=true; btn.textContent='⏳ 排程中…';
-
   const day = TRIP_DAYS[currentDay];
   const favs = getFavs();
-  const region = day.region;
-
-  // 撈最愛的景點（優先該地區）
+  const region = getDayRegion(day.date);
+  function extractHours(note){
+    const m = (note||'').match(/(\d{1,2}:\d{2})[–\-~～至到](\d{1,2}:\d{2})/);
+    return m ? `${m[1]}–${m[2]}` : '';
+  }
+  const usedNames = new Set();
+  TRIP_DAYS.forEach(d=>{
+    if(d.date===day.date) return;
+    if(getDayRegion(d.date)!==region) return;
+    (itineraryData[d.date]||[]).forEach(item=>{
+      if(item.type==='spot'||item.type==='meal') usedNames.add(item.name);
+    });
+  });
   let candidates = allPlaces().filter(p=>favs.includes(p.id)&&p.category!=='住宿');
   if(region) candidates = candidates.filter(p=>p.region===region);
-  if(!candidates.length) candidates = allPlaces().filter(p=>favs.includes(p.id)&&p.category!=='住宿').slice(0,6);
-
-  // 排序：餐廳穿插，景點為主
-  const meals = candidates.filter(p=>p.category==='餐廳');
-  const spots = candidates.filter(p=>p.category!=='餐廳');
-
+  let fresh = candidates.filter(p=>!usedNames.has(p.name));
+  let pool = fresh.length ? fresh.concat(candidates.filter(p=>usedNames.has(p.name))) : candidates;
+  if(!pool.length) pool = allPlaces().filter(p=>favs.includes(p.id)&&p.category!=='住宿').slice(0,6);
+  const meals = pool.filter(p=>p.category==='餐廳');
+  const spots = pool.filter(p=>p.category!=='餐廳');
   let schedule = [];
-  let currentMin = 8*60; // 08:00 開始
-
+  let currentMin = 8*60;
   function addItem(p, type){
     const dur = DURATION_DEFAULT[p.subcategory]||DURATION_DEFAULT[p.category]||60;
     const start = `${String(Math.floor(currentMin/60)).padStart(2,'0')}:${String(currentMin%60).padStart(2,'0')}`;
     currentMin += dur;
     const end = `${String(Math.floor(currentMin/60)).padStart(2,'0')}:${String(currentMin%60).padStart(2,'0')}`;
-    schedule.push({type, name:p.name, start, end, hours:extractHours(p.note||''), cost:'', note:p.note||'', transitMode:'🚗 開車', transitMin:15});
-    // 加交通
+    schedule.push({type, name:p.name, start, end, hours:extractHours(p.note||''), cost:'', note:p.note||'', transitMode:'🚗 開車', transitMin:15, region:p.region||'', category:p.category||'', subcategory:p.subcategory||''});
     currentMin += 15;
     if(currentMin >= 22*60) return false;
     return true;
   }
-
-  function extractHours(note){
-    const m = note.match(/(\d{1,2}:\d{2})[–\-~～至到](\d{1,2}:\d{2})/);
-    return m ? `${m[1]}–${m[2]}` : '';
-  }
-
-  // 早餐 08:00
-  currentMin = 8*60;
-  // 上午景點
   let si=0;
   for(;si<Math.min(2,spots.length);si++){ if(!addItem(spots[si],'spot'))break; }
-  // 午餐 ~12:00
   if(meals.length>0 && currentMin<13*60){ currentMin=Math.max(currentMin,12*60); addItem(meals[0],'meal'); }
-  // 下午景點
   for(;si<Math.min(4,spots.length);si++){ if(!addItem(spots[si],'spot'))break; }
-  // 晚餐 ~18:00
   if(meals.length>1 && currentMin<19*60){ currentMin=Math.max(currentMin,18*60); addItem(meals[1],'meal'); }
-  // 住宿
   const stayPlace = allPlaces().find(p=>p.category==='住宿'&&(region?p.region===region:true));
   if(stayPlace){ currentMin=Math.max(currentMin,20*60); addItem(stayPlace,'stay'); }
-
-  // 寫入 Firebase
   const date = day.date;
   const ref = window.__ref(window.__db,`itinerary/${date}`);
   window.__remove(ref).then(()=>{
@@ -587,10 +621,11 @@ function autoScheduleDay(){
     btn.disabled=false; btn.textContent='🪄 自動排這天';
   });
 }
-
 // ── Modal 開關 ──
 document.getElementById('btn-add-item').addEventListener('click',()=>{
   buildPlaceSuggestions();
+  setupTimeInput('m-start');
+  setupTimeInput('m-end');
   editingKey=null;
   document.getElementById('modal-overlay').classList.add('open');
   ['m-name','m-hours','m-cost','m-transit-min','m-note'].forEach(id=>document.getElementById(id).value='');
@@ -609,33 +644,28 @@ document.getElementById('modal-overlay').addEventListener('click',e=>{
 document.getElementById('btn-modal-save').addEventListener('click',()=>{
   const name=document.getElementById('m-name').value.trim();
   if(!name){alert('請填寫名稱');return;}
+  const startVal = document.getElementById('m-start').value.trim();
+  const endVal = document.getElementById('m-end').value.trim();
+  const timeOk = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(startVal) && /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(endVal);
+  if(!timeOk){ alert('請輸入正確的 24 小時制時間，例如 09:00 或 14:30'); return; }
+  if(endVal <= startVal){ alert('結束時間需晚於開始時間'); return; }
   const date=TRIP_DAYS[currentDay].date;
-  const region = typeof getDayRegion==='function' ? getDayRegion(date) : (TRIP_DAYS[currentDay].region||'');
+  const region = getDayRegion(date);
   const matchedPlaces = allPlaces().filter(p=>normalizeName(p.name)===normalizeName(name));
   const matchedPlace = matchedPlaces.find(p=>region && p.region===region) || matchedPlaces[0] || null;
-  const startVal=document.getElementById('m-start').value;
-  const endVal=document.getElementById('m-end').value;
   const item={
-    type:document.getElementById('m-type').value,
-    name, start:startVal,
-    end:endVal,
-    hours:document.getElementById('m-hours').value.trim(),
-    cost:parseInt(document.getElementById('m-cost').value)||0,
+    type: matchedPlace ? guessItemType(matchedPlace) : document.getElementById('m-type').value,
+    name, start:startVal, end:endVal,
+    hours: document.getElementById('m-hours').value.trim() || (matchedPlace?.hours||''),
+    cost: parseInt(document.getElementById('m-cost').value)||parseInt(matchedPlace?.cost)||0,
     transitMode:document.getElementById('m-transit').value,
     transitMin:parseInt(document.getElementById('m-transit-min').value)||0,
-    note:document.getElementById('m-note').value.trim(),
-    createdAt:new Date().toISOString(),
+    note: document.getElementById('m-note').value.trim() || (matchedPlace?.note||''),
     region: matchedPlace?.region || region || '',
     category: matchedPlace?.category || '',
-    subcategory: matchedPlace?.subcategory || ''
+    subcategory: matchedPlace?.subcategory || '',
+    createdAt:new Date().toISOString()
   };
-  if(matchedPlace){
-    if(!item.hours) item.hours = matchedPlace.hours || '';
-    if(!item.note) item.note = matchedPlace.note || '';
-    if(!item.cost) item.cost = parseInt(matchedPlace.cost)||0;
-    item.type = guessItemType(matchedPlace);
-  }
-  if(startVal && endVal && endVal <= startVal){ alert('結束時間需晚於開始時間'); return; }
   if(editingKey){
     window.__set(window.__ref(window.__db,`itinerary/${date}/${editingKey}`),item);
   } else {
@@ -659,9 +689,16 @@ document.getElementById('btn-clear-day').addEventListener('click',()=>{
 });
 
 
-document.getElementById('m-name').addEventListener('change',autofillPlaceFields);
-document.getElementById('m-name').addEventListener('blur',autofillPlaceFields);
-document.getElementById('m-start').addEventListener('change',setEndByStartAndPlace);
+document.getElementById('day-region-select').addEventListener('change',e=>{
+  const date = TRIP_DAYS[currentDay].date;
+  const val = e.target.value;
+  dayRegionMap[date] = val;
+  if(window.__db) window.__set(window.__ref(window.__db,`day_regions/${date}`), val||null);
+  buildTabs(); updateAiDesc();
+});
+document.getElementById('m-name').addEventListener('change', autofillPlaceFields);
+document.getElementById('m-name').addEventListener('blur', autofillPlaceFields);
+document.getElementById('m-start').addEventListener('change', setEndByStartAndPlace);
 
 // ── Theme ──
 document.getElementById('theme-btn').addEventListener('click',()=>{
@@ -675,6 +712,7 @@ function waitFirebase(cb){ if(window.__firebaseReady){cb();return;} window.addEv
 
 waitFirebase(()=>{
   const db=window.__db;
+  window.__onValue(window.__ref(db,'day_regions'),snap=>{ dayRegionMap=snap.val()||{}; buildTabs(); buildDayRegionSelect(); updateAiDesc(); });
   // 載入景點資料
   window.__onValue(window.__ref(db,'base_places'),snap=>{
     allBasePlaces=snap.val()?Object.values(snap.val()):[];
@@ -692,7 +730,7 @@ waitFirebase(()=>{
     });
     renderDay();
   });
-  buildTabs();
+  buildTabs(); buildDayRegionSelect(); updateAiDesc();
   renderDay();
 });
 </script>
