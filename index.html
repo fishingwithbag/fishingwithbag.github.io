@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>九州旅遊 2026 — 景點總覽</title>
+  <title>日本九州旅遊 2026/9/30~10/7 — 景點總覽</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet">
   <style>
@@ -33,6 +33,10 @@
     .topbar__actions{display:flex;gap:.5rem;}
     .icon-btn{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;border:1px solid var(--border);background:var(--surface);color:var(--text);transition:border-color .2s,background .2s;-webkit-tap-highlight-color:transparent;}
     .icon-btn:hover,.icon-btn.active{border-color:var(--accent);background:var(--surface2);}
+    [data-theme="dark"]  #fav-only-btn{color:#AAAAAA;}
+    [data-theme="light"] #fav-only-btn{color:#555555;}
+    #fav-only-btn.active{color:#FFD700 !important;}
+    [data-theme="light"] #fav-only-btn.active{color:#E6A800 !important;}
 
     /* Stats */
     .stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem;padding:.75rem 1rem;}
@@ -137,7 +141,14 @@
     .card__sub{font-size:.62rem;letter-spacing:.1em;opacity:.35;}
     .card__name{font-family:var(--serif);font-size:.95rem;font-weight:700;line-height:1.4;cursor:pointer;-webkit-tap-highlight-color:transparent;}
     .card__actions{display:flex;flex-direction:column;gap:.4rem;align-items:flex-end;flex-shrink:0;}
-    .fav-btn{font-size:1.2rem;min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;}
+    .fav-btn{font-size:1.2rem;min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:transform .15s;}
+    .fav-btn:active{transform:scale(1.3);}
+    /* 未加入最愛：深色用淺灰，亮色用深灰，都看得清楚 */
+    [data-theme="dark"]  .fav-btn{color:#AAAAAA;}
+    [data-theme="light"] .fav-btn{color:#555555;}
+    /* 已加入最愛：統一用金黃色，兩種模式都醒目 */
+    .fav-btn.is-fav{color:#FFD700;}
+    [data-theme="light"] .fav-btn.is-fav{color:#E6A800;}
     .maps-btn{font-size:.63rem;padding:.28rem .65rem;border:1px solid var(--border);border-radius:20px;white-space:nowrap;opacity:.6;-webkit-tap-highlight-color:transparent;}
     .maps-btn:active{opacity:1;border-color:var(--accent);}
     .card__note-wrap{padding:0 1rem .85rem;}
@@ -460,7 +471,7 @@ function buildCard(p){
         <div class="card__name">${p.name}</div>
       </div>
       <div class="card__actions">
-        <button class="fav-btn" data-fav="${p.id}">${fav?'⭐':'☆'}</button>
+        <button class="fav-btn${fav?' is-fav':''}" data-fav="${p.id}">${fav?'⭐':'☆'}</button>
         <a class="maps-btn" href="https://www.google.com/maps/search/?api=1&query=${q}" target="_blank" rel="noopener">🗺 Maps</a>
       </div>
     </div>
@@ -535,7 +546,13 @@ document.getElementById('region-tags').addEventListener('click',e=>{
 });
 document.getElementById('card-grid').addEventListener('click',e=>{
   const fav=e.target.closest('[data-fav]');
-  if(fav){fav.textContent=toggleFav(+fav.dataset.fav);if(favOnly)renderCards();return;}
+  if(fav){
+    const result=toggleFav(+fav.dataset.fav);
+    fav.textContent=result;
+    fav.classList.toggle('is-fav', result==='⭐');
+    if(favOnly)renderCards();
+    return;
+  }
   const tog=e.target.closest('.card__note-toggle')||e.target.closest('.card__name');
   if(tog){const c=tog.closest('.card');const o=c.classList.toggle('note-open');const t=c.querySelector('.card__note-toggle');if(t)t.textContent=o?'▾ 收合備註':'▸ 展開備註';}
 });
