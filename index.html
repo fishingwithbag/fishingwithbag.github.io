@@ -376,6 +376,33 @@
       body { padding-bottom:0; }
     }
   </style>
+    <!-- Firebase SDK -->
+    <script type="module">
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+      import { getDatabase, ref, onValue, push, set, remove, update }
+        from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+    
+      const firebaseConfig = {
+        apiKey: "AIzaSyApX90ynhEGP2uBgxMXOhNeM-Jbrvyzgps",
+        authDomain: "gen-lang-client-0162948406.firebaseapp.com",
+        databaseURL: "https://gen-lang-client-0162948406-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "gen-lang-client-0162948406",
+        storageBucket: "gen-lang-client-0162948406.firebasestorage.app",
+        messagingSenderId: "700325287638",
+        appId: "1:700325287638:web:541c2146fd62adcb789b77"
+      };
+    
+      const app = initializeApp(firebaseConfig);
+      const db  = getDatabase(app);
+      window.__db   = db;
+      window.__ref  = ref;
+      window.__push = push;
+      window.__set  = set;
+      window.__remove = remove;
+      window.__update = update;
+      window.__firebaseReady = true;
+      window.dispatchEvent(new Event('firebase-ready'));
+    </script>
 </head>
 <body>
 
@@ -422,36 +449,28 @@
 </div>
 
 <!-- Cost Block -->
-<div class="cost-block" id="cost-block">
+<div class="cost-block open" id="cost-block">
   <div class="cost-block__header" id="cost-toggle">
     <span class="cost-block__title">💴 住宿費用</span>
     <span class="cost-block__toggle">▾</span>
   </div>
   <div class="cost-block__body" id="cost-body">
-
-    <!-- 人數 -->
     <div class="cost-person-row">
       <label for="person-input">分攤人數</label>
       <input id="person-input" type="number" min="1" max="20" value="4">
       <span style="font-size:.75rem;opacity:.5;">人</span>
     </div>
-
-    <!-- 欄位標頭 -->
     <div class="cost-entry-header">
       <span>項目名稱</span>
       <span style="text-align:right;width:100px;">金額 (TWD)</span>
       <span style="width:32px;"></span>
     </div>
-
-    <!-- 動態費用列 -->
     <div id="cost-entries"></div>
-
-    <!-- 新增按鈕 -->
     <button class="btn-add-cost" id="btn-add-cost">＋ 新增費用項目</button>
-
-    <!-- 合計 -->
     <div id="cost-summary"></div>
-
+    <div style="margin-top:.5rem;display:flex;gap:.4rem;">
+      <span id="cost-sync-status" style="font-size:.65rem;opacity:.4;align-self:center;">⏳ 連線中…</span>
+    </div>
   </div>
 </div>
 
@@ -885,7 +904,156 @@ function initAddForm() {
     a.click();
   });
 }
+// ══════════════════════════════════════
+//  Firebase 整合：費用帳本 + 新增地點
+// ══════════════════════════════════════
 
+function waitFirebase(cb) {
+  if (window.__firebaseReady) { cb(); return; }
+  window.addEventListener('firebase-ready', cb, { once: true });
+}
+
+// ── 費用帳本（Firebase）──
+function initCostFirebase() {
+  const db       = window.__db;
+  const fbRef    = window.__ref;
+  const fbPush   = window.__push;
+  const fbSet    = window.__set;
+  const fbRemove = window.__remove;
+  const costRef  = fbRef(db, 'cost_entries');
+
+  const entriesEl = document.getElementById('cost-entries');
+  const summaryEl = document.getElementById('cost-summary');
+  const personEl  = document.getElementById('person-input');
+  const statusEl  = document.getElementById('cost-sync-status');
+
+  let entries = {}; // { firebaseKey: { name, amt } }
+
+  function renderSummary() {
+    const n     = Math.max(1, parseInt(personEl.value) || 1);
+    const total = Object.values(entries).reduce((s, e) => s + (parseFloat(e.amt) || 0), 0);
+    summaryEl.innerHTML = `
+      <div class="cost-total">
+        <div>
+          <div class="cost-total__label">住宿合計</div>
+          <div class="cost-per">每人約 TWD ${Math.ceil(total / n).toLocaleString()}</div>
+        </div>
+        <span class="cost-total__num">TWD ${total.toLocaleString()}</span>
+      </div>`;
+  }
+
+  function renderEntries() {
+    entriesEl.innerHTML = '';
+    Object.entries(entries).forEach(([key, entry]) => {
+      const row = document.createElement('div');
+      row.className = 'cost-entry';
+      row.dataset.key = key;
+      row.innerHTML = `
+        <input type="text"   class="cost-name" placeholder="例：AMP FLAT 福岡" value="${entry.name||''}">
+        <input type="number" class="cost-amt"  placeholder="0" value="${entry.amt||''}" min="0" step="1">
+        <button class="cost-entry__del" title="刪除">✕</button>`;
+      entriesEl.appendChild(row);
+    });
+    renderSummary();
+  }
+
+  // 即時監聽 Firebase（所有人看到同樣資料）
+  const { onValue } = { onValue: window.__db ? null : null };
+  import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js').then(m => {
+    m.onValue(costRef, snap => {
+      entries = snap.val() || {};
+      renderEntries();
+      statusEl.textContent = '✅ 已同步';
+    });
+  });
+
+  // 輸入即時更新到 Firebase
+  let debounceTimer;
+  entriesEl.addEventListener('input', e => {
+    const row = e.target.closest('.cost-entry'); if (!row) return;
+    const key = row.dataset.key;
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      const name = row.querySelector('.cost-name').value;
+      const amt  = parseFloat(row.querySelector('.cost-amt').value) || 0;
+      window.__set(window.__ref(db, `cost_entries/${key}`), { name, amt });
+      statusEl.textContent = '☁️ 儲存中…';
+    }, 600);
+  });
+
+  // 刪除
+  entriesEl.addEventListener('click', e => {
+    const del = e.target.closest('.cost-entry__del'); if (!del) return;
+    const key = del.closest('.cost-entry').dataset.key;
+    window.__remove(window.__ref(db, `cost_entries/${key}`));
+  });
+
+  // 新增
+  document.getElementById('btn-add-cost').addEventListener('click', () => {
+    window.__push(costRef, { name: '', amt: 0 });
+  });
+
+  // 人數
+  personEl.addEventListener('input', renderSummary);
+
+  // 折疊
+  document.getElementById('cost-toggle').addEventListener('click', () => {
+    document.getElementById('cost-block').classList.toggle('open');
+  });
+}
+
+// ── 新增地點（Firebase）──
+function initAddPlaceFirebase() {
+  const db        = window.__db;
+  const addRef    = window.__ref(db, 'custom_places');
+  const addForm   = document.getElementById('add-place-form');
+  if (!addForm) return;
+
+  // 監聽 Firebase 新增地點，合併進 CUSTOM_DATA
+  import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js').then(m => {
+    m.onValue(addRef, snap => {
+      const cloud = snap.val() || {};
+      // 將雲端資料合併進全域清單
+      window.__cloudPlaces = Object.values(cloud);
+      // 重新渲染（呼叫主程式的 render 函式）
+      if (typeof renderAll === 'function') renderAll();
+    });
+  });
+
+  addForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const region   = document.getElementById('add-region').value.trim();
+    const category = document.getElementById('add-category').value.trim();
+    const name     = document.getElementById('add-name').value.trim();
+    const note     = document.getElementById('add-note').value.trim();
+    if (!region || !category || !name) return;
+
+    const newPlace = {
+      id: Date.now(),
+      region, category,
+      subcategory: category,
+      name, note,
+      twd: null, tags: [region], fav: false, photo: null,
+      createdAt: new Date().toISOString()
+    };
+
+    window.__push(addRef, newPlace);
+    addForm.reset();
+
+    // 顯示成功提示
+    const btn = addForm.querySelector('button[type="submit"]');
+    const orig = btn.textContent;
+    btn.textContent = '✅ 已新增並同步！';
+    setTimeout(() => btn.textContent = orig, 2000);
+  });
+}
+
+// ── 啟動 ──
+waitFirebase(() => {
+  initCostFirebase();
+  initAddPlaceFirebase();
+});
+  
 // ── Search & filter events
 ['search-input','sel-region','sel-cat'].forEach(id=>{
   document.getElementById(id)?.addEventListener('input', render);
