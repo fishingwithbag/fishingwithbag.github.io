@@ -516,51 +516,55 @@ function autoScheduleDay(){
   const favs = getFavs();
   const region = getDayRegion(day.date);
 
-  // 撈最愛的景點（優先該地區）
-  let candidates = allPlaces().filter(p=>favs.includes(p.id)&&p.category!=='住宿');
-  if(region) candidates = candidates.filter(p=>p.region===region);
-  if(!candidates.length) candidates = allPlaces().filter(p=>favs.includes(p.id)&&p.category!=='住宿').slice(0,6);
+  function extractHours(note){
+    const m = (note||'').match(/(\d{1,2}:\d{2})[–\-~～至到](\d{1,2}:\d{2})/);
+    return m ? `${m[1]}–${m[2]}` : '';
+  }
 
-  // 排序：餐廳穿插，景點為主
-  const meals = candidates.filter(p=>p.category==='餐廳');
-  const spots = candidates.filter(p=>p.category!=='餐廳');
+  const usedNames = new Set();
+  TRIP_DAYS.forEach(d=>{
+    if(d.date===day.date) return;
+    const sameRegion = getDayRegion(d.date) === region;
+    if(!sameRegion) return;
+    const items = itineraryData[d.date] || [];
+    items.forEach(item=>{
+      if(item.type==='spot' || item.type==='meal') usedNames.add(item.name);
+    });
+  });
+
+  let candidates = allPlaces().filter(p=>favs.includes(p.id) && p.category!=='住宿');
+  if(region) candidates = candidates.filter(p=>p.region===region);
+
+  let freshCandidates = candidates.filter(p=>!usedNames.has(p.name));
+  let pool = freshCandidates.length ? freshCandidates.concat(candidates.filter(p=>usedNames.has(p.name))) : candidates;
+  if(!pool.length) pool = allPlaces().filter(p=>favs.includes(p.id)&&p.category!=='住宿').slice(0,6);
+
+  const meals = pool.filter(p=>p.category==='餐廳');
+  const spots = pool.filter(p=>p.category!=='餐廳');
 
   let schedule = [];
-  let currentMin = 8*60; // 08:00 開始
+  let currentMin = 8*60;
 
   function addItem(p, type){
     const dur = DURATION_DEFAULT[p.subcategory]||DURATION_DEFAULT[p.category]||60;
     const start = `${String(Math.floor(currentMin/60)).padStart(2,'0')}:${String(currentMin%60).padStart(2,'0')}`;
     currentMin += dur;
     const end = `${String(Math.floor(currentMin/60)).padStart(2,'0')}:${String(currentMin%60).padStart(2,'0')}`;
-    schedule.push({type, name:p.name, start, end, hours:extractHours(p.note||''), cost:'', note:p.note||'', transitMode:'🚗 開車', transitMin:15});
-    // 加交通
+    schedule.push({type, name:p.name, start, end, hours:extractHours(p.note||''), cost:'', note:p.note||'', transitMode:'🚗 開車', transitMin:15, region:p.region||'', category:p.category||'', subcategory:p.subcategory||''});
     currentMin += 15;
     if(currentMin >= 22*60) return false;
     return true;
   }
 
-  function extractHours(note){
-    const m = note.match(/(\d{1,2}:\d{2})[–\-~～至到](\d{1,2}:\d{2})/);
-    return m ? `${m[1]}–${m[2]}` : '';
-  }
-
-  // 早餐 08:00
-  currentMin = 8*60;
-  // 上午景點
   let si=0;
   for(;si<Math.min(2,spots.length);si++){ if(!addItem(spots[si],'spot'))break; }
-  // 午餐 ~12:00
   if(meals.length>0 && currentMin<13*60){ currentMin=Math.max(currentMin,12*60); addItem(meals[0],'meal'); }
-  // 下午景點
   for(;si<Math.min(4,spots.length);si++){ if(!addItem(spots[si],'spot'))break; }
-  // 晚餐 ~18:00
   if(meals.length>1 && currentMin<19*60){ currentMin=Math.max(currentMin,18*60); addItem(meals[1],'meal'); }
-  // 住宿
+
   const stayPlace = allPlaces().find(p=>p.category==='住宿'&&(region?p.region===region:true));
   if(stayPlace){ currentMin=Math.max(currentMin,20*60); addItem(stayPlace,'stay'); }
 
-  // 寫入 Firebase
   const date = day.date;
   const ref = window.__ref(window.__db,`itinerary/${date}`);
   window.__remove(ref).then(()=>{
@@ -568,7 +572,6 @@ function autoScheduleDay(){
     btn.disabled=false; btn.textContent='🪄 自動排這天';
   });
 }
-
 // ── Modal 開關 ──
 document.getElementById('btn-add-item').addEventListener('click',()=>{
   editingKey=null;
