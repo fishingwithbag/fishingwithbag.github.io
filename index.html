@@ -3,183 +3,143 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>九州旅遊 2026 — 景點總覽</title>
+  <title>九州福岡熊本旅遊 2026/9/30~10/7 </title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg:#0D0D0D; --surface:#141414; --surface2:#1C1C1C;
-      --border:rgba(255,255,255,0.09); --text:#E8E8E8;
-      --muted:rgba(232,232,232,0.48); --accent:#E8734A; --accent2:#A8C5B0;
-      --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
-      --serif:'Noto Serif JP',serif; --sans:'Noto Sans TC',sans-serif;
-      --r:10px; --ease:cubic-bezier(.4,0,.2,1);
+    :root{
+      --bg:#0D0D0D;--surface:#141414;--surface2:#1C1C1C;
+      --border:rgba(255,255,255,0.09);--text:#E8E8E8;--muted:rgba(232,232,232,0.48);
+      --accent:#E8734A;--accent2:#A8C5B0;--purple:#B8AFFF;
+      --serif:'Noto Serif JP',serif;--sans:'Noto Sans TC',sans-serif;
+      --r:10px;--ease:cubic-bezier(.4,0,.2,1);
+      --safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px);
     }
-    [data-theme="light"] {
-      --bg:#F5F2EE; --surface:#FFFFFF; --surface2:#F0EDE9;
-      --border:rgba(0,0,0,0.1); --text:#1A1A1A; --muted:rgba(26,26,26,0.55);
-    }
+    [data-theme="light"]{--bg:#F5F2EE;--surface:#FFF;--surface2:#F0EDE9;--border:rgba(0,0,0,0.1);--text:#1A1A1A;--muted:rgba(26,26,26,0.55);}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth;}
+    html{-webkit-text-size-adjust:100%;}
     body{font-family:var(--sans);background:var(--bg);color:var(--text);overflow-x:hidden;padding-bottom:calc(64px + var(--safe-b));transition:background .3s,color .3s;}
     a{color:inherit;text-decoration:none;}
     button{font-family:inherit;cursor:pointer;border:none;background:none;}
     input,select,textarea{font-family:inherit;}
 
-    /* Topbar */
-    .topbar{position:sticky;top:0;z-index:200;background:rgba(13,13,13,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 1rem;padding-top:var(--safe-t);display:flex;align-items:center;justify-content:space-between;min-height:52px;}
+    /* ── Topbar ── */
+    .topbar{position:sticky;top:0;z-index:200;background:rgba(13,13,13,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 1rem;padding-top:var(--safe-t);display:flex;align-items:center;justify-content:space-between;min-height:52px;gap:.5rem;}
     [data-theme="light"] .topbar{background:rgba(245,242,238,.95);}
-    .topbar__title{font-family:var(--serif);font-size:.9rem;letter-spacing:.18em;}
-    .topbar__actions{display:flex;gap:.5rem;}
-    .icon-btn{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;border:1px solid var(--border);background:var(--surface);color:var(--text);transition:border-color .2s,background .2s;-webkit-tap-highlight-color:transparent;}
-    .icon-btn:hover,.icon-btn.active{border-color:var(--accent);background:var(--surface2);}
-    [data-theme="dark"]  #fav-only-btn{color:#AAAAAA;}
-    [data-theme="light"] #fav-only-btn{color:#555555;}
-    #fav-only-btn.active{color:#FFD700 !important;}
-    [data-theme="light"] #fav-only-btn.active{color:#E6A800 !important;}
+    .topbar__title{font-family:var(--serif);font-size:.95rem;letter-spacing:.18em;}
+    .topbar__actions{display:flex;gap:.4rem;}
+    .icon-btn{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.05rem;border:1px solid var(--border);background:var(--surface);color:var(--text);-webkit-tap-highlight-color:transparent;}
 
-    /* Stats */
-    .stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem;padding:.75rem 1rem;}
-    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.85rem 1rem;}
-    .stat-card__num{font-family:var(--serif);font-size:1.6rem;font-weight:700;line-height:1;display:block;}
-    .stat-card__num.orange{color:var(--accent);}
-    .stat-card__num.green{color:var(--accent2);}
-    .stat-card__label{font-size:.65rem;letter-spacing:.12em;opacity:.45;margin-top:.25rem;display:block;}
+    /* ── 快速入口區（頁面最上方） ── */
+    .quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;padding:.75rem 1rem .25rem;}
+    .qa-btn{display:flex;align-items:center;gap:.6rem;padding:.75rem .9rem;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);color:var(--text);text-decoration:none;-webkit-tap-highlight-color:transparent;transition:border-color .2s,background .2s;}
+    .qa-btn:active{border-color:var(--accent);background:var(--surface2);}
+    .qa-btn--itinerary{background:linear-gradient(135deg,rgba(184,175,255,.1),rgba(232,115,74,.07));border-color:rgba(184,175,255,.3);}
+    .qa-btn--add{background:linear-gradient(135deg,rgba(168,197,176,.1),rgba(232,115,74,.07));border-color:rgba(168,197,176,.3);}
+    .qa-btn__icon{font-size:1.3rem;line-height:1;}
+    .qa-btn__info{}
+    .qa-btn__title{font-family:var(--serif);font-size:.85rem;font-weight:700;display:block;}
+    .qa-btn__sub{font-size:.62rem;opacity:.45;display:block;margin-top:.15rem;}
 
-    /* Filter */
-    .filter-panel{padding:0 1rem .5rem;display:flex;flex-direction:column;gap:.6rem;}
+    /* ── Search & Filter ── */
+    .search-bar{padding:.5rem 1rem .4rem;display:flex;flex-direction:column;gap:.45rem;}
     .search-wrap{position:relative;}
     .search-icon{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);opacity:.4;font-size:.9rem;pointer-events:none;}
     #search-input{width:100%;padding:.65rem .75rem .65rem 2.2rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:.88rem;outline:none;transition:border-color .2s;}
     #search-input:focus{border-color:var(--accent);}
-    .selects-row{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
-    .filter-select{padding:.6rem .75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:.82rem;outline:none;transition:border-color .2s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .7rem center;padding-right:2rem;background-color:var(--surface);}
+    .selects-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;}
+    .filter-select{padding:.6rem .5rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:.78rem;outline:none;transition:border-color .2s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .5rem center;padding-right:1.6rem;background-color:var(--surface);}
     [data-theme="dark"] .filter-select{color:#E8E8E8;}
     [data-theme="light"] .filter-select{color:#1A1A1A;}
     .filter-select option{color:#1A1A1A;background:#FFFFFF;}
     .filter-select:focus{border-color:var(--accent);}
     .region-tags{display:flex;flex-direction:row;flex-wrap:nowrap;gap:.4rem;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px;align-items:center;}
     .region-tags::-webkit-scrollbar{display:none;}
-    .region-tag{flex:0 0 auto;scroll-snap-align:start;padding:.35rem .85rem;border-radius:20px;border:1px solid var(--border);font-size:.75rem;letter-spacing:.08em;white-space:nowrap;transition:background .2s,border-color .2s,color .2s;min-height:34px;display:inline-flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;cursor:pointer;background:var(--surface2);color:var(--text);opacity:1;}
+    .region-tag{flex:0 0 auto;scroll-snap-align:start;padding:.35rem .85rem;border-radius:20px;border:1px solid var(--border);font-size:.72rem;letter-spacing:.06em;white-space:nowrap;-webkit-tap-highlight-color:transparent;cursor:pointer;transition:background .15s,border-color .15s,color .15s;}
     .region-tag.active{background:var(--accent);border-color:var(--accent);color:#fff;}
-    [data-theme="dark"] .region-tag{color:#D8D8D8;border-color:rgba(255,255,255,0.18);}
-    [data-theme="light"] .region-tag{color:#2A2A2A;border-color:rgba(0,0,0,0.18);}
-    [data-theme="light"] .region-tag.active{color:#fff;}
+    .fav-toggle{padding:.38rem 1rem;border-radius:20px;border:1px solid var(--border);font-size:.72rem;letter-spacing:.06em;white-space:nowrap;-webkit-tap-highlight-color:transparent;cursor:pointer;background:var(--surface);color:var(--text);transition:background .15s,border-color .15s;}
+    .fav-toggle.on{background:var(--accent);border-color:var(--accent);color:#fff;}
 
-    /* Cost Block */
-    .cost-block{margin:.25rem 1rem .5rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
-    .cost-block__header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;cursor:pointer;-webkit-tap-highlight-color:transparent;}
-    .cost-block__title{font-family:var(--serif);font-size:.95rem;font-weight:700;}
-    .cost-block__toggle{font-size:.8rem;opacity:.5;transition:transform .3s;}
-    .cost-block.open .cost-block__toggle{transform:rotate(180deg);}
-    .cost-block__body{display:none;padding:0 1rem 1rem;}
-    .cost-block.open .cost-block__body{display:block;}
-    .cost-person-row{display:flex;align-items:center;gap:.6rem;padding:.5rem 0;border-bottom:1px solid var(--border);margin-bottom:.75rem;}
-    .cost-person-row label{font-size:.8rem;opacity:.6;}
-    .cost-person-row input[type="number"]{width:60px;padding:.35rem .5rem;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.9rem;outline:none;}
-    .cost-entry{display:grid;grid-template-columns:1fr auto auto;gap:.4rem;align-items:center;margin-bottom:.5rem;}
-    .cost-entry input[type="text"],.cost-entry input[type="number"]{padding:.5rem .65rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.82rem;outline:none;transition:border-color .2s;width:100%;}
-    .cost-entry input:focus{border-color:var(--accent);}
-    .cost-entry input[type="number"]{width:100px;text-align:right;}
-    .cost-entry__del{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:rgba(255,80,80,.12);color:#ff6b6b;font-size:.85rem;flex-shrink:0;transition:background .2s;-webkit-tap-highlight-color:transparent;}
-    .cost-entry__del:active{background:rgba(255,80,80,.25);}
-    .cost-entry-header{display:grid;grid-template-columns:1fr auto auto;gap:.4rem;margin-bottom:.3rem;}
-    .cost-entry-header span{font-size:.62rem;letter-spacing:.1em;opacity:.38;padding:0 .1rem;}
-    .btn-add-cost{width:100%;padding:.55rem;margin-top:.3rem;margin-bottom:.75rem;background:transparent;border:1px dashed rgba(255,255,255,.18);border-radius:8px;color:var(--text);font-size:.8rem;letter-spacing:.08em;opacity:.6;transition:opacity .2s,border-color .2s;-webkit-tap-highlight-color:transparent;}
-    .btn-add-cost:active{opacity:1;border-color:var(--accent);}
-    .cost-total{display:flex;justify-content:space-between;align-items:center;margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border);}
-    .cost-total__label{font-size:.78rem;opacity:.55;letter-spacing:.1em;}
-    .cost-total__num{font-family:var(--serif);font-size:1.3rem;font-weight:700;color:var(--accent);}
-    .cost-per{font-size:.72rem;opacity:.5;margin-top:.2rem;}
-
-    /* Rental Block */
-    .rental-block{margin:.25rem 1rem .5rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
-    .rental-block__header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;cursor:pointer;-webkit-tap-highlight-color:transparent;}
-    .rental-block__title{font-family:var(--serif);font-size:.95rem;font-weight:700;}
-    .rental-block__toggle{font-size:.8rem;opacity:.5;transition:transform .3s;}
-    .rental-block.open .rental-block__toggle{transform:rotate(180deg);}
-    .rental-block__body{display:none;padding:0 1rem 1rem;}
-    .rental-block.open .rental-block__body{display:block;}
-    .rental-field-row{display:flex;flex-direction:column;gap:.3rem;margin-bottom:.6rem;}
-    .rental-field-row label{font-size:.72rem;opacity:.55;letter-spacing:.08em;}
-    .rental-field-row input,.rental-field-row textarea{padding:.55rem .75rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.84rem;outline:none;transition:border-color .2s;width:100%;resize:vertical;}
-    .rental-field-row input:focus,.rental-field-row textarea:focus{border-color:var(--accent);}
-    .btn-save-rental{padding:.6rem 1.2rem;border-radius:8px;background:var(--accent);color:#fff;font-size:.82rem;letter-spacing:.08em;margin-top:.25rem;transition:opacity .2s;-webkit-tap-highlight-color:transparent;}
-    .btn-save-rental:active{opacity:.75;}
-    .rental-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:.85rem 1rem;margin-top:.75rem;}
-    .rental-card__row{display:flex;justify-content:space-between;align-items:center;padding:.3rem 0;border-bottom:1px solid var(--border);font-size:.8rem;}
-    .rental-card__row:last-of-type{border-bottom:none;}
-    .rental-card__label{opacity:.45;font-size:.72rem;flex-shrink:0;width:80px;}
-    .rental-card__val{text-align:right;flex:1;}
-    .rental-card__del{width:100%;margin-top:.6rem;padding:.4rem;font-size:.72rem;letter-spacing:.1em;opacity:.4;border:1px solid var(--border);border-radius:6px;transition:opacity .2s,border-color .2s;-webkit-tap-highlight-color:transparent;}
-    .rental-card__del:active{opacity:1;border-color:#ff6b6b;color:#ff6b6b;}
-    .driving-tips{margin-top:1rem;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
-    .driving-tips__header{display:flex;align-items:center;justify-content:space-between;padding:.7rem .9rem;cursor:pointer;font-size:.82rem;font-weight:700;letter-spacing:.08em;background:var(--surface2);-webkit-tap-highlight-color:transparent;}
-    .tips-toggle-icon{font-size:.75rem;opacity:.5;transition:transform .3s;}
-    .driving-tips.open .tips-toggle-icon{transform:rotate(90deg);}
-    .driving-tips__body{display:none;padding:.75rem .9rem;}
-    .driving-tips.open .driving-tips__body{display:block;}
-    .tip-section{margin-bottom:.9rem;}
-    .tip-section__title{font-size:.78rem;font-weight:700;letter-spacing:.08em;margin-bottom:.4rem;color:var(--accent);}
-    .tip-list{list-style:none;display:flex;flex-direction:column;gap:.35rem;}
-    .tip-list li{font-size:.76rem;line-height:1.65;color:var(--muted);padding-left:.9rem;position:relative;}
-    .tip-list li::before{content:"—";position:absolute;left:0;opacity:.35;}
-    .tip-list li strong{color:var(--text);}
-    .tip-section--highlight{background:rgba(168,197,176,.07);border-radius:8px;padding:.65rem .75rem;}
-
-    /* Card grid */
-    .section-heading{display:flex;align-items:baseline;justify-content:space-between;padding:.5rem 1rem .35rem;}
-    .section-heading h2{font-family:var(--serif);font-size:1rem;font-weight:700;}
-    .section-heading span{font-size:.65rem;opacity:.4;letter-spacing:.12em;}
-    .card-grid{display:grid;grid-template-columns:1fr;gap:.65rem;padding:0 1rem .5rem;}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;opacity:0;transform:translateY(12px);transition:opacity .35s var(--ease),transform .35s var(--ease);}
-    .card.visible{opacity:1;transform:none;}
-    .card__top{display:flex;align-items:flex-start;justify-content:space-between;padding:.85rem 1rem .45rem;gap:.5rem;}
-    .card__left{flex:1;min-width:0;}
-    .card__meta{display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem;flex-wrap:wrap;}
-    .card__region{font-size:.62rem;padding:.1rem .45rem;border-radius:20px;border:1px solid var(--border);opacity:.55;}
-    .card__sub{font-size:.62rem;letter-spacing:.1em;opacity:.35;}
-    .card__name{font-family:var(--serif);font-size:.95rem;font-weight:700;line-height:1.4;cursor:pointer;-webkit-tap-highlight-color:transparent;}
-    .card__actions{display:flex;flex-direction:column;gap:.4rem;align-items:flex-end;flex-shrink:0;}
-    .fav-btn{font-size:1.2rem;min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:transform .15s;}
-    .fav-btn:active{transform:scale(1.3);}
-    /* 未加入最愛：深色用淺灰，亮色用深灰，都看得清楚 */
-    [data-theme="dark"]  .fav-btn{color:#AAAAAA;}
-    [data-theme="light"] .fav-btn{color:#555555;}
-    /* 已加入最愛：統一用金黃色，兩種模式都醒目 */
-    .fav-btn.is-fav{color:#FFD700;}
-    [data-theme="light"] .fav-btn.is-fav{color:#E6A800;}
-    .maps-btn{font-size:.63rem;padding:.28rem .65rem;border:1px solid var(--border);border-radius:20px;white-space:nowrap;opacity:.6;-webkit-tap-highlight-color:transparent;}
-    .maps-btn:active{opacity:1;border-color:var(--accent);}
-    .card__note-wrap{padding:0 1rem .85rem;}
-    .card__note-toggle{display:none;font-size:.73rem;color:var(--accent);opacity:.75;-webkit-tap-highlight-color:transparent;}
-    .card.has-note .card__note-toggle{display:inline-block;}
-    .card__note{font-size:.79rem;line-height:1.75;color:var(--muted);margin-top:.4rem;display:none;}
-    .card.note-open .card__note{display:block;}
-    .card__tags{display:flex;flex-wrap:wrap;gap:.3rem;padding:0 1rem .75rem;}
-    .tag{font-size:.63rem;padding:.18rem .55rem;border:1px solid rgba(255,255,255,.1);border-radius:20px;opacity:.5;}
-    .tag--fishing{border-color:rgba(126,200,227,.5);color:#7EC8E3;opacity:1;}
-    .empty{grid-column:1/-1;text-align:center;padding:3rem 1rem;opacity:.3;font-size:.85rem;letter-spacing:.15em;}
-
-    /* Add place */
-    .add-section{margin:.25rem 1rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
-    .add-section__header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;cursor:pointer;-webkit-tap-highlight-color:transparent;}
-    .add-section__title{font-family:var(--serif);font-size:.95rem;font-weight:700;}
-    .add-toggle-icon{font-size:.8rem;opacity:.5;transition:transform .3s;}
+    /* ── 新增地點 Collapsible ── */
+    .add-section{margin:.3rem 1rem .5rem;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--surface);}
+    .add-section__header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;cursor:pointer;-webkit-tap-highlight-color:transparent;min-height:44px;}
+    .add-section__title{font-size:.84rem;font-weight:700;letter-spacing:.08em;}
+    .add-toggle-icon{font-size:.75rem;opacity:.5;transition:transform .25s;}
     .add-section.open .add-toggle-icon{transform:rotate(180deg);}
-    .add-section__body{display:none;padding:0 1rem 1rem;}
+    .add-section__body{display:none;padding:.5rem 1rem .85rem;border-top:1px solid var(--border);}
     .add-section.open .add-section__body{display:block;}
-    .add-field{display:flex;flex-direction:column;gap:.3rem;margin-bottom:.6rem;}
-    .add-field label{font-size:.72rem;opacity:.55;letter-spacing:.08em;}
-    .add-field input,.add-field textarea,.add-field select{padding:.55rem .75rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.84rem;outline:none;transition:border-color .2s;width:100%;resize:vertical;}
-    .add-field input:focus,.add-field textarea:focus,.add-field select:focus{border-color:var(--accent);}
-    .btn-add-place{width:100%;padding:.65rem;border-radius:8px;background:var(--accent);color:#fff;font-size:.84rem;letter-spacing:.1em;margin-top:.25rem;transition:opacity .2s;-webkit-tap-highlight-color:transparent;}
-    .btn-add-place:active{opacity:.75;}
-    .btn-export{width:100%;padding:.55rem;border-radius:8px;border:1px solid var(--border);color:var(--text);font-size:.78rem;letter-spacing:.08em;margin-top:.5rem;opacity:.6;transition:opacity .2s,border-color .2s;-webkit-tap-highlight-color:transparent;}
-    .btn-export:active{opacity:1;border-color:var(--accent);}
-    .sync-badge{font-size:.65rem;opacity:.4;padding:.3rem 0;display:block;}
+    .add-field{display:flex;flex-direction:column;gap:.28rem;margin-bottom:.55rem;}
+    .add-field label{font-size:.7rem;opacity:.5;letter-spacing:.08em;}
+    .add-field input,.add-field select,.add-field textarea{padding:.5rem .7rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.84rem;outline:none;transition:border-color .2s;}
+    .add-field input:focus,.add-field select:focus,.add-field textarea:focus{border-color:var(--accent);}
+    .add-field textarea{resize:vertical;}
+    .add-field select option{color:#1A1A1A;background:#FFF;}
+    .btn-add-place{width:100%;padding:.65rem;border-radius:8px;background:var(--accent);color:#fff;font-size:.88rem;letter-spacing:.1em;margin-top:.35rem;}
+    .btn-export{width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--border);color:var(--text);font-size:.78rem;letter-spacing:.08em;margin-top:.4rem;opacity:.55;}
+    .sync-badge{font-size:.68rem;opacity:.45;margin-left:.5rem;display:inline-block;}
 
-    /* Bottom Nav */
+    /* ── Cost Block ── */
+    .cost-block{margin:.3rem 1rem .5rem;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--surface);}
+    .cost-block__header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;cursor:pointer;-webkit-tap-highlight-color:transparent;min-height:44px;}
+    .cost-block__title{font-size:.84rem;font-weight:700;letter-spacing:.08em;}
+    .cost-block__toggle{font-size:.75rem;opacity:.5;transition:transform .25s;}
+    .cost-block.open .cost-block__toggle{transform:rotate(180deg);}
+    .cost-block__body{display:none;padding:.5rem 1rem .85rem;border-top:1px solid var(--border);}
+    .cost-block.open .cost-block__body{display:block;}
+    .cost-person-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem;font-size:.82rem;}
+    #person-input{width:56px;padding:.35rem .5rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.84rem;text-align:center;outline:none;}
+    .cost-entry-header{display:flex;align-items:center;font-size:.68rem;opacity:.4;letter-spacing:.08em;padding-bottom:.3rem;border-bottom:1px solid var(--border);margin-bottom:.35rem;}
+    .cost-entry-header span:first-child{flex:1;}
+    .cost-entry{display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem;}
+    .cost-entry__name{flex:1;padding:.42rem .6rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.82rem;outline:none;}
+    .cost-entry__name:focus{border-color:var(--accent);}
+    .cost-entry__amount{width:100px;padding:.42rem .6rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.82rem;text-align:right;outline:none;}
+    .cost-entry__amount:focus{border-color:var(--accent);}
+    .cost-entry__del{width:28px;height:28px;border-radius:50%;font-size:.75rem;opacity:.35;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .btn-add-cost{width:100%;padding:.5rem;border-radius:8px;border:1px dashed rgba(255,255,255,.2);color:var(--text);font-size:.78rem;letter-spacing:.08em;margin-top:.2rem;opacity:.55;}
+    #cost-summary{margin-top:.75rem;padding:.75rem;background:var(--surface2);border-radius:8px;font-size:.82rem;line-height:1.8;}
+    #cost-summary strong{color:var(--accent);}
+
+    /* ── Rental Block ── */
+    .rental-block{margin:.3rem 1rem .5rem;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--surface);}
+    .rental-block__header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;cursor:pointer;-webkit-tap-highlight-color:transparent;min-height:44px;}
+    .rental-block__title{font-size:.84rem;font-weight:700;letter-spacing:.08em;}
+    .rental-block__toggle{font-size:.75rem;opacity:.5;transition:transform .25s;}
+    .rental-block.open .rental-block__toggle{transform:rotate(180deg);}
+    .rental-block__body{display:none;padding:.5rem 1rem .85rem;border-top:1px solid var(--border);}
+    .rental-block.open .rental-block__body{display:block;}
+    .rental-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.5rem;}
+    .rental-field{display:flex;flex-direction:column;gap:.25rem;}
+    .rental-field label{font-size:.68rem;opacity:.45;letter-spacing:.08em;}
+    .rental-field input,.rental-field select{padding:.45rem .6rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.8rem;outline:none;}
+    .rental-field input:focus,.rental-field select:focus{border-color:var(--accent);}
+    .rental-field select option{color:#1A1A1A;background:#FFF;}
+
+    /* ── Cards ── */
+    .cards-header{display:flex;align-items:center;justify-content:space-between;padding:.3rem 1rem .2rem;}
+    .cards-count{font-size:.72rem;opacity:.35;letter-spacing:.08em;}
+    .cards-sort{font-size:.72rem;opacity:.5;padding:.3rem .6rem;border:1px solid var(--border);border-radius:20px;background:var(--surface);}
+    .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.6rem;padding:.3rem 1rem .5rem;}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;opacity:0;transform:translateY(8px);transition:opacity .35s var(--ease),transform .35s var(--ease),border-color .2s;}
+    .card.visible{opacity:1;transform:none;}
+    .card:active{border-color:var(--accent);}
+    .card__img{width:100%;aspect-ratio:4/3;object-fit:cover;background:var(--surface2);display:block;}
+    .card__img-placeholder{width:100%;aspect-ratio:4/3;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:1.8rem;}
+    .card__body{padding:.55rem .65rem .5rem;}
+    .card__tags{display:flex;flex-wrap:wrap;gap:.25rem;margin-bottom:.28rem;}
+    .tag{font-size:.58rem;padding:.1rem .4rem;border-radius:20px;border:1px solid var(--border);opacity:.55;white-space:nowrap;}
+    .tag--fish{border-color:var(--accent2);color:var(--accent2);opacity:.9;}
+    .card__name{font-family:var(--serif);font-size:.9rem;font-weight:700;line-height:1.35;word-break:break-word;}
+    .card__hours{font-size:.68rem;color:var(--accent2);margin-top:.18rem;}
+    .card__note{font-size:.72rem;color:var(--muted);margin-top:.25rem;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+    .card__footer{display:flex;align-items:center;justify-content:space-between;padding:.3rem .65rem .5rem;border-top:1px solid var(--border);margin-top:.3rem;}
+    .card__cost{font-size:.72rem;color:var(--accent);font-weight:700;}
+    .card__actions{display:flex;gap:.3rem;}
+    .card__btn{font-size:.65rem;padding:.22rem .55rem;border:1px solid var(--border);border-radius:20px;opacity:.55;-webkit-tap-highlight-color:transparent;white-space:nowrap;}
+    .card__btn:active{opacity:1;border-color:var(--accent);}
+    .card__fav{font-size:.9rem;line-height:1;padding:.2rem;}
+
+    /* ── Bottom Nav ── */
     .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:200;display:flex;background:rgba(13,13,13,.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);padding-bottom:var(--safe-b);}
     [data-theme="light"] .bottom-nav{background:rgba(245,242,238,.97);}
     .bottom-nav__item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:.6rem 0;min-height:44px;opacity:.4;transition:opacity .2s;text-decoration:none;color:var(--text);-webkit-tap-highlight-color:transparent;}
@@ -187,15 +147,18 @@
     .bottom-nav__item span:first-child{font-size:1.15rem;line-height:1;}
     .bottom-nav__item span:last-child{font-size:.58rem;letter-spacing:.08em;}
 
-    @media(min-width:600px){.card-grid{grid-template-columns:repeat(2,1fr);}.stats-row{grid-template-columns:repeat(4,1fr);}}
-    @media(min-width:960px){.card-grid{grid-template-columns:repeat(3,1fr);}.bottom-nav{display:none;}body{padding-bottom:0;}}
+    @media(min-width:768px){
+      .cards{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));}
+      body{padding-bottom:0;}
+      .bottom-nav{display:none;}
+    }
   </style>
 
   <!-- Firebase SDK -->
   <script type="module">
     import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
     import{getDatabase,ref,onValue,push,set,remove,update}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
-    const firebaseConfig={
+    const cfg={
       apiKey:"AIzaSyApX90ynhEGP2uBgxMXOhNeM-Jbrvyzgps",
       authDomain:"gen-lang-client-0162948406.firebaseapp.com",
       databaseURL:"https://gen-lang-client-0162948406-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -204,7 +167,7 @@
       messagingSenderId:"700325287638",
       appId:"1:700325287638:web:541c2146fd62adcb789b77"
     };
-    const app=initializeApp(firebaseConfig);
+    const app=initializeApp(cfg);
     const db=getDatabase(app);
     window.__db=db;window.__ref=ref;window.__push=push;
     window.__set=set;window.__remove=remove;window.__update=update;
@@ -215,37 +178,96 @@
 </head>
 <body>
 
+<!-- ══ Topbar ══ -->
 <header class="topbar">
-  <span class="topbar__title">九州旅遊 2026</span>
+  <span class="topbar__title">九州福岡熊本旅遊 2026</span>
   <div class="topbar__actions">
-    <button class="icon-btn" id="fav-only-btn" title="只看最愛">☆</button>
-    <button class="icon-btn" id="theme-btn" title="切換主題">🌙</button>
+    <button class="icon-btn" id="fav-btn" title="只看最愛">☆</button>
+    <button class="icon-btn" id="theme-btn">🌙</button>
   </div>
 </header>
 
-<!-- Stats -->
-<div class="stats-row">
-  <div class="stat-card"><span class="stat-card__num orange" id="stat-shown">0</span><span class="stat-card__label">顯示筆數</span></div>
-  <div class="stat-card"><span class="stat-card__num" id="stat-stay">0</span><span class="stat-card__label">住宿筆數</span></div>
-  <div class="stat-card"><span class="stat-card__num green" id="stat-region">0</span><span class="stat-card__label">地區數</span></div>
-  <div class="stat-card"><span class="stat-card__num" id="stat-cat">0</span><span class="stat-card__label">類別數</span></div>
+<!-- ══ 快速入口（頁面最上方）══ -->
+<div class="quick-actions">
+  <a href="itinerary.html" class="qa-btn qa-btn--itinerary">
+    <span class="qa-btn__icon">🗓</span>
+    <div class="qa-btn__info">
+      <span class="qa-btn__title">每日行程表</span>
+      <span class="qa-btn__sub">AI 自動排程</span>
+    </div>
+  </a>
+  <button class="qa-btn qa-btn--add" id="qa-add-btn">
+    <span class="qa-btn__icon">➕</span>
+    <div class="qa-btn__info">
+      <span class="qa-btn__title">新增地點</span>
+      <span class="qa-btn__sub">加入心願清單</span>
+    </div>
+  </button>
 </div>
 
-<!-- Filters -->
-<div class="filter-panel">
+<!-- ══ 搜尋與篩選 ══ -->
+<div class="search-bar">
   <div class="search-wrap">
     <span class="search-icon">🔍</span>
-    <input id="search-input" type="search" placeholder="搜尋名稱或備註…" autocomplete="off">
+    <input id="search-input" type="search" placeholder="搜尋名稱、地區、備註…" autocomplete="off">
   </div>
   <div class="selects-row">
     <select id="region-select" class="filter-select"><option value="">全部地區</option></select>
-    <select id="cat-select" class="filter-select"><option value="">全部類別</option></select>
+    <select id="cat-select" class="filter-select">
+      <option value="">全部類別</option>
+      <option>景點</option><option>餐廳</option><option>住宿</option><option>購物</option><option>其他</option>
+    </select>
+    <select id="sub-select" class="filter-select"><option value="">全部子類別</option></select>
   </div>
   <div class="region-tags" id="region-tags"></div>
 </div>
 
-<!-- Cost Block -->
-<div class="cost-block open" id="cost-block">
+<!-- ══ 新增地點（預設折疊）══ -->
+<div class="add-section" id="add-section">
+  <div class="add-section__header" id="add-toggle">
+    <span class="add-section__title">＋ 新增地點</span>
+    <span class="add-toggle-icon">▾</span>
+  </div>
+  <div class="add-section__body">
+    <form id="add-place-form">
+      <div class="add-field">
+        <label>地區 *</label>
+        <input id="add-region" type="text" placeholder="例：福岡、熊本" required>
+      </div>
+      <div class="add-field">
+        <label>類別 *</label>
+        <select id="add-category" required>
+          <option value="">選擇類別</option>
+          <option>景點</option><option>餐廳</option><option>住宿</option><option>購物</option><option>其他</option>
+        </select>
+      </div>
+      <div class="add-field">
+        <label>子類別</label>
+        <select id="add-sub">
+          <option value="">請先選擇類別</option>
+        </select>
+      </div>
+      <div class="add-field">
+        <label>名稱 *</label>
+        <input id="add-name" type="text" placeholder="景點或店家名稱" required>
+      </div>
+      <div class="add-field">
+        <label>營業時間</label>
+        <input id="add-hours" type="text" placeholder="例：09:00–17:00，週三休">
+      </div>
+      <div class="add-field">
+        <label>備註</label>
+        <textarea id="add-note" rows="2" placeholder="地址、電話、交通方式…"></textarea>
+      </div>
+      <button type="submit" class="btn-add-place">新增地點</button>
+      <span class="sync-badge" id="add-sync-status"></span>
+    </form>
+    <button class="btn-export" id="btn-export-csv">📥 匯出 CSV</button>
+  </div>
+</div>
+
+<!-- ══ 住宿費用（預設折疊）══ -->
+<div class="cost-block" id="cost-block">
   <div class="cost-block__header" id="cost-toggle">
     <span class="cost-block__title">💴 住宿費用</span>
     <span class="cost-block__toggle">▾</span>
@@ -268,173 +290,62 @@
   </div>
 </div>
 
-<!-- Rental Block -->
+<!-- ══ 租車資訊 ══ -->
 <div class="rental-block" id="rental-block">
   <div class="rental-block__header" id="rental-toggle">
     <span class="rental-block__title">🚗 租車資訊</span>
     <span class="rental-block__toggle">▾</span>
   </div>
   <div class="rental-block__body">
-    <div id="rental-form-wrap">
-      <div class="rental-field-row"><label>租車公司</label><input id="r-company" type="text" placeholder="例：Times Car / OTS / Nippon"></div>
-      <div class="rental-field-row"><label>車型</label><input id="r-cartype" type="text" placeholder="例：Toyota Voxy / Honda Fit"></div>
-      <div class="rental-field-row"><label>取車日期</label><input id="r-pickup-date" type="date"></div>
-      <div class="rental-field-row"><label>取車地點</label><input id="r-pickup-loc" type="text" placeholder="例：熊本機場店"></div>
-      <div class="rental-field-row"><label>還車日期</label><input id="r-return-date" type="date"></div>
-      <div class="rental-field-row"><label>還車地點</label><input id="r-return-loc" type="text" placeholder="例：福岡博多站前店（異地還車）"></div>
-      <div class="rental-field-row"><label>費用 (TWD)</label><input id="r-cost" type="number" placeholder="0" min="0"></div>
-      <div class="rental-field-row"><label>訂單編號</label><input id="r-booking" type="text" placeholder="預約確認碼"></div>
-      <div class="rental-field-row"><label>備註</label><textarea id="r-note" rows="2" placeholder="例：ETC 租借、兒童座椅、保險方案…"></textarea></div>
-      <button class="btn-save-rental" id="btn-save-rental">💾 儲存租車資訊</button>
-      <span class="sync-badge" id="rental-sync-status">⏳ 連線中…</span>
+    <div class="rental-info-grid">
+      <div class="rental-field"><label>取車日期</label><input id="r-pickup-date" type="date"></div>
+      <div class="rental-field"><label>還車日期</label><input id="r-return-date" type="date"></div>
+      <div class="rental-field"><label>取車地點</label><input id="r-pickup-loc" type="text" placeholder="例：福岡機場"></div>
+      <div class="rental-field"><label>還車地點</label><input id="r-return-loc" type="text" placeholder="例：福岡機場"></div>
+      <div class="rental-field"><label>租車公司</label><input id="r-company" type="text" placeholder="例：Times"></div>
+      <div class="rental-field"><label>車型</label><input id="r-car" type="text" placeholder="例：Toyota Aqua"></div>
+      <div class="rental-field"><label>費用 (TWD)</label><input id="r-cost" type="number" placeholder="0"></div>
+      <div class="rental-field"><label>預訂編號</label><input id="r-booking" type="text" placeholder="訂單號碼"></div>
     </div>
-    <div id="rental-saved"></div>
-
-    <!-- 日本自駕注意事項 -->
-    <div class="driving-tips" id="driving-tips">
-      <div class="driving-tips__header" id="tips-toggle">
-        <span>🗾 日本自駕注意事項</span>
-        <span class="tips-toggle-icon">▸</span>
-      </div>
-      <div class="driving-tips__body">
-        <div class="tip-section">
-          <div class="tip-section__title">📄 出發前必備文件</div>
-          <ul class="tip-list">
-            <li>台灣駕照 + <strong>日本語譯本</strong>（台灣監理站辦理，需 2–3 工作天）</li>
-            <li>護照正本</li>
-            <li>租車確認書（印出或手機截圖）</li>
-            <li>國際信用卡（租車押金用，部分需 Visa/Master）</li>
-          </ul>
-        </div>
-        <div class="tip-section">
-          <div class="tip-section__title">🛣️ 行駛規則</div>
-          <ul class="tip-list">
-            <li><strong>靠左行駛</strong>，方向盤在右側（與台灣相反）</li>
-            <li>市區限速 <strong>40–60 km/h</strong>，郊區 <strong>60–80 km/h</strong>，高速 <strong>100 km/h</strong></li>
-            <li>「止まれ」標誌必須<strong>完全停車</strong>，不可滾動通過</li>
-            <li>轉彎時讓行人優先，斑馬線前必須停車</li>
-            <li>右轉需等對向來車完全通過</li>
-            <li>高速公路進出口在<strong>左側</strong></li>
-          </ul>
-        </div>
-        <div class="tip-section">
-          <div class="tip-section__title">🅿️ 停車</div>
-          <ul class="tip-list">
-            <li>多為<strong>自動繳費機</strong>，準備日幣硬幣或 IC 卡</li>
-            <li>路邊黃線禁停，白線可短暫停車（依標示）</li>
-            <li>推薦 <strong>Times Park</strong> 或 <strong>Navitime</strong> App 找停車場</li>
-            <li>觀光地停車場假日容易客滿，建議早去</li>
-          </ul>
-        </div>
-        <div class="tip-section">
-          <div class="tip-section__title">⛽ 加油</div>
-          <ul class="tip-list">
-            <li>一般車輛加 <strong>レギュラー（Regular）</strong></li>
-            <li>自助加油：選油種 → 插卡/投現 → 拿油槍 → 加完按「返金」</li>
-            <li>取車時確認油箱類型（汽油 or 柴油）</li>
-          </ul>
-        </div>
-        <div class="tip-section">
-          <div class="tip-section__title">🛣️ 高速公路 ETC</div>
-          <ul class="tip-list">
-            <li>租車時建議加租 <strong>ETC 車載機</strong>（日本 ETC ≠ 台灣 ETC）</li>
-            <li>沒有 ETC 走一般車道，準備日幣現金</li>
-            <li>九州熊本→福岡約 ¥2,000–2,800</li>
-            <li><strong>ドラぷら（Dra-pla）</strong> App 可查過路費</li>
-          </ul>
-        </div>
-        <div class="tip-section">
-          <div class="tip-section__title">📱 導航</div>
-          <ul class="tip-list">
-            <li>推薦 <strong>Google Maps</strong>（需行動數據）</li>
-            <li><strong>Navitime Japan</strong> 可離線，適合山區路段</li>
-            <li>輸入目的地建議用<strong>電話號碼</strong>或<strong>郵遞區號</strong></li>
-          </ul>
-        </div>
-        <div class="tip-section">
-          <div class="tip-section__title">🚨 緊急狀況</div>
-          <ul class="tip-list">
-            <li>報警：<strong>110</strong> / 救護車火災：<strong>119</strong></li>
-            <li>JAF 道路救援：<strong>0570-00-8139</strong></li>
-            <li>發生事故先拍照，不移動車輛，等警察到場</li>
-            <li>取車時確認租車公司緊急聯絡電話並存入手機</li>
-          </ul>
-        </div>
-        <div class="tip-section">
-          <div class="tip-section__title">🚫 嚴禁事項</div>
-          <ul class="tip-list">
-            <li><strong>飲酒駕車</strong>：血液酒精 0.03% 以上即違法</li>
-            <li><strong>手持手機</strong>：罰款 ¥18,000，記點</li>
-            <li><strong>超速 30 km/h 以上</strong>：可能被逮捕</li>
-            <li>全車乘客都必須繫安全帶（含後座）</li>
-          </ul>
-        </div>
-        <div class="tip-section tip-section--highlight">
-          <div class="tip-section__title">📍 本次行程租車重點</div>
-          <ul class="tip-list">
-            <li>熊本機場取車 → 阿蘇、天草、芦北方向行駛</li>
-            <li>天草公路多山路彎道，單線道會車需禮讓</li>
-            <li>福岡市區停車費高，建議停郊區轉地鐵</li>
-            <li>異地還車（熊本取→福岡還）需確認是否收異地費</li>
-          </ul>
-        </div>
-      </div>
-    </div>
+    <button class="btn-add-place" id="btn-save-rental" style="margin-top:.25rem;">儲存租車資訊</button>
+    <span class="sync-badge" id="rental-sync-status"></span>
   </div>
 </div>
 
-<!-- Card list -->
-<div class="section-heading">
-  <h2>景點 / 餐廳 / 住宿</h2>
-  <span id="result-label">載入中…</span>
+<!-- ══ 地點卡片 ══ -->
+<div class="cards-header">
+  <span class="cards-count" id="cards-count">載入中…</span>
+  <select class="cards-sort" id="sort-select">
+    <option value="default">預設排序</option>
+    <option value="region">依地區</option>
+    <option value="cat">依類別</option>
+    <option value="fav">最愛優先</option>
+  </select>
 </div>
-<div class="card-grid" id="card-grid"></div>
+<div class="cards" id="cards"></div>
 
-<!-- 行程表入口 -->
-<a href="itinerary.html" style="display:flex;align-items:center;justify-content:space-between;margin:.25rem 1rem .5rem;padding:.9rem 1rem;background:linear-gradient(135deg,rgba(184,175,255,.12),rgba(232,115,74,.08));border:1px solid rgba(184,175,255,.3);border-radius:var(--r);text-decoration:none;color:var(--text);-webkit-tap-highlight-color:transparent;">
-  <div>
-    <div style="font-family:var(--serif);font-size:.95rem;font-weight:700;">🗓 每日行程表</div>
-    <div style="font-size:.72rem;opacity:.5;margin-top:.2rem;">AI 自動排程 · 手動編輯 · 即時同步</div>
-  </div>
-  <span style="font-size:1.2rem;opacity:.5;">→</span>
-</a>
-
-<!-- Add place -->
-<div class="add-section" id="add-section">
-  <div class="add-section__header" id="add-toggle">
-    <span class="add-section__title">＋ 新增地點</span>
-    <span class="add-toggle-icon">▾</span>
-  </div>
-  <div class="add-section__body">
-    <form id="add-place-form">
-      <div class="add-field"><label>地區 *</label><input id="add-region" type="text" placeholder="例：福岡" required></div>
-      <div class="add-field"><label>類別 *</label>
-        <select id="add-category" required>
-          <option value="">選擇類別</option>
-          <option>景點</option><option>餐廳</option><option>住宿</option><option>購物</option><option>其他</option>
-        </select>
-      </div>
-      <div class="add-field"><label>子類別</label><input id="add-sub" type="text" placeholder="例：拉麵店、神社、溫泉飯店"></div>
-      <div class="add-field"><label>名稱 *</label><input id="add-name" type="text" placeholder="景點或店家名稱" required></div>
-      <div class="add-field"><label>營業時間</label><input id="add-hours" type="text" placeholder="例：09:00–17:00，週三休"></div>
-      <div class="add-field"><label>備註</label><textarea id="add-note" rows="2" placeholder="地址、電話、交通方式…"></textarea></div>
-      <button type="submit" class="btn-add-place" id="btn-add-place">新增地點</button>
-      <span class="sync-badge" id="add-sync-status"></span>
-    </form>
-    <button class="btn-export" id="btn-export-csv">📥 匯出 CSV</button>
-  </div>
-</div>
-
+<!-- ══ Bottom Nav ══ -->
 <nav class="bottom-nav">
   <a href="travel.html" class="bottom-nav__item"><span>🏠</span><span>首頁</span></a>
   <a href="index.html" class="bottom-nav__item active"><span>🔍</span><span>總覽</span></a>
-  <a href="fukuoka.html" class="bottom-nav__item"><span>🌆</span><span>福岡</span></a>
   <a href="itinerary.html" class="bottom-nav__item"><span>🗓</span><span>行程</span></a>
+  <a href="fukuoka.html" class="bottom-nav__item"><span>🌆</span><span>福岡</span></a>
 </nav>
 
 <script>
 // ════════════════════════════════════════
-//  資料（從 trips.json 載入 + Firebase 雲端新增）
+//  子類別映射
+// ════════════════════════════════════════
+const SUB_MAP = {
+  '景點':['神社','公園','城堡','博物館','市場','水族館','動物園','海灘','溫泉','展望台','釣點','其他景點'],
+  '餐廳':['拉麵店','燒肉店','壽司','鰻魚料理','居酒屋','甜點','咖啡廳','海鮮','定食','其他餐廳'],
+  '住宿':['商務飯店','溫泉飯店','共居飯店','民宿','膠囊旅館'],
+  '購物':['釣具店','百貨','藥妝','超市','伴手禮','其他購物'],
+  '其他':['交通','活動','球賽','釣魚體驗','其他'],
+};
+
+// ════════════════════════════════════════
+//  狀態
 // ════════════════════════════════════════
 let PLACES = [];
 let CLOUD_PLACES = [];
@@ -442,10 +353,11 @@ let favOnly = false;
 let searchQ = '';
 let filterRegion = '';
 let filterCat = '';
+let filterSub = '';
 
 function allPlaces(){ return [...PLACES, ...CLOUD_PLACES]; }
 
-// ── Intersection Observer for card reveal ──
+// ── Intersection Observer ──
 const revObs = new IntersectionObserver(entries=>{
   entries.forEach(({isIntersecting,target},i)=>{
     if(!isIntersecting)return;
@@ -454,7 +366,7 @@ const revObs = new IntersectionObserver(entries=>{
   });
 },{threshold:.04,rootMargin:'0px 0px -6px 0px'});
 
-// ── Favs (localStorage per device) ──
+// ── Favs ──
 function getFavs(){ return JSON.parse(localStorage.getItem('kyushu_favs')||'[]'); }
 function toggleFav(id){
   const s=getFavs(),i=s.indexOf(id);
@@ -463,287 +375,340 @@ function toggleFav(id){
   return i>-1?'☆':'⭐';
 }
 
-// ── Render cards ──
+// ── 建卡片 ──
 function buildCard(p){
   const el=document.createElement('article');
   el.className='card'; el.dataset.id=p.id;
   const q=encodeURIComponent(p.name+' '+p.region+' Japan');
-  const FISH=['釣','路亞','釣具'];
-  const tags=(p.tags||[]).map(t=>`<span class="tag${FISH.some(k=>t.includes(k))?' tag--fishing':''}">${t}</span>`).join('');
-  const fav=getFavs().includes(p.id);
+  const FISH_KW=['釣','路亞','釣具'];
+  const tags=(p.tags||[]).map(t=>`<span class="tag${FISH_KW.some(k=>t.includes(k))?' tag--fish':''}">${t}</span>`).join('');
+  const isFav=getFavs().includes(p.id);
+  const sub = p.subcategory||p.category||'';
   el.innerHTML=`
-    <div class="card__top">
-      <div class="card__left">
-        <div class="card__meta">
-          <span class="card__region">${p.region}</span>
-          <span class="card__sub">${p.subcategory||p.category}</span>
-        </div>
-        <div class="card__name">${p.name}</div>
-        ${p.hours?`<div style="font-size:.68rem;color:var(--accent2);margin-top:.15rem;">🕐 ${p.hours}</div>`:''}
+    <div class="card__img-placeholder">${catEmoji(p.category)}</div>
+    <div class="card__body">
+      <div class="card__tags">
+        <span class="tag">${p.region||''}</span>
+        <span class="tag">${sub}</span>
+        ${tags}
       </div>
+      <div class="card__name">${p.name}</div>
+      ${p.hours?`<div class="card__hours">🕐 ${p.hours}</div>`:''}
+      ${p.note?`<p class="card__note">${p.note}</p>`:''}
+    </div>
+    <div class="card__footer">
+      <span class="card__cost">${p.twd?'NT$'+Number(p.twd).toLocaleString():''}</span>
       <div class="card__actions">
-        <button class="fav-btn${fav?' is-fav':''}" data-fav="${p.id}">${fav?'⭐':'☆'}</button>
-        <a class="maps-btn" href="https://www.google.com/maps/search/?api=1&query=${q}" target="_blank" rel="noopener">🗺 Maps</a>
+        <button class="card__btn card__fav" data-id="${p.id}">${isFav?'⭐':'☆'}</button>
+        <a class="card__btn" href="https://www.google.com/maps/search/?api=1&query=${q}" target="_blank" rel="noopener">🗺</a>
+        <button class="card__btn btn-del-place" data-id="${p.id}" data-src="${p._src||'base'}">🗑</button>
       </div>
-    </div>
-    <div class="card__note-wrap">
-      <button class="card__note-toggle">▸ 展開備註</button>
-      <p class="card__note">${p.note||''}</p>
-    </div>
-    <div class="card__tags">${tags}</div>`;
-  if(p.note) el.classList.add('has-note');
+    </div>`;
+  // fav
+  el.querySelector('.card__fav').addEventListener('click',function(){
+    this.textContent=toggleFav(p.id);
+    if(favOnly) render();
+  });
+  // del
+  el.querySelector('.btn-del-place').addEventListener('click',function(){
+    if(!confirm('確定刪除「'+p.name+'」？'))return;
+    const src=this.dataset.src;
+    const key=p._key;
+    if(src==='custom'&&key){
+      window.__remove(window.__ref(window.__db,'custom_places/'+key));
+    } else if(src==='base'&&key){
+      window.__remove(window.__ref(window.__db,'base_places/'+key));
+    }
+  });
+  revObs.observe(el);
   return el;
 }
 
-function renderCards(){
-  const grid=document.getElementById('card-grid');
+function catEmoji(c){
+  return {'景點':'🏛','餐廳':'🍜','住宿':'🏨','購物':'🛍','其他':'📌'}[c]||'📌';
+}
+
+// ── Render ──
+function render(){
+  const wrap=document.getElementById('cards');
+  wrap.innerHTML='';
   const favs=getFavs();
+  const sortVal=document.getElementById('sort-select').value;
+
   let list=allPlaces().filter(p=>{
     if(favOnly && !favs.includes(p.id)) return false;
-    if(filterRegion && p.region!==filterRegion) return false;
-    if(filterCat && p.category!==filterCat) return false;
     if(searchQ){
       const q=searchQ.toLowerCase();
-      return (p.name||'').toLowerCase().includes(q)||(p.note||'').toLowerCase().includes(q);
+      if(!(p.name||'').toLowerCase().includes(q)&&
+         !(p.region||'').toLowerCase().includes(q)&&
+         !(p.note||'').toLowerCase().includes(q)&&
+         !(p.subcategory||'').toLowerCase().includes(q)) return false;
     }
+    if(filterRegion && p.region!==filterRegion) return false;
+    if(filterCat && p.category!==filterCat) return false;
+    if(filterSub && (p.subcategory||'')!==filterSub) return false;
     return true;
   });
-  grid.innerHTML='';
-  if(!list.length){grid.innerHTML='<p class="empty">無符合結果</p>';return;}
-  list.forEach(p=>{const c=buildCard(p);grid.appendChild(c);revObs.observe(c);});
-  // stats
-  document.getElementById('stat-shown').textContent=list.length;
-  document.getElementById('stat-stay').textContent=list.filter(p=>p.category==='住宿').length;
-  document.getElementById('result-label').textContent=`${list.length} 筆`;
-}
 
-function buildFilters(){
-  const all=allPlaces();
-  const regions=[...new Set(all.map(p=>p.region))].sort();
-  const cats=[...new Set(all.map(p=>p.category))].sort();
-  const rSel=document.getElementById('region-select');
-  const cSel=document.getElementById('cat-select');
-  rSel.innerHTML='<option value="">全部地區</option>'+regions.map(r=>`<option>${r}</option>`).join('');
-  cSel.innerHTML='<option value="">全部類別</option>'+cats.map(c=>`<option>${c}</option>`).join('');
-  // region tags
-  const tagWrap=document.getElementById('region-tags');
-  tagWrap.innerHTML='';
-  ['全部',...regions].forEach(r=>{
-    const btn=document.createElement('button');
-    btn.className='region-tag'+(r==='全部'?' active':'');
-    btn.textContent=r; btn.dataset.r=r;
-    tagWrap.appendChild(btn);
+  if(sortVal==='region') list.sort((a,b)=>(a.region||'').localeCompare(b.region||'','zh'));
+  else if(sortVal==='cat') list.sort((a,b)=>(a.category||'').localeCompare(b.category||'','zh'));
+  else if(sortVal==='fav') list.sort((a,b)=>{
+    const fa=favs.includes(a.id),fb=favs.includes(b.id);
+    return fa===fb?0:fa?-1:1;
   });
-  document.getElementById('stat-region').textContent=regions.length;
-  document.getElementById('stat-cat').textContent=cats.length;
-}
 
-// ── Events ──
-document.getElementById('search-input').addEventListener('input',e=>{
-  searchQ=e.target.value; renderCards();
-});
-document.getElementById('region-select').addEventListener('change',e=>{
-  filterRegion=e.target.value;
-  document.querySelectorAll('.region-tag').forEach(t=>t.classList.toggle('active',t.dataset.r===(filterRegion||'全部')));
-  renderCards();
-});
-document.getElementById('cat-select').addEventListener('change',e=>{filterCat=e.target.value;renderCards();});
-document.getElementById('region-tags').addEventListener('click',e=>{
-  const btn=e.target.closest('.region-tag');if(!btn)return;
-  filterRegion=btn.dataset.r==='全部'?'':btn.dataset.r;
-  document.getElementById('region-select').value=filterRegion;
-  document.querySelectorAll('.region-tag').forEach(t=>t.classList.toggle('active',t===btn));
-  renderCards();
-});
-document.getElementById('card-grid').addEventListener('click',e=>{
-  const fav=e.target.closest('[data-fav]');
-  if(fav){
-    const result=toggleFav(+fav.dataset.fav);
-    fav.textContent=result;
-    fav.classList.toggle('is-fav', result==='⭐');
-    if(favOnly)renderCards();
+  document.getElementById('cards-count').textContent=`共 ${list.length} 個地點`;
+  if(!list.length){
+    wrap.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;opacity:.3;font-size:.9rem;">沒有符合條件的地點</div>';
     return;
   }
-  const tog=e.target.closest('.card__note-toggle')||e.target.closest('.card__name');
-  if(tog){const c=tog.closest('.card');const o=c.classList.toggle('note-open');const t=c.querySelector('.card__note-toggle');if(t)t.textContent=o?'▾ 收合備註':'▸ 展開備註';}
+  list.forEach(p=>wrap.appendChild(buildCard(p)));
+}
+
+// ── 地區 Tags ──
+function buildRegionTags(){
+  const regions=[...new Set(allPlaces().map(p=>p.region).filter(Boolean))].sort();
+  const wrap=document.getElementById('region-tags');
+  wrap.innerHTML='';
+  const allBtn=document.createElement('button');
+  allBtn.className='region-tag'+(filterRegion===''?' active':'');
+  allBtn.textContent='全部';
+  allBtn.addEventListener('click',()=>{ filterRegion=''; buildRegionTags(); render(); });
+  wrap.appendChild(allBtn);
+  regions.forEach(r=>{
+    const btn=document.createElement('button');
+    btn.className='region-tag'+(filterRegion===r?' active':'');
+    btn.textContent=r;
+    btn.addEventListener('click',()=>{ filterRegion=r; buildRegionTags(); render(); });
+    wrap.appendChild(btn);
+  });
+}
+
+// ── Region Select ──
+function buildRegionSelect(){
+  const regions=[...new Set(allPlaces().map(p=>p.region).filter(Boolean))].sort();
+  const sel=document.getElementById('region-select');
+  const cur=sel.value;
+  sel.innerHTML='<option value="">全部地區</option>';
+  regions.forEach(r=>{ const o=document.createElement('option');o.value=r;o.textContent=r;if(r===cur)o.selected=true;sel.appendChild(o); });
+}
+
+// ── Sub Select（篩選）聯動 ──
+function updateFilterSubOptions(cat){
+  const subSel=document.getElementById('sub-select');
+  subSel.innerHTML='<option value="">全部子類別</option>';
+  if(cat && SUB_MAP[cat]){
+    SUB_MAP[cat].forEach(s=>{
+      const o=document.createElement('option');o.value=s;o.textContent=s;
+      if(s===filterSub)o.selected=true;
+      subSel.appendChild(o);
+    });
+  } else {
+    const subs=[...new Set(allPlaces().map(p=>p.subcategory||'').filter(Boolean))].sort();
+    subs.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;if(s===filterSub)o.selected=true;subSel.appendChild(o);});
+  }
+}
+
+// ── Add Form 子類別聯動 ──
+function updateAddSubOptions(cat){
+  const addSub=document.getElementById('add-sub');
+  addSub.innerHTML='<option value="">選擇子類別</option>';
+  (SUB_MAP[cat]||[]).forEach(s=>{
+    const o=document.createElement('option');o.value=s;o.textContent=s;addSub.appendChild(o);
+  });
+}
+
+// ════════════════════════════════════════
+//  事件綁定
+// ════════════════════════════════════════
+
+// 搜尋
+document.getElementById('search-input').addEventListener('input',e=>{ searchQ=e.target.value.trim(); render(); });
+
+// 地區 select
+document.getElementById('region-select').addEventListener('change',e=>{ filterRegion=e.target.value; buildRegionTags(); render(); });
+
+// 類別 select → 聯動子類別
+document.getElementById('cat-select').addEventListener('change',e=>{
+  filterCat=e.target.value;
+  filterSub='';
+  updateFilterSubOptions(filterCat);
+  render();
 });
-document.getElementById('fav-only-btn').addEventListener('click',function(){
-  favOnly=!favOnly;this.classList.toggle('active',favOnly);this.textContent=favOnly?'⭐':'☆';renderCards();
+
+// 子類別 select
+document.getElementById('sub-select').addEventListener('change',e=>{ filterSub=e.target.value; render(); });
+
+// 排序
+document.getElementById('sort-select').addEventListener('change',render);
+
+// Fav toggle（topbar icon）
+document.getElementById('fav-btn').addEventListener('click',()=>{
+  favOnly=!favOnly;
+  document.getElementById('fav-btn').textContent=favOnly?'⭐':'☆';
+  render();
 });
+
+// 快速入口「新增地點」按鈕 → 展開表單並滾到表單
+document.getElementById('qa-add-btn').addEventListener('click',()=>{
+  const sec=document.getElementById('add-section');
+  sec.classList.add('open');
+  sec.scrollIntoView({behavior:'smooth',block:'start'});
+});
+
+// 新增表單展開/折疊
+document.getElementById('add-toggle').addEventListener('click',()=>{
+  document.getElementById('add-section').classList.toggle('open');
+});
+
+// Add form 類別聯動
+document.getElementById('add-category').addEventListener('change',e=>{ updateAddSubOptions(e.target.value); });
+
+// 提交新增地點
+document.getElementById('add-place-form').addEventListener('submit',e=>{
+  e.preventDefault();
+  const region=document.getElementById('add-region').value.trim();
+  const category=document.getElementById('add-category').value;
+  const sub=document.getElementById('add-sub').value;
+  const name=document.getElementById('add-name').value.trim();
+  const hours=document.getElementById('add-hours').value.trim();
+  const note=document.getElementById('add-note').value.trim();
+  if(!region||!category||!name){alert('請填寫地區、類別與名稱');return;}
+  const addRef=window.__ref(window.__db,'custom_places');
+  const status=document.getElementById('add-sync-status');
+  status.textContent='⏳ 儲存中…';
+  window.__push(addRef,{
+    id:Date.now(),region,category,subcategory:sub||category,name,hours,note,
+    twd:null,tags:[region],fav:false,photo:null,createdAt:new Date().toISOString(),_src:'custom'
+  }).then(()=>{
+    status.textContent='✅ 已儲存';
+    e.target.reset();
+    document.getElementById('add-sub').innerHTML='<option value="">請先選擇類別</option>';
+    setTimeout(()=>status.textContent='',2500);
+  });
+});
+
+// 匯出 CSV
+document.getElementById('btn-export-csv').addEventListener('click',()=>{
+  const rows=[['id','region','category','subcategory','name','hours','note','twd','createdAt']];
+  allPlaces().forEach(p=>rows.push([p.id,p.region||'',p.category||'',p.subcategory||'',p.name||'',p.hours||'',p.note||'',p.twd||'',p.createdAt||'']));
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download='kyushu_places.csv'; a.click();
+});
+
+// 住宿費用 toggle（預設關閉）
+document.getElementById('cost-toggle').addEventListener('click',()=>{
+  document.getElementById('cost-block').classList.toggle('open');
+});
+
+// 租車 toggle
+document.getElementById('rental-toggle').addEventListener('click',()=>{
+  document.getElementById('rental-block').classList.toggle('open');
+});
+
+// Theme
 document.getElementById('theme-btn').addEventListener('click',()=>{
   const t=document.documentElement.dataset.theme==='dark'?'light':'dark';
   document.documentElement.dataset.theme=t;
   document.getElementById('theme-btn').textContent=t==='dark'?'🌙':'☀️';
+  localStorage.setItem('kyushu_theme',t);
 });
-document.getElementById('cost-toggle').addEventListener('click',()=>document.getElementById('cost-block').classList.toggle('open'));
-document.getElementById('rental-toggle').addEventListener('click',()=>document.getElementById('rental-block').classList.toggle('open'));
-document.getElementById('tips-toggle').addEventListener('click',()=>document.getElementById('driving-tips').classList.toggle('open'));
-document.getElementById('add-toggle').addEventListener('click',()=>document.getElementById('add-section').classList.toggle('open'));
-
-// ── Export CSV ──
-document.getElementById('btn-export-csv').addEventListener('click',()=>{
-  const header='id,region,category,subcategory,name,note,twd';
-  const rows=allPlaces().map(p=>[p.id,p.region,p.category,p.subcategory||'',`"${(p.name||'').replace(/"/g,'""')}"`,`"${(p.note||'').replace(/"/g,'""')}"`,p.twd||''].join(','));
-  const blob=new Blob([header+'\n'+rows.join('\n')],{type:'text/csv;charset=utf-8;'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='kyushu_places.csv';a.click();
-});
-
-// ── Load base_places from Firebase ──
-function loadBasePlaces(){
-  const basRef=window.__ref(window.__db,'base_places');
-  window.__onValue(basRef,snap=>{
-    const data=snap.val();
-    if(data){
-      PLACES=Object.values(data);
-      buildFilters();
-      renderCards();
-    } else {
-      document.getElementById('card-grid').innerHTML='<p class="empty">⚠️ Firebase 尚無資料，請先執行 import-to-firebase.html</p>';
-    }
-  });
-}
-waitFirebase(loadBasePlaces);
+(()=>{ const t=localStorage.getItem('kyushu_theme')||'dark'; document.documentElement.dataset.theme=t; document.getElementById('theme-btn').textContent=t==='dark'?'🌙':'☀️'; })();
 
 // ════════════════════════════════════════
-//  Firebase 功能
+//  住宿費用（Firebase）
 // ════════════════════════════════════════
-function waitFirebase(cb){
-  if(window.__firebaseReady){cb();return;}
-  window.addEventListener('firebase-ready',cb,{once:true});
-}
-
-// ── 費用帳本 ──
-function initCostFirebase(){
-  const db=window.__db;
-  const costRef=window.__ref(db,'cost_entries');
-  const entriesEl=document.getElementById('cost-entries');
-  const summaryEl=document.getElementById('cost-summary');
-  const personEl=document.getElementById('person-input');
-  const statusEl=document.getElementById('cost-sync-status');
-  let entries={};
-
-  function renderSummary(){
-    const n=Math.max(1,parseInt(personEl.value)||1);
-    const total=Object.values(entries).reduce((s,e)=>s+(parseFloat(e.amt)||0),0);
-    summaryEl.innerHTML=`<div class="cost-total"><div><div class="cost-total__label">住宿合計</div><div class="cost-per">每人約 TWD ${Math.ceil(total/n).toLocaleString()}</div></div><span class="cost-total__num">TWD ${total.toLocaleString()}</span></div>`;
-  }
-  function renderEntries(){
-    entriesEl.innerHTML='';
-    Object.entries(entries).forEach(([key,entry])=>{
-      const row=document.createElement('div');
-      row.className='cost-entry';row.dataset.key=key;
-      row.innerHTML=`<input type="text" class="cost-name" placeholder="例：AMP FLAT 福岡" value="${entry.name||''}"><input type="number" class="cost-amt" placeholder="0" value="${entry.amt||''}" min="0" step="1"><button class="cost-entry__del">✕</button>`;
-      entriesEl.appendChild(row);
+let costItems=[];
+function renderCostEntries(){
+  const wrap=document.getElementById('cost-entries');
+  wrap.innerHTML='';
+  costItems.forEach((item,idx)=>{
+    const row=document.createElement('div'); row.className='cost-entry';
+    row.innerHTML=`<input class="cost-entry__name" value="${item.name||''}" placeholder="項目名稱">
+      <input class="cost-entry__amount" type="number" value="${item.amount||0}" min="0">
+      <button class="cost-entry__del">✕</button>`;
+    row.querySelector('.cost-entry__name').addEventListener('change',e=>{
+      costItems[idx].name=e.target.value;
+      saveCostItems();
     });
-    renderSummary();
-  }
-  window.__onValue(costRef,snap=>{
-    entries=snap.val()||{};
-    renderEntries();
-    if(statusEl)statusEl.textContent='✅ 已同步';
-  });
-  let dbt;
-  entriesEl.addEventListener('input',e=>{
-    const row=e.target.closest('.cost-entry');if(!row)return;
-    const key=row.dataset.key;
-    clearTimeout(dbt);
-    dbt=setTimeout(()=>{
-      const name=row.querySelector('.cost-name').value;
-      const amt=parseFloat(row.querySelector('.cost-amt').value)||0;
-      window.__set(window.__ref(db,`cost_entries/${key}`),{name,amt});
-      if(statusEl)statusEl.textContent='☁️ 儲存中…';
-    },600);
-  });
-  entriesEl.addEventListener('click',e=>{
-    const del=e.target.closest('.cost-entry__del');if(!del)return;
-    window.__remove(window.__ref(db,`cost_entries/${del.closest('.cost-entry').dataset.key}`));
-  });
-  document.getElementById('btn-add-cost').addEventListener('click',()=>{
-    window.__push(costRef,{name:'',amt:0});
-  });
-  personEl.addEventListener('input',renderSummary);
-}
-
-// ── 租車資訊 ──
-function initRentalFirebase(){
-  const db=window.__db;
-  const rentalRef=window.__ref(db,'rental_info');
-  const statusEl=document.getElementById('rental-sync-status');
-  const savedEl=document.getElementById('rental-saved');
-
-  function renderRental(data){
-    if(!data||!Object.keys(data).length){savedEl.innerHTML='<p style="font-size:.75rem;opacity:.35;padding:.5rem 0;">尚未儲存租車資訊</p>';return;}
-    savedEl.innerHTML='';
-    Object.entries(data).forEach(([key,r])=>{
-      const card=document.createElement('div');card.className='rental-card';
-      card.innerHTML=`
-        ${r.company?`<div class="rental-card__row"><span class="rental-card__label">租車公司</span><span class="rental-card__val">${r.company}</span></div>`:''}
-        ${r.cartype?`<div class="rental-card__row"><span class="rental-card__label">車型</span><span class="rental-card__val">${r.cartype}</span></div>`:''}
-        ${r.pickupDate?`<div class="rental-card__row"><span class="rental-card__label">取車</span><span class="rental-card__val">${r.pickupDate} ${r.pickupLoc||''}</span></div>`:''}
-        ${r.returnDate?`<div class="rental-card__row"><span class="rental-card__label">還車</span><span class="rental-card__val">${r.returnDate} ${r.returnLoc||''}</span></div>`:''}
-        ${r.cost?`<div class="rental-card__row"><span class="rental-card__label">費用</span><span class="rental-card__val" style="color:var(--accent);font-weight:700;">TWD ${Number(r.cost).toLocaleString()}</span></div>`:''}
-        ${r.booking?`<div class="rental-card__row"><span class="rental-card__label">訂單編號</span><span class="rental-card__val">${r.booking}</span></div>`:''}
-        ${r.note?`<div class="rental-card__row"><span class="rental-card__label">備註</span><span class="rental-card__val">${r.note}</span></div>`:''}
-        <button class="rental-card__del" data-key="${key}">✕ 刪除此筆</button>`;
-      savedEl.appendChild(card);
+    row.querySelector('.cost-entry__amount').addEventListener('change',e=>{
+      costItems[idx].amount=Number(e.target.value)||0;
+      saveCostItems(); renderCostSummary();
     });
-  }
-  window.__onValue(rentalRef,snap=>{renderRental(snap.val());if(statusEl)statusEl.textContent='✅ 已同步';});
-  savedEl.addEventListener('click',e=>{
-    const del=e.target.closest('[data-key]');if(!del)return;
-    window.__remove(window.__ref(db,`rental_info/${del.dataset.key}`));
+    row.querySelector('.cost-entry__del').addEventListener('click',()=>{
+      costItems.splice(idx,1); saveCostItems(); renderCostEntries(); renderCostSummary();
+    });
+    wrap.appendChild(row);
   });
-  document.getElementById('btn-save-rental').addEventListener('click',()=>{
-    const r={
-      company:document.getElementById('r-company').value.trim(),
-      cartype:document.getElementById('r-cartype').value.trim(),
-      pickupDate:document.getElementById('r-pickup-date').value,
-      pickupLoc:document.getElementById('r-pickup-loc').value.trim(),
-      returnDate:document.getElementById('r-return-date').value,
-      returnLoc:document.getElementById('r-return-loc').value.trim(),
-      cost:parseFloat(document.getElementById('r-cost').value)||0,
-      booking:document.getElementById('r-booking').value.trim(),
-      note:document.getElementById('r-note').value.trim(),
-      createdAt:new Date().toISOString()
-    };
-    if(!r.company&&!r.cartype){alert('請至少填寫租車公司或車型');return;}
-    window.__push(rentalRef,r);
-    document.querySelectorAll('#rental-form-wrap input,#rental-form-wrap textarea').forEach(el=>el.value='');
-    if(statusEl)statusEl.textContent='☁️ 儲存中…';
+  renderCostSummary();
+}
+function renderCostSummary(){
+  const persons=parseInt(document.getElementById('person-input').value)||1;
+  const total=costItems.reduce((s,i)=>s+(Number(i.amount)||0),0);
+  document.getElementById('cost-summary').innerHTML=`
+    <strong>總計：NT$${total.toLocaleString()}</strong><br>
+    每人分攤：NT$${Math.ceil(total/persons).toLocaleString()}（${persons}人）`;
+}
+function saveCostItems(){
+  if(!window.__firebaseReady)return;
+  window.__set(window.__ref(window.__db,'cost_items'),costItems);
+}
+document.getElementById('btn-add-cost').addEventListener('click',()=>{
+  costItems.push({name:'',amount:0});
+  renderCostEntries();
+});
+document.getElementById('person-input').addEventListener('change',renderCostSummary);
+
+// ════════════════════════════════════════
+//  租車資訊（Firebase）
+// ════════════════════════════════════════
+const RENTAL_FIELDS=['pickup-date','return-date','pickup-loc','return-loc','company','car','cost','booking'];
+function loadRentalUI(data){
+  RENTAL_FIELDS.forEach(f=>{
+    const el=document.getElementById('r-'+f);
+    if(el&&data&&data[f]) el.value=data[f];
   });
 }
-
-// ── 新增地點 ──
-function initAddPlaceFirebase(){
-  const db=window.__db;
-  const addRef=window.__ref(db,'custom_places');
-  const statusEl=document.getElementById('add-sync-status');
-  window.__onValue(addRef,snap=>{
-    CLOUD_PLACES=snap.val()?Object.values(snap.val()):[];
-    buildFilters();renderCards();
+document.getElementById('btn-save-rental').addEventListener('click',()=>{
+  const data={};
+  RENTAL_FIELDS.forEach(f=>{
+    const el=document.getElementById('r-'+f);
+    if(el) data[f]=el.value;
   });
-  document.getElementById('add-place-form').addEventListener('submit',e=>{
-    e.preventDefault();
-    const region=document.getElementById('add-region').value.trim();
-    const category=document.getElementById('add-category').value;
-    const sub=document.getElementById('add-sub').value.trim();
-    const name=document.getElementById('add-name').value.trim();
-    const note=document.getElementById('add-note').value.trim();
-    if(!region||!category||!name)return;
-    const hours=document.getElementById('add-hours').value.trim();
-    window.__push(addRef,{id:Date.now(),region,category,subcategory:sub||category,name,hours,note,twd:null,tags:[region],fav:false,photo:null,createdAt:new Date().toISOString()});
-    e.target.reset();
-    const btn=document.getElementById('btn-add-place');
-    btn.textContent='✅ 已新增並同步！';
-    setTimeout(()=>btn.textContent='新增地點',2000);
-  });
-}
+  window.__set(window.__ref(window.__db,'rental_info'),data);
+  const s=document.getElementById('rental-sync-status');
+  s.textContent='✅ 已儲存'; setTimeout(()=>s.textContent='',2500);
+});
 
-// ── 啟動 Firebase ──
+// ════════════════════════════════════════
+//  Firebase 初始化
+// ════════════════════════════════════════
+function waitFirebase(cb){ if(window.__firebaseReady){cb();return;} window.addEventListener('firebase-ready',cb,{once:true}); }
+
 waitFirebase(()=>{
-  initCostFirebase();
-  initRentalFirebase();
-  initAddPlaceFirebase();
+  const db=window.__db;
+  // Base places
+  window.__onValue(window.__ref(db,'base_places'),snap=>{
+    PLACES=snap.val()?Object.entries(snap.val()).map(([k,v])=>({...v,_key:k,_src:'base'})):[];
+    buildRegionSelect(); buildRegionTags(); render();
+  });
+  // Custom places
+  window.__onValue(window.__ref(db,'custom_places'),snap=>{
+    CLOUD_PLACES=snap.val()?Object.entries(snap.val()).map(([k,v])=>({...v,_key:k,_src:'custom'})):[];
+    buildRegionSelect(); buildRegionTags(); render();
+  });
+  // Cost
+  window.__onValue(window.__ref(db,'cost_items'),snap=>{
+    costItems=snap.val()||[];
+    document.getElementById('cost-sync-status').textContent='';
+    renderCostEntries();
+  });
+  // Rental
+  window.__onValue(window.__ref(db,'rental_info'),snap=>{
+    if(snap.val()) loadRentalUI(snap.val());
+  });
 });
 </script>
 </body>
