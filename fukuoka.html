@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>福岡 — 九州旅遊紀錄 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    :root {
+      --c-accent: #E8734A;
+      --c-accent-l: #F4A88A;
+    }
+
+    /* ── Page Hero ── */
+    .page-hero {
+      height: 60svh; min-height: 360px;
+      display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 3.5rem; position: relative; overflow: hidden;
+    }
+    .page-hero__bg {
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, #1A0A0A 0%, #2D1810 40%, #1A1A2E 100%);
+    }
+    .page-hero__bg::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 70% 60%, rgba(232,115,74,0.18) 0%, transparent 65%);
+    }
+    .page-hero__content { position: relative; z-index: 2; }
+    .page-hero__back {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.72rem; letter-spacing: 0.15em; opacity: 0.55;
+      margin-bottom: 1.5rem;
+      transition: opacity 0.3s;
+    }
+    .page-hero__back:hover { opacity: 1; }
+    .page-hero__tag {
+      font-size: 0.7rem; letter-spacing: 0.3em;
+      text-transform: uppercase; opacity: 0.6; margin-bottom: 0.6rem;
+    }
+    .page-hero__title {
+      font-family: 'Noto Serif JP', serif;
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      font-weight: 700; line-height: 1;
+      color: var(--c-accent);
+      margin-bottom: 0.8rem;
+    }
+    .page-hero__sub {
+      font-size: 0.85rem; opacity: 0.55; max-width: 50ch; line-height: 1.7;
+    }
+
+    /* ── Stats Strip ── */
+    .stats-strip {
+      display: flex; gap: 0;
+      border-bottom: 1px solid var(--c-border);
+    }
+    .stats-strip__item {
+      flex: 1; padding: 1.5rem 2rem;
+      border-right: 1px solid var(--c-border);
+      display: flex; align-items: baseline; gap: 0.5rem;
+    }
+    .stats-strip__item:last-child { border-right: none; }
+    .stats-strip__num {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 1.8rem; font-weight: 700;
+      color: var(--c-accent);
+    }
+    .stats-strip__label { font-size: 0.72rem; letter-spacing: 0.12em; opacity: 0.5; }
+
+    /* ── Filter + Grid Section ── */
+    .content-section { padding: 4rem 0 6rem; }
+
+    .section-heading {
+      display: flex; align-items: baseline; gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .section-heading h2 {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 1.4rem; font-weight: 700;
+    }
+    .section-heading span {
+      font-size: 0.7rem; letter-spacing: 0.2em; opacity: 0.4;
+    }
+
+    /* ── Filter Tabs ── */
+    .filter-bar {
+      display: flex; flex-wrap: wrap; gap: 0.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .filter-btn {
+      padding: 0.38rem 1rem; font-size: 0.73rem; letter-spacing: 0.1em;
+      border: 1px solid var(--c-border); border-radius: 20px;
+      background: transparent; color: var(--c-text); cursor: pointer;
+      font-family: inherit;
+      transition: background 0.22s, border-color 0.22s, color 0.22s;
+    }
+    .filter-btn:hover { border-color: rgba(255,255,255,0.25); }
+    .filter-btn.active {
+      background: var(--c-accent); color: #fff;
+      border-color: var(--c-accent);
+    }
+
+    /* ── Card Grid ── */
+    #places-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+
+    .card {
+      background: #111111;
+      border: 1px solid var(--c-border);
+      border-radius: 8px; overflow: hidden;
+      transition: transform 0.32s cubic-bezier(0.4,0,0.2,1),
+                  border-color 0.32s, box-shadow 0.32s;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(232,115,74,0.35);
+      box-shadow: 0 12px 40px rgba(232,115,74,0.08);
+    }
+    .card__img {
+      height: 180px; overflow: hidden;
+      background: #1A1A1A;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .card__img img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+    }
+    .card:hover .card__img img { transform: scale(1.06); }
+    .card__placeholder { font-size: 2rem; opacity: 0.12; }
+
+    .card__body { padding: 1.2rem; }
+    .card__meta {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 0.45rem;
+    }
+    .card__sub {
+      font-size: 0.64rem; letter-spacing: 0.18em;
+      text-transform: uppercase; opacity: 0.45;
+    }
+    .card__cat-badge {
+      font-size: 0.6rem; letter-spacing: 0.12em;
+      padding: 0.15rem 0.55rem;
+      border-radius: 20px; border: 1px solid var(--c-border);
+      opacity: 0.5;
+    }
+    .card__name {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 0.98rem; font-weight: 700;
+      line-height: 1.4; margin-bottom: 0.5rem;
+    }
+    .card__note {
+      font-size: 0.78rem; line-height: 1.75;
+      color: rgba(232,232,232,0.48);
+    }
+    .card__tags {
+      display: flex; flex-wrap: wrap; gap: 0.35rem;
+      margin-top: 0.85rem;
+    }
+    .tag {
+      font-size: 0.62rem; letter-spacing: 0.06em;
+      padding: 0.18rem 0.55rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px; opacity: 0.55;
+    }
+    .tag--fishing {
+      border-color: rgba(77,166,255,0.4);
+      color: #7EC8E3; opacity: 1;
+    }
+
+    /* ── Reveal animation ── */
+    .card {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.5s cubic-bezier(0.4,0,0.2,1),
+                  transform 0.5s cubic-bezier(0.4,0,0.2,1),
+                  border-color 0.32s, box-shadow 0.32s;
+    }
+    .card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .card:hover {
+      transform: translateY(-5px) !important;
+    }
+
+    /* ── Empty state ── */
+    .empty {
+      grid-column: 1/-1; text-align: center;
+      padding: 4rem; opacity: 0.3;
+      font-size: 0.85rem; letter-spacing: 0.15em;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 960px) {
+      #places-grid { grid-template-columns: repeat(2, 1fr); }
+      .stats-strip { flex-wrap: wrap; }
+      .stats-strip__item { flex: 1 1 50%; }
+      .stats-strip__item:nth-child(2) { border-right: none; }
+    }
+    @media (max-width: 580px) {
+      #places-grid { grid-template-columns: 1fr; }
+      .page-hero { padding: 2rem 1.25rem; height: 50svh; }
+      .stats-strip__item { flex: 1 1 100%; border-right: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Nav ── -->
+  <nav class="nav">
+    <a href="index.html" class="nav__logo">九州 · 2026 秋</a>
+    <ul class="nav__links">
+      <li><a href="kumamoto.html">熊本</a></li>
+      <li><a href="fukuoka.html" class="active">福岡</a></li>
+      <li><a href="oita.html">大分</a></li>
+    </ul>
+  </nav>
+
+  <!-- ── Page Hero ── -->
+  <header class="page-hero">
+    <div class="page-hero__bg"></div>
+    <div class="page-hero__content">
+      <a href="index.html" class="page-hero__back">← 返回首頁</a>
+      <p class="page-hero__tag">Fukuoka · 美食 × 都市 × 夜生活</p>
+      <h1 class="page-hero__title">福岡</h1>
+      <p class="page-hero__sub">拉麵、燒肉、居酒屋、市場、神社 — 博多的每一條巷子都藏著驚喜。</p>
+    </div>
+  </header>
+
+  <!-- ── Stats Strip ── -->
+  <div class="stats-strip">
+    <div class="stats-strip__item">
+      <span class="stats-strip__num" id="stat-total">0</span>
+      <span class="stats-strip__label">筆紀錄</span>
+    </div>
+    <div class="stats-strip__item">
+      <span class="stats-strip__num" id="stat-food">0</span>
+      <span class="stats-strip__label">餐廳</span>
+    </div>
+    <div class="stats-strip__item">
+      <span class="stats-strip__num" id="stat-spot">0</span>
+      <span class="stats-strip__label">景點</span>
+    </div>
+    <div class="stats-strip__item">
+      <span class="stats-strip__num" id="stat-stay">0</span>
+      <span class="stats-strip__label">住宿選項</span>
+    </div>
+  </div>
+
+  <!-- ── Main Content ── -->
+  <main class="container content-section">
+    <div class="section-heading">
+      <h2>所有地點</h2>
+      <span id="result-count">— 筆</span>
+    </div>
+
+    <div class="filter-bar" id="filter-bar"></div>
+    <div id="places-grid"></div>
+  </main>
+
+  <!-- ── Footer ── -->
+  <footer style="border-top:1px solid var(--c-border);padding:2rem;text-align:center;opacity:0.3;font-size:0.72rem;letter-spacing:0.15em;">
+    九州旅遊紀錄 2026 · 9/30 – 10/7
+  </footer>
+
+  <script type="module">
+    // ── Icon map
+    const ICON = {
+      '景點': '🗺️', '餐廳': '🍜', '住宿': '🏨', '購物': '🛍️'
+    };
+    const FISHING_TAGS = ['釣魚', '路亞', '釣具', '磯釣'];
+
+    // ── Counter animation
+    function animateCount(el, target, duration = 800) {
+      const start = performance.now();
+      const update = (now) => {
+        const progress = Math.min((now - start) / duration, 1);
+        el.textContent = Math.floor(progress * target);
+        if (progress < 1) requestAnimationFrame(update);
+        else el.textContent = target;
+      };
+      requestAnimationFrame(update);
+    }
+
+    // ── Intersection observer for reveal
+    const revealObs = new IntersectionObserver(entries => {
+      entries.forEach(({ isIntersecting, target }, i) => {
+        if (!isIntersecting) return;
+        setTimeout(() => target.classList.add('visible'), i * 40);
+        revealObs.unobserve(target);
+      });
+    }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
+
+    // ── Card builder
+    function buildCard(p) {
+      const img = p.photo
+        ? `<img src="${p.photo}" alt="${p.name}" loading="lazy">`
+        : `<span class="card__placeholder">${ICON[p.category] ?? '📍'}</span>`;
+
+      const tags = p.tags.map(t => {
+        const isFishing = FISHING_TAGS.some(k => t.includes(k));
+        return `<span class="tag${isFishing ? ' tag--fishing' : ''}">${t}</span>`;
+      }).join('');
+
+      const article = document.createElement('article');
+      article.className = 'card';
+      article.innerHTML = `
+        <div class="card__img">${img}</div>
+        <div class="card__body">
+          <div class="card__meta">
+            <span class="card__sub">${p.subcategory}</span>
+            <span class="card__cat-badge">${p.category}</span>
+          </div>
+          <h3 class="card__name">${p.name}</h3>
+          <p class="card__note">${p.note}</p>
+          <div class="card__tags">${tags}</div>
+        </div>`;
+      return article;
+    }
+
+    // ── Render grid
+    function renderGrid(places) {
+      const grid = document.getElementById('places-grid');
+      const count = document.getElementById('result-count');
+      grid.innerHTML = '';
+      count.textContent = `${places.length} 筆`;
+
+      if (!places.length) {
+        grid.innerHTML = '<p class="empty">此分類暫無資料</p>';
+        return;
+      }
+      places.forEach(p => {
+        const card = buildCard(p);
+        grid.appendChild(card);
+        revealObs.observe(card);
+      });
+    }
+
+    // ── Build filter buttons
+    function buildFilters(places) {
+      const bar = document.getElementById('filter-bar');
+      const cats = ['全部', ...new Set(places.map(p => p.category))];
+      cats.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = `filter-btn${cat === '全部' ? ' active' : ''}`;
+        btn.textContent = cat === '全部' ? `全部（${places.length}）` : `${ICON[cat] ?? ''} ${cat}`;
+        btn.dataset.cat = cat;
+        bar.appendChild(btn);
+      });
+
+      bar.addEventListener('click', e => {
+        const btn = e.target.closest('.filter-btn');
+        if (!btn) return;
+        bar.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const cat = btn.dataset.cat;
+        renderGrid(cat === '全部' ? places : places.filter(p => p.category === cat));
+      });
+    }
+
+    // ── Stats
+    function updateStats(places) {
+      const food  = places.filter(p => p.category === '餐廳').length;
+      const spot  = places.filter(p => p.category === '景點').length;
+      const stay  = places.filter(p => p.category === '住宿').length;
+      animateCount(document.getElementById('stat-total'), places.length);
+      animateCount(document.getElementById('stat-food'),  food);
+      animateCount(document.getElementById('stat-spot'),  spot);
+      animateCount(document.getElementById('stat-stay'),  stay);
+    }
+
+    // ── Nav scroll state
+    const nav = document.querySelector('.nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 40);
+    }, { passive: true });
+
+    // ── Init
+    const res = await fetch('data/trips.json');
+    const { places: all } = await res.json();
+    const fukuoka = all.filter(p => p.region === '福岡');
+
+    updateStats(fukuoka);
+    buildFilters(fukuoka);
+    renderGrid(fukuoka);
+  </script>
+
+</body>
+</html>
