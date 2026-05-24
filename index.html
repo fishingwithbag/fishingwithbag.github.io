@@ -1,12 +1,293 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>釣魚 with Bag</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>九州旅遊紀錄 2024</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --kumamoto: #3D5A47;
+      --fukuoka: #E8734A;
+      --dark: #0D0D0D;
+      --light: #F5F0E8;
+      --text: #E8E8E8;
+      --transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ── Hero Split Screen ── */
+    .hero {
+      display: flex;
+      height: 100svh;
+    }
+
+    .hero__panel {
+      position: relative;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 3rem;
+      overflow: hidden;
+      cursor: pointer;
+      transition: flex var(--transition);
+    }
+
+    .hero__panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      transition: transform var(--transition), filter var(--transition);
+      filter: brightness(0.45);
+    }
+
+    .hero__panel:hover::before {
+      transform: scale(1.04);
+      filter: brightness(0.6);
+    }
+
+    .hero:has(.hero__panel--kumamoto:hover) .hero__panel--kumamoto { flex: 1.6; }
+    .hero:has(.hero__panel--fukuoka:hover) .hero__panel--fukuoka { flex: 1.6; }
+
+    .hero__panel--kumamoto::before {
+      background-image: url('assets/img/kumamoto-hero.jpg');
+    }
+
+    .hero__panel--fukuoka::before {
+      background-image: url('assets/img/fukuoka-hero.jpg');
+    }
+
+    .hero__divider {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: rgba(255,255,255,0.15);
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .hero__content {
+      position: relative;
+      z-index: 2;
+      transform: translateY(8px);
+      transition: transform var(--transition);
+    }
+
+    .hero__panel:hover .hero__content { transform: translateY(0); }
+
+    .hero__tag {
+      font-family: 'Noto Serif JP', serif;
+      font-size: clamp(0.65rem, 1vw, 0.8rem);
+      font-weight: 300;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      opacity: 0.7;
+      margin-bottom: 0.5rem;
+    }
+
+    .hero__title {
+      font-family: 'Noto Serif JP', serif;
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 1rem;
+    }
+
+    .hero__panel--kumamoto .hero__title { color: #A8C5B0; }
+    .hero__panel--fukuoka .hero__title { color: var(--fukuoka); }
+
+    .hero__desc {
+      font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+      font-weight: 300;
+      opacity: 0;
+      max-width: 28ch;
+      line-height: 1.7;
+      transition: opacity var(--transition);
+    }
+
+    .hero__panel:hover .hero__desc { opacity: 0.85; }
+
+    .hero__cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+      padding: 0.6rem 1.4rem;
+      border: 1px solid rgba(255,255,255,0.3);
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-decoration: none;
+      color: var(--text);
+      opacity: 0;
+      transform: translateX(-6px);
+      transition: opacity var(--transition), transform var(--transition), border-color 0.3s;
+    }
+
+    .hero__cta:hover { border-color: rgba(255,255,255,0.8); }
+    .hero__panel:hover .hero__cta { opacity: 1; transform: translateX(0); }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 2.5rem;
+      background: linear-gradient(to bottom, rgba(13,13,13,0.8), transparent);
+      backdrop-filter: blur(4px);
+    }
+
+    .nav__logo {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 0.9rem;
+      letter-spacing: 0.2em;
+      opacity: 0.9;
+    }
+
+    .nav__links { display: flex; gap: 2rem; list-style: none; }
+
+    .nav__links a {
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      text-decoration: none;
+      color: var(--text);
+      opacity: 0.7;
+      transition: opacity 0.3s;
+    }
+
+    .nav__links a:hover { opacity: 1; }
+
+    /* ── Stats Bar ── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .stats__item {
+      padding: 2rem;
+      border-right: 1px solid rgba(255,255,255,0.08);
+      text-align: center;
+    }
+
+    .stats__item:last-child { border-right: none; }
+
+    .stats__num {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      display: block;
+    }
+
+    .stats__label {
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      opacity: 0.5;
+      margin-top: 0.3rem;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .hero { flex-direction: column; }
+      .hero__divider { display: none; }
+      .hero:has(.hero__panel--kumamoto:hover) .hero__panel--kumamoto,
+      .hero:has(.hero__panel--fukuoka:hover) .hero__panel--fukuoka { flex: 1.5; }
+      .hero__desc, .hero__cta { opacity: 1; transform: none; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .stats__item:nth-child(2) { border-right: none; }
+      nav { padding: 1rem 1.5rem; }
+    }
+  </style>
 </head>
 <body>
-<h1>釣魚 with Bag</h1>
-<p>磯釣・筏釣・岸拋路亞作品集</p>
+
+  <nav>
+    <span class="nav__logo">九州 · 2024 秋</span>
+    <ul class="nav__links">
+      <li><a href="kumamoto.html">熊本</a></li>
+      <li><a href="fukuoka.html">福岡</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <div class="hero__divider"></div>
+
+      <article class="hero__panel hero__panel--kumamoto">
+        <div class="hero__content">
+          <p class="hero__tag">Kumamoto · 歷史 × 自然</p>
+          <h1 class="hero__title">熊本</h1>
+          <p class="hero__desc">上色見熊野座神社的秘境石階、天草的釣堀體驗、芦北的海濱公園。</p>
+          <a href="kumamoto.html" class="hero__cta">探索熊本 →</a>
+        </div>
+      </article>
+
+      <article class="hero__panel hero__panel--fukuoka">
+        <div class="hero__content">
+          <p class="hero__tag">Fukuoka · 美食 × 都市</p>
+          <h1 class="hero__title">福岡</h1>
+          <p class="hero__desc">博多拉麵、太宰府天滿宮、柳橋市場、長濱鮮魚場的海鮮初體驗。</p>
+          <a href="fukuoka.html" class="hero__cta">探索福岡 →</a>
+        </div>
+      </article>
+    </section>
+
+    <section class="stats">
+      <div class="stats__item">
+        <span class="stats__num" data-target="8">0</span>
+        <span class="stats__label">旅遊天數</span>
+      </div>
+      <div class="stats__item">
+        <span class="stats__num" data-target="30">0</span>
+        <span class="stats__label">景點 ／ 餐廳</span>
+      </div>
+      <div class="stats__item">
+        <span class="stats__num" data-target="3">0</span>
+        <span class="stats__label">釣魚體驗</span>
+      </div>
+      <div class="stats__item">
+        <span class="stats__num" data-target="2">0</span>
+        <span class="stats__label">同行人數</span>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const counters = document.querySelectorAll('[data-target]');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(({ isIntersecting, target }) => {
+        if (!isIntersecting) return;
+        const end = +target.dataset.target;
+        let current = 0;
+        const step = Math.ceil(end / 40);
+        const timer = setInterval(() => {
+          current = Math.min(current + step, end);
+          target.textContent = current;
+          if (current >= end) clearInterval(timer);
+        }, 30);
+        observer.unobserve(target);
+      });
+    }, { threshold: 0.5 });
+    counters.forEach(c => observer.observe(c));
+  </script>
+
 </body>
 </html>
