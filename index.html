@@ -367,10 +367,11 @@ const revObs = new IntersectionObserver(entries=>{
 },{threshold:.04,rootMargin:'0px 0px -6px 0px'});
 
 // ── Favs ──
-let _favsCache = JSON.parse(localStorage.getItem('kyushu_favs')||'[]');
+let _favsCache = (JSON.parse(localStorage.getItem('kyushu_favs')||'[]')||[]).map(String);
 function getFavs(){ return _favsCache; }
 function toggleFav(id){
-  const s=getFavs(),i=s.indexOf(id);
+  id=String(id);
+  const s=[...getFavs()],i=s.indexOf(id);
   i>-1?s.splice(i,1):s.push(id);
   _favsCache = s;
   localStorage.setItem('kyushu_favs',JSON.stringify(s));
@@ -385,7 +386,7 @@ function buildCard(p){
   const q=encodeURIComponent(p.name+' '+p.region+' Japan');
   const FISH_KW=['釣','路亞','釣具'];
   const tags=(p.tags||[]).map(t=>`<span class="tag${FISH_KW.some(k=>t.includes(k))?' tag--fish':''}">${t}</span>`).join('');
-  const isFav=getFavs().includes(p.id);
+  const isFav=getFavs().includes(String(p.id));
   const sub = p.subcategory||p.category||'';
   el.innerHTML=`
     <div class="card__img-placeholder">${catEmoji(p.category, p.subcategory)}</div>
@@ -455,7 +456,7 @@ function render(){
   const sortVal=document.getElementById('sort-select').value;
 
   let list=allPlaces().filter(p=>{
-    if(favOnly && !favs.includes(p.id)) return false;
+    if(favOnly && !favs.includes(String(p.id))) return false;
     if(searchQ){
       const q=searchQ.toLowerCase();
       if(!(p.name||'').toLowerCase().includes(q)&&
@@ -472,7 +473,7 @@ function render(){
   if(sortVal==='region') list.sort((a,b)=>(a.region||'').localeCompare(b.region||'','zh'));
   else if(sortVal==='cat') list.sort((a,b)=>(a.category||'').localeCompare(b.category||'','zh'));
   else if(sortVal==='fav') list.sort((a,b)=>{
-    const fa=favs.includes(a.id),fb=favs.includes(b.id);
+    const fa=favs.includes(String(a.id)),fb=favs.includes(String(b.id));
     return fa===fb?0:fa?-1:1;
   });
 
@@ -721,9 +722,11 @@ waitFirebase(()=>{
   // Favs
   window.__onValue(window.__ref(db,'favs'),snap=>{
     const raw = snap.val();
-    _favsCache = raw ? Object.keys(raw) : [];
+    const nextFavs = raw ? Object.keys(raw).map(String) : [];
+    const same = JSON.stringify([...nextFavs].sort())===JSON.stringify([..._favsCache].sort());
+    _favsCache = nextFavs;
     localStorage.setItem('kyushu_favs', JSON.stringify(_favsCache));
-    render();
+    if(!same) render();
   });
   // Cost
   window.__onValue(window.__ref(db,'cost_items'),snap=>{
