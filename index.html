@@ -405,7 +405,17 @@
           <option>景點</option><option>餐廳</option><option>住宿</option><option>購物</option><option>其他</option>
         </select>
       </div>
-      <div class="add-field"><label>子類別</label><input id="add-sub" type="text" placeholder="例：拉麵店、神社、溫泉飯店"></div>
+      <div class="add-field">
+        <label>子類別</label>
+        <div style="display:flex;gap:.4rem;">
+          <select id="add-sub-select" class="filter-select" style="flex:1;">
+            <option value="">選擇子類別</option>
+          </select>
+          <input id="add-sub-custom" type="text" placeholder="或自訂輸入"
+            style="flex:1;padding:.55rem .75rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.84rem;outline:none;">
+        </div>
+        <span style="font-size:.62rem;opacity:.38;margin-top:.2rem;">選下拉 或 右側自訂輸入，自訂優先</span>
+      </div>
       <div class="add-field"><label>名稱 *</label><input id="add-name" type="text" placeholder="景點或店家名稱" required></div>
       <div class="add-field"><label>備註</label><textarea id="add-note" rows="2" placeholder="地址、電話、營業時間…"></textarea></div>
       <button type="submit" class="btn-add-place" id="btn-add-place">新增地點</button>
@@ -569,6 +579,30 @@ document.getElementById('rental-toggle').addEventListener('click',()=>document.g
 document.getElementById('tips-toggle').addEventListener('click',()=>document.getElementById('driving-tips').classList.toggle('open'));
 document.getElementById('add-toggle').addEventListener('click',()=>document.getElementById('add-section').classList.toggle('open'));
 
+// 子類別動態下拉 — 從現有資料抓，不足的補預設
+const SUB_DEFAULTS = {
+  '景點':['神社','寺廟','公園','市場','博物館','動物園','水族館','釣點','釣具店','酒廠','展望台','海灘','溫泉','城堡','街道','其他景點'],
+  '餐廳':['拉麵店','燒肉店','壽司','迴轉壽司','海鮮','海鮮丼','天婦羅店','鰻魚料理','內臟鍋','水炊鍋','居酒屋','燒鳥店','和食','咖啡廳','甜點','麵包店','其他餐廳'],
+  '住宿':['商務飯店','溫泉飯店','包棟民宿','共居飯店','膠囊旅館','其他住宿'],
+  '購物':['百貨公司','超市','藥妝店','釣具店','伴手禮','其他購物'],
+  '其他':['交通','租車','加油站','便利商店','其他']
+};
+
+function updateSubSelect(cat){
+  const sel = document.getElementById('add-sub-select');
+  if(!cat){ sel.innerHTML='<option value="">先選類別</option>'; return; }
+  // 從現有所有資料抓該類別已有的子類別
+  const fromData = [...new Set(allPlaces().filter(p=>p.category===cat).map(p=>p.subcategory).filter(Boolean))];
+  // 合併預設清單，去重排序
+  const defaults = SUB_DEFAULTS[cat] || [];
+  const merged = [...new Set([...fromData, ...defaults])].sort();
+  sel.innerHTML = '<option value="">選擇子類別</option>' + merged.map(o=>`<option value="${o}">${o}</option>`).join('');
+  document.getElementById('add-sub-custom').value='';
+}
+
+document.getElementById('add-category').addEventListener('change', function(){
+  updateSubSelect(this.value);
+});
 // ── Export CSV ──
 document.getElementById('btn-export-csv').addEventListener('click',()=>{
   const header='id,region,category,subcategory,name,note,twd';
@@ -715,12 +749,16 @@ function initAddPlaceFirebase(){
     e.preventDefault();
     const region=document.getElementById('add-region').value.trim();
     const category=document.getElementById('add-category').value;
-    const sub=document.getElementById('add-sub').value.trim();
+    const subSelect=document.getElementById('add-sub-select').value;
+    const subCustom=document.getElementById('add-sub-custom').value.trim();
+    const sub=subCustom||subSelect;
     const name=document.getElementById('add-name').value.trim();
     const note=document.getElementById('add-note').value.trim();
     if(!region||!category||!name)return;
     window.__push(addRef,{id:Date.now(),region,category,subcategory:sub||category,name,note,twd:null,tags:[region],fav:false,photo:null,createdAt:new Date().toISOString()});
     e.target.reset();
+  document.getElementById('add-sub-select').innerHTML='<option value="">選擇子類別</option>';
+  document.getElementById('add-sub-custom').value='';
     const btn=document.getElementById('btn-add-place');
     btn.textContent='✅ 已新增並同步！';
     setTimeout(()=>btn.textContent='新增地點',2000);
