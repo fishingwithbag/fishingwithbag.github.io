@@ -41,15 +41,7 @@
     .qa-btn__title{font-family:var(--serif);font-size:.85rem;font-weight:700;display:block;}
     .qa-btn__sub{font-size:.62rem;opacity:.45;display:block;margin-top:.15rem;}
 
-    
-    .stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem;padding:.75rem 1rem;}
-    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.85rem .75rem;display:flex;flex-direction:column;gap:.15rem;min-height:72px;justify-content:center;}
-    .stat-card__num{font-family:var(--serif);font-size:1.35rem;line-height:1;color:var(--text);}
-    .stat-card__num.orange{color:var(--accent);}
-    .stat-card__num.green{color:var(--accent2);}
-    .stat-card__label{font-size:.68rem;letter-spacing:.08em;color:var(--muted);}
-
-/* ── Search & Filter ── */
+    /* ── Search & Filter ── */
     .search-bar{padding:.5rem 1rem .4rem;display:flex;flex-direction:column;gap:.45rem;}
     .search-wrap{position:relative;}
     .search-icon{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);opacity:.4;font-size:.9rem;pointer-events:none;}
@@ -160,23 +152,7 @@
       body{padding-bottom:0;}
       .bottom-nav{display:none;}
     }
-  
-    .driving-tips{margin:.3rem 1rem .8rem;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--surface);}
-    .driving-tips__header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;cursor:pointer;-webkit-tap-highlight-color:transparent;min-height:44px;font-size:.84rem;font-weight:700;letter-spacing:.08em;}
-    .tips-toggle-icon{font-size:.75rem;opacity:.5;transition:transform .25s;}
-    .driving-tips.open .tips-toggle-icon{transform:rotate(180deg);}
-    .driving-tips__body{display:none;padding:.15rem 1rem .9rem;border-top:1px solid var(--border);}
-    .driving-tips.open .driving-tips__body{display:block;}
-    .tip-section{margin-top:.8rem;}
-    .tip-section:first-child{margin-top:.55rem;}
-    .tip-section__title{font-size:.8rem;font-weight:700;color:var(--accent2);margin-bottom:.45rem;letter-spacing:.04em;}
-    .tip-list{list-style:none;display:flex;flex-direction:column;gap:.4rem;}
-    .tip-list li{position:relative;padding-left:.8rem;font-size:.76rem;line-height:1.7;color:var(--text);}
-    .tip-list li::before{content:'•';position:absolute;left:0;top:0;opacity:.35;}
-    .tip-list li strong{color:var(--text);}
-    .tip-section--highlight{background:rgba(168,197,176,.08);border:1px solid rgba(168,197,176,.15);border-radius:10px;padding:.65rem .75rem;}
-
-</style>
+  </style>
 
   <!-- Firebase SDK -->
   <script type="module">
@@ -230,14 +206,6 @@
 </div>
 
 <!-- ══ 搜尋與篩選 ══ -->
-
-<div class="stats-row">
-  <div class="stat-card"><span class="stat-card__num orange" id="stat-shown">0</span><span class="stat-card__label">顯示筆數</span></div>
-  <div class="stat-card"><span class="stat-card__num" id="stat-stay">0</span><span class="stat-card__label">住宿筆數</span></div>
-  <div class="stat-card"><span class="stat-card__num green" id="stat-region">0</span><span class="stat-card__label">地區數</span></div>
-  <div class="stat-card"><span class="stat-card__num" id="stat-cat">0</span><span class="stat-card__label">類別數</span></div>
-</div>
-
 <div class="search-bar">
   <div class="search-wrap">
     <span class="search-icon">🔍</span>
@@ -344,98 +312,6 @@
   </div>
 </div>
 
-
-<!-- 日本自駕注意事項 -->
-<div class="driving-tips" id="driving-tips">
-  <div class="driving-tips__header" id="tips-toggle">
-    <span>🗾 日本自駕注意事項</span>
-    <span class="tips-toggle-icon">▾</span>
-  </div>
-  <div class="driving-tips__body">
-    <div class="tip-section">
-      <div class="tip-section__title">📄 出發前必備文件</div>
-      <ul class="tip-list">
-        <li>台灣駕照 + <strong>日本語譯本</strong>（台灣監理站辦理，需 2–3 工作天）</li>
-        <li>護照正本</li>
-        <li>租車確認書（印出或手機截圖）</li>
-        <li>國際信用卡（租車押金用，部分需 Visa/Master）</li>
-      </ul>
-    </div>
-    <div class="tip-section">
-      <div class="tip-section__title">🛣️ 行駛規則</div>
-      <ul class="tip-list">
-        <li><strong>靠左行駛</strong>，方向盤在右側（與台灣相反）</li>
-        <li>市區限速 <strong>40–60 km/h</strong>，郊區 <strong>60–80 km/h</strong>，高速 <strong>100 km/h</strong></li>
-        <li>「止まれ」標誌必須<strong>完全停車</strong>，不可滾動通過</li>
-        <li>轉彎時讓行人優先，斑馬線前必須停車</li>
-        <li>右轉需等對向來車完全通過</li>
-        <li>高速公路進出口在<strong>左側</strong></li>
-      </ul>
-    </div>
-    <div class="tip-section">
-      <div class="tip-section__title">🅿️ 停車</div>
-      <ul class="tip-list">
-        <li>多為<strong>自動繳費機</strong>，準備日幣硬幣或 IC 卡</li>
-        <li>路邊黃線禁停，白線可短暫停車（依標示）</li>
-        <li>推薦 <strong>Times Park</strong> 或 <strong>Navitime</strong> App 找停車場</li>
-        <li>觀光地停車場假日容易客滿，建議早去</li>
-      </ul>
-    </div>
-    <div class="tip-section">
-      <div class="tip-section__title">⛽ 加油</div>
-      <ul class="tip-list">
-        <li>一般車輛加 <strong>レギュラー（Regular）</strong></li>
-        <li>自助加油：選油種 → 插卡/投現 → 拿油槍 → 加完按「返金」</li>
-        <li>取車時確認油箱類型（汽油 or 柴油）</li>
-      </ul>
-    </div>
-    <div class="tip-section">
-      <div class="tip-section__title">🛣️ 高速公路 ETC</div>
-      <ul class="tip-list">
-        <li>租車時建議加租 <strong>ETC 車載機</strong>（日本 ETC ≠ 台灣 ETC）</li>
-        <li>沒有 ETC 走一般車道，準備日幣現金</li>
-        <li>九州熊本→福岡約 ¥2,000–2,800</li>
-        <li><strong>ドラぷら（Dra-pla）</strong> App 可查過路費</li>
-      </ul>
-    </div>
-    <div class="tip-section">
-      <div class="tip-section__title">📱 導航</div>
-      <ul class="tip-list">
-        <li>推薦 <strong>Google Maps</strong>（需行動數據）</li>
-        <li><strong>Navitime Japan</strong> 可離線，適合山區路段</li>
-        <li>輸入目的地建議用<strong>電話號碼</strong>或<strong>郵遞區號</strong></li>
-      </ul>
-    </div>
-    <div class="tip-section">
-      <div class="tip-section__title">🚨 緊急狀況</div>
-      <ul class="tip-list">
-        <li>報警：<strong>110</strong> / 救護車火災：<strong>119</strong></li>
-        <li>JAF 道路救援：<strong>0570-00-8139</strong></li>
-        <li>發生事故先拍照，不移動車輛，等警察到場</li>
-        <li>取車時確認租車公司緊急聯絡電話並存入手機</li>
-      </ul>
-    </div>
-    <div class="tip-section">
-      <div class="tip-section__title">🚫 嚴禁事項</div>
-      <ul class="tip-list">
-        <li><strong>飲酒駕車</strong>：血液酒精 0.03% 以上即違法</li>
-        <li><strong>手持手機</strong>：罰款 ¥18,000，記點</li>
-        <li><strong>超速 30 km/h 以上</strong>：可能被逮捕</li>
-        <li>全車乘客都必須繫安全帶（含後座）</li>
-      </ul>
-    </div>
-    <div class="tip-section tip-section--highlight">
-      <div class="tip-section__title">📍 本次行程租車重點</div>
-      <ul class="tip-list">
-        <li>熊本機場取車 → 阿蘇、天草、芦北方向行駛</li>
-        <li>天草公路多山路彎道，單線道會車需禮讓</li>
-        <li>福岡市區停車費高，建議停郊區轉地鐵</li>
-        <li>異地還車（熊本取→福岡還）需確認是否收異地費</li>
-      </ul>
-    </div>
-  </div>
-</div>
-
 <!-- ══ 地點卡片 ══ -->
 <div class="cards-header">
   <span class="cards-count" id="cards-count">載入中…</span>
@@ -491,11 +367,14 @@ const revObs = new IntersectionObserver(entries=>{
 },{threshold:.04,rootMargin:'0px 0px -6px 0px'});
 
 // ── Favs ──
-function getFavs(){ return JSON.parse(localStorage.getItem('kyushu_favs')||'[]'); }
+let _favsCache = JSON.parse(localStorage.getItem('kyushu_favs')||'[]');
+function getFavs(){ return _favsCache; }
 function toggleFav(id){
   const s=getFavs(),i=s.indexOf(id);
   i>-1?s.splice(i,1):s.push(id);
+  _favsCache = s;
   localStorage.setItem('kyushu_favs',JSON.stringify(s));
+  if(window.__db) window.__set(window.__ref(window.__db,'favs'), s.length ? s.reduce((o,v)=>{o[v]=true;return o;},{}) : null);
   return i>-1?'☆':'⭐';
 }
 
@@ -598,14 +477,6 @@ function render(){
   });
 
   document.getElementById('cards-count').textContent=`共 ${list.length} 個地點`;
-  const statShown=document.getElementById('stat-shown');
-  const statStay=document.getElementById('stat-stay');
-  const statRegion=document.getElementById('stat-region');
-  const statCat=document.getElementById('stat-cat');
-  if(statShown) statShown.textContent = list.length;
-  if(statStay) statStay.textContent = list.filter(p=>(p.category||'')==='住宿').length;
-  if(statRegion) statRegion.textContent = new Set(list.map(p=>p.region).filter(Boolean)).size;
-  if(statCat) statCat.textContent = new Set(list.map(p=>p.category).filter(Boolean)).size;
   if(!list.length){
     wrap.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;opacity:.3;font-size:.9rem;">沒有符合條件的地點</div>';
     return;
@@ -847,6 +718,13 @@ waitFirebase(()=>{
     CLOUD_PLACES=snap.val()?Object.entries(snap.val()).map(([k,v])=>({...v,_key:k,_src:'custom'})):[];
     buildRegionSelect(); buildRegionTags(); render();
   });
+  // Favs
+  window.__onValue(window.__ref(db,'favs'),snap=>{
+    const raw = snap.val();
+    _favsCache = raw ? Object.keys(raw) : [];
+    localStorage.setItem('kyushu_favs', JSON.stringify(_favsCache));
+    render();
+  });
   // Cost
   window.__onValue(window.__ref(db,'cost_items'),snap=>{
     costItems=snap.val()||[];
@@ -858,15 +736,6 @@ waitFirebase(()=>{
     if(snap.val()) loadRentalUI(snap.val());
   });
 });
-
-const tipsToggle = document.getElementById('tips-toggle');
-const drivingTips = document.getElementById('driving-tips');
-if (tipsToggle && drivingTips) {
-  tipsToggle.addEventListener('click', () => {
-    drivingTips.classList.toggle('open');
-  });
-}
-
 </script>
 </body>
 </html>
