@@ -141,7 +141,15 @@
       .bottom-nav{display:none;}
       body{padding-bottom:0;}
     }
-  </style>
+  
+    .region-picker{display:flex;align-items:center;gap:.55rem;padding:.55rem 1rem;border-bottom:1px solid var(--border);background:var(--surface2);}
+    .region-picker__label{font-size:.7rem;opacity:.45;white-space:nowrap;letter-spacing:.08em;}
+    .region-picker__select{flex:1;padding:.55rem .75rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:.8rem;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .65rem center;padding-right:2rem;background-color:var(--surface);}
+    [data-theme="dark"] .region-picker__select{color:#E8E8E8;}
+    [data-theme="light"] .region-picker__select{color:#1A1A1A;}
+    .region-picker__select option{color:#1A1A1A;background:#FFF;}
+
+</style>
 
   <!-- Firebase SDK -->
   <script type="module">
@@ -178,10 +186,19 @@
 <!-- 日期 Tabs -->
 <div class="date-tabs" id="date-tabs"></div>
 
+
+<!-- 城市選擇 -->
+<div class="region-picker">
+  <span class="region-picker__label">📍 今日城市</span>
+  <select class="region-picker__select" id="day-region-select">
+    <option value="">請選擇城市</option>
+  </select>
+</div>
+
 <!-- AI 排程區 -->
 <div class="ai-bar">
   <div class="ai-bar__title">✨ AI 智慧排程</div>
-  <div class="ai-bar__desc">從最愛清單 ⭐ 自動排出最佳行程，考量營業時間、地理位置與交通時間。</div>
+  <div class="ai-bar__desc" id="ai-bar-desc">從最愛清單 ⭐ 自動排出最佳行程，考量營業時間、地理位置與交通時間。</div>
   <div class="ai-bar__actions">
     <button class="btn-ai btn-ai--primary" id="btn-auto-schedule">🪄 自動排這天</button>
     <button class="btn-ai btn-ai--secondary" id="btn-auto-all">排全程</button>
@@ -281,11 +298,11 @@
 const TRIP_DAYS = [
   {date:'2026-09-30', label:'9/30', sub:'別府', region:'別府'},
   {date:'2026-10-01', label:'10/1', sub:'大分', region:'大分'},
-  {date:'2026-10-02', label:'10/2', sub:'福岡', region:'福岡'},
-  {date:'2026-10-03', label:'10/3', sub:'福岡', region:'福岡'},
+  {date:'2026-10-02', label:'10/2', sub:'熊本', region:'熊本'},
+  {date:'2026-10-03', label:'10/3', sub:'移動', region:''},
   {date:'2026-10-04', label:'10/4', sub:'福岡', region:'福岡'},
   {date:'2026-10-05', label:'10/5', sub:'福岡', region:'福岡'},
-  {date:'2026-10-06', label:'10/6', sub:'熊本', region:'熊本'},
+  {date:'2026-10-06', label:'10/6', sub:'福岡', region:'福岡'},
   {date:'2026-10-07', label:'10/7', sub:'回台', region:''},
 ];
 
@@ -299,14 +316,39 @@ const DURATION_DEFAULT = {
   '住宿':0,'釣點':240,'釣具店':30,'購物':60,'其他':30
 };
 
+const ALL_REGIONS = ['別府','大分','熊本','阿蘇','福岡','北九州','移動日'];
 let currentDay = 0;
 let allBasePlaces = [];
 let allCustomPlaces = [];
 let itineraryData = {}; // { 'YYYY-MM-DD': [items] }
+let dayRegionMap = {}; // { 'YYYY-MM-DD': '福岡' }
 let editingKey = null;
 
 function allPlaces(){ return [...allBasePlaces, ...allCustomPlaces]; }
 function getFavs(){ return JSON.parse(localStorage.getItem('kyushu_favs')||'[]'); }
+
+
+function getDayRegion(date){
+  const d = date || TRIP_DAYS[currentDay].date;
+  const manual = dayRegionMap[d];
+  if(manual!==undefined && manual!==null) return manual;
+  const day = TRIP_DAYS.find(x=>x.date===d);
+  return day?.region || '';
+}
+
+function buildDayRegionSelect(){
+  const sel = document.getElementById('day-region-select');
+  if(!sel) return;
+  const current = getDayRegion();
+  sel.innerHTML = '<option value="">請選擇城市</option>';
+  ALL_REGIONS.forEach(r=>{
+    const opt = document.createElement('option');
+    opt.value = r;
+    opt.textContent = r;
+    if(r===current) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
 
 // ── Date Tabs ──
 function buildTabs(){
@@ -315,8 +357,9 @@ function buildTabs(){
   TRIP_DAYS.forEach((d,i)=>{
     const btn = document.createElement('button');
     btn.className = 'date-tab' + (i===currentDay?' active':'');
-    btn.innerHTML = `<span class="date-tab__day">${d.label}</span><span class="date-tab__label">${d.sub}</span>`;
-    btn.addEventListener('click',()=>{ currentDay=i; buildTabs(); renderDay(); });
+    const regionLabel = getDayRegion(d.date) || d.sub;
+    btn.innerHTML = `<span class="date-tab__day">${d.label}</span><span class="date-tab__label">${regionLabel}</span>`;
+    btn.addEventListener('click',()=>{ currentDay=i; buildTabs(); buildDayRegionSelect(); renderDay(); });
     wrap.appendChild(btn);
   });
 }
@@ -465,7 +508,7 @@ function autoScheduleDay(){
 
   const day = TRIP_DAYS[currentDay];
   const favs = getFavs();
-  const region = day.region;
+  const region = getDayRegion(day.date);
 
   // 撈最愛的景點（優先該地區）
   let candidates = allPlaces().filter(p=>favs.includes(p.id)&&p.category!=='住宿');
@@ -574,6 +617,21 @@ document.getElementById('btn-clear-day').addEventListener('click',()=>{
   window.__remove(window.__ref(window.__db,`itinerary/${date}`));
 });
 
+
+document.getElementById('day-region-select').addEventListener('change',e=>{
+  const date = TRIP_DAYS[currentDay].date;
+  const val = e.target.value;
+  dayRegionMap[date] = val;
+  if(window.__db){
+    window.__set(window.__ref(window.__db,`day_regions/${date}`), val || null);
+  }
+  const desc = document.getElementById('ai-bar-desc');
+  if(desc){
+    desc.textContent = val ? `目前城市：${val}，AI 會優先依此城市排程。` : '從最愛清單 ⭐ 自動排出最佳行程，考量營業時間、地理位置與交通時間。';
+  }
+  buildTabs();
+});
+
 // ── Theme ──
 document.getElementById('theme-btn').addEventListener('click',()=>{
   const t=document.documentElement.dataset.theme==='dark'?'light':'dark';
@@ -604,6 +662,7 @@ waitFirebase(()=>{
     renderDay();
   });
   buildTabs();
+  buildDayRegionSelect();
   renderDay();
 });
 </script>
