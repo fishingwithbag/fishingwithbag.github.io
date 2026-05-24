@@ -146,33 +146,76 @@
     .cost-block.open .cost-block__toggle { transform:rotate(180deg); }
     .cost-block__body { display:none; padding:0 1rem 1rem; }
     .cost-block.open .cost-block__body { display:block; }
-
+    
     .cost-person-row {
       display:flex; align-items:center; gap:.6rem;
-      padding:.5rem 0; border-bottom:1px solid var(--border);
-      margin-bottom:.75rem;
+      padding:.5rem 0; border-bottom:1px solid var(--border); margin-bottom:.75rem;
     }
     .cost-person-row label { font-size:.8rem; opacity:.6; }
-    .cost-person-row input {
+    .cost-person-row input[type="number"] {
       width:60px; padding:.35rem .5rem; text-align:center;
       background:var(--surface2); border:1px solid var(--border);
-      border-radius:6px; color:var(--text); font-size:.9rem;
+      border-radius:6px; color:var(--text); font-size:.9rem; outline:none;
+      font-family:inherit;
     }
+    
+    /* 費用輸入列 */
+    .cost-entry {
+      display:grid; grid-template-columns:1fr auto auto;
+      gap:.4rem; align-items:center; margin-bottom:.5rem;
+    }
+    .cost-entry input[type="text"],
+    .cost-entry input[type="number"] {
+      padding:.5rem .65rem;
+      background:var(--surface2); border:1px solid var(--border);
+      border-radius:8px; color:var(--text); font-size:.82rem;
+      outline:none; transition:border-color .2s; font-family:inherit;
+      width:100%;
+    }
+    .cost-entry input:focus { border-color:var(--accent); }
+    .cost-entry input[type="number"] { width:100px; text-align:right; }
+    .cost-entry__del {
+      width:32px; height:32px; border-radius:6px;
+      display:flex; align-items:center; justify-content:center;
+      background:rgba(255,80,80,.12); color:#ff6b6b;
+      font-size:.85rem; flex-shrink:0;
+      transition:background .2s;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .cost-entry__del:active { background:rgba(255,80,80,.25); }
+    
+    .cost-entry-header {
+      display:grid; grid-template-columns:1fr auto auto;
+      gap:.4rem; margin-bottom:.3rem;
+    }
+    .cost-entry-header span {
+      font-size:.62rem; letter-spacing:.1em; opacity:.38; padding:0 .1rem;
+    }
+    
+    .btn-add-cost {
+      width:100%; padding:.55rem; margin-top:.3rem; margin-bottom:.75rem;
+      background:transparent; border:1px dashed rgba(255,255,255,.18);
+      border-radius:8px; color:var(--text); font-size:.8rem;
+      letter-spacing:.08em; opacity:.6; transition:opacity .2s,border-color .2s;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .btn-add-cost:active { opacity:1; border-color:var(--accent); }
+    
     .cost-item {
-      display:flex; justify-content:space-between; align-items:flex-start;
-      padding:.45rem 0; border-bottom:1px solid var(--border); gap:.5rem;
+      display:flex; justify-content:space-between; align-items:center;
+      padding:.4rem 0; border-bottom:1px solid var(--border); gap:.5rem;
     }
     .cost-item:last-of-type { border-bottom:none; }
-    .cost-item__name { font-size:.82rem; line-height:1.5; flex:1; }
-    .cost-item__amt  { font-size:.85rem; font-weight:700; white-space:nowrap; color:var(--accent); }
+    .cost-item__name { font-size:.82rem; flex:1; opacity:.8; }
+    .cost-item__amt  { font-size:.85rem; font-weight:700; color:var(--accent); white-space:nowrap; }
+    
     .cost-total {
       display:flex; justify-content:space-between; align-items:center;
-      margin-top:.75rem; padding-top:.75rem;
-      border-top:1px solid var(--border);
+      margin-top:.75rem; padding-top:.75rem; border-top:1px solid var(--border);
     }
     .cost-total__label { font-size:.78rem; opacity:.55; letter-spacing:.1em; }
     .cost-total__num   { font-family:var(--serif); font-size:1.3rem; font-weight:700; color:var(--accent); }
-    .cost-per  { font-size:.72rem; opacity:.5; margin-top:.2rem; }
+    .cost-per { font-size:.72rem; opacity:.5; margin-top:.2rem; }
 
     /* ── Card Grid ── */
     .result-bar {
@@ -385,19 +428,30 @@
     <span class="cost-block__toggle">▾</span>
   </div>
   <div class="cost-block__body" id="cost-body">
+
+    <!-- 人數 -->
     <div class="cost-person-row">
-      <label for="person-input">人數</label>
+      <label for="person-input">分攤人數</label>
       <input id="person-input" type="number" min="1" max="20" value="4">
-      <span style="font-size:.75rem;opacity:.5;">人分攤</span>
+      <span style="font-size:.75rem;opacity:.5;">人</span>
     </div>
-    <div id="cost-items"></div>
-    <div class="cost-total">
-      <div>
-        <div class="cost-total__label">住宿合計</div>
-        <div class="cost-per" id="cost-per-text"></div>
-      </div>
-      <span class="cost-total__num" id="cost-total-num">—</span>
+
+    <!-- 欄位標頭 -->
+    <div class="cost-entry-header">
+      <span>項目名稱</span>
+      <span style="text-align:right;width:100px;">金額 (TWD)</span>
+      <span style="width:32px;"></span>
     </div>
+
+    <!-- 動態費用列 -->
+    <div id="cost-entries"></div>
+
+    <!-- 新增按鈕 -->
+    <button class="btn-add-cost" id="btn-add-cost">＋ 新增費用項目</button>
+
+    <!-- 合計 -->
+    <div id="cost-summary"></div>
+
   </div>
 </div>
 
@@ -688,32 +742,90 @@ function initRegionTags() {
   });
 }
 
-// ── Cost block
+// ── Cost block（動態版）──
 function initCost() {
-  const hasCost = places.filter(p=>p.twd);
-  const itemsEl = document.getElementById('cost-items');
-  const totalEl = document.getElementById('cost-total-num');
-  const perEl   = document.getElementById('cost-per-text');
-  const personEl= document.getElementById('person-input');
+  // 預設三筆資料
+  let entries = JSON.parse(localStorage.getItem('kyushu_cost') || 'null') || [
+    { name: 'Mt. Steam HOME beppu（別府）', amt: 6226 },
+    { name: 'AMP FLAT Yoshizuka（福岡）',  amt: 25063 },
+    { name: 'Flower Base Lily Sweet（福岡）', amt: 21916 }
+  ];
 
-  function updateCost() {
-    const n = Math.max(1, +personEl.value||1);
-    const total = hasCost.reduce((s,p)=>s+p.twd,0);
-    itemsEl.innerHTML = hasCost.map(p=>`
-      <div class="cost-item">
-        <span class="cost-item__name">${p.region} · ${p.name}</span>
-        <span class="cost-item__amt">TWD ${p.twd.toLocaleString()}</span>
-      </div>`).join('');
-    totalEl.textContent = `TWD ${total.toLocaleString()}`;
-    perEl.textContent   = `每人約 TWD ${Math.ceil(total/n).toLocaleString()}`;
+  const entriesEl = document.getElementById('cost-entries');
+  const summaryEl = document.getElementById('cost-summary');
+  const personEl  = document.getElementById('person-input');
+
+  function saveEntries() {
+    localStorage.setItem('kyushu_cost', JSON.stringify(entries));
   }
 
-  personEl.addEventListener('input', updateCost);
+  function calcTotal() {
+    return entries.reduce((s, e) => s + (parseFloat(e.amt) || 0), 0);
+  }
+
+  function renderSummary() {
+    const n     = Math.max(1, parseInt(personEl.value) || 1);
+    const total = calcTotal();
+    summaryEl.innerHTML = `
+      <div class="cost-total">
+        <div>
+          <div class="cost-total__label">住宿合計</div>
+          <div class="cost-per">每人約 TWD ${Math.ceil(total / n).toLocaleString()}</div>
+        </div>
+        <span class="cost-total__num">TWD ${total.toLocaleString()}</span>
+      </div>`;
+  }
+
+  function renderEntries() {
+    entriesEl.innerHTML = '';
+    entries.forEach((entry, i) => {
+      const row = document.createElement('div');
+      row.className = 'cost-entry';
+      row.innerHTML = `
+        <input type="text"   class="cost-name" placeholder="例：AMP FLAT 福岡" value="${entry.name}" data-i="${i}">
+        <input type="number" class="cost-amt"  placeholder="0" value="${entry.amt||''}" data-i="${i}" min="0" step="1">
+        <button class="cost-entry__del" data-del="${i}" title="刪除">✕</button>`;
+      entriesEl.appendChild(row);
+    });
+    renderSummary();
+  }
+
+  // 事件：輸入即時更新
+  entriesEl.addEventListener('input', e => {
+    const i = e.target.dataset.i;
+    if (i === undefined) return;
+    if (e.target.classList.contains('cost-name')) entries[i].name = e.target.value;
+    if (e.target.classList.contains('cost-amt'))  entries[i].amt  = parseFloat(e.target.value) || 0;
+    saveEntries();
+    renderSummary();
+  });
+
+  // 事件：刪除
+  entriesEl.addEventListener('click', e => {
+    const del = e.target.closest('[data-del]');
+    if (!del) return;
+    entries.splice(+del.dataset.del, 1);
+    saveEntries(); renderEntries();
+  });
+
+  // 新增
+  document.getElementById('btn-add-cost').addEventListener('click', () => {
+    entries.push({ name: '', amt: 0 });
+    saveEntries(); renderEntries();
+    // 自動 focus 最後一筆名稱欄
+    const inputs = entriesEl.querySelectorAll('.cost-name');
+    inputs[inputs.length - 1]?.focus();
+  });
+
+  // 人數變更
+  personEl.addEventListener('input', renderSummary);
+
+  // 折疊開關
   document.getElementById('cost-toggle').addEventListener('click', () => {
     document.getElementById('cost-block').classList.toggle('open');
-    updateCost();
   });
-  updateCost();
+
+  renderEntries();
 }
 
 // ── Theme toggle
