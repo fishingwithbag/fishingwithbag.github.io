@@ -41,7 +41,15 @@
     .qa-btn__title{font-family:var(--serif);font-size:.85rem;font-weight:700;display:block;}
     .qa-btn__sub{font-size:.62rem;opacity:.45;display:block;margin-top:.15rem;}
 
-    /* ── Search & Filter ── */
+    
+    .stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem;padding:.75rem 1rem;}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.85rem .75rem;display:flex;flex-direction:column;gap:.15rem;min-height:72px;justify-content:center;}
+    .stat-card__num{font-family:var(--serif);font-size:1.35rem;line-height:1;color:var(--text);}
+    .stat-card__num.orange{color:var(--accent);}
+    .stat-card__num.green{color:var(--accent2);}
+    .stat-card__label{font-size:.68rem;letter-spacing:.08em;color:var(--muted);}
+
+/* ── Search & Filter ── */
     .search-bar{padding:.5rem 1rem .4rem;display:flex;flex-direction:column;gap:.45rem;}
     .search-wrap{position:relative;}
     .search-icon{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);opacity:.4;font-size:.9rem;pointer-events:none;}
@@ -206,6 +214,14 @@
 </div>
 
 <!-- ══ 搜尋與篩選 ══ -->
+
+<div class="stats-row">
+  <div class="stat-card"><span class="stat-card__num orange" id="stat-shown">0</span><span class="stat-card__label">顯示筆數</span></div>
+  <div class="stat-card"><span class="stat-card__num" id="stat-stay">0</span><span class="stat-card__label">住宿筆數</span></div>
+  <div class="stat-card"><span class="stat-card__num green" id="stat-region">0</span><span class="stat-card__label">地區數</span></div>
+  <div class="stat-card"><span class="stat-card__num" id="stat-cat">0</span><span class="stat-card__label">類別數</span></div>
+</div>
+
 <div class="search-bar">
   <div class="search-wrap">
     <span class="search-icon">🔍</span>
