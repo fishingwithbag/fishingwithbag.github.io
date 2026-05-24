@@ -605,15 +605,6 @@ function initCostFirebase(){
   }
   window.__onValue(costRef,snap=>{
     entries=snap.val()||{};
-    // 若空，預設三筆
-    if(!Object.keys(entries).length){
-      [
-        {name:'Mt. Steam HOME beppu（別府）',amt:6226},
-        {name:'AMP FLAT Yoshizuka（福岡）',amt:25063},
-        {name:'Flower Base Lily Sweet（福岡）',amt:21916}
-      ].forEach(e=>window.__push(costRef,e));
-      return;
-    }
     renderEntries();
     if(statusEl)statusEl.textContent='✅ 已同步';
   });
