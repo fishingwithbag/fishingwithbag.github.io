@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>九州福岡熊本旅遊 2026/9/30~10/7 </title>
+  <title>九州旅遊總覽 2026</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet">
   <style>
@@ -180,7 +180,7 @@
 
 <!-- ══ Topbar ══ -->
 <header class="topbar">
-  <span class="topbar__title">九州福岡熊本旅遊 2026</span>
+  <span class="topbar__title">九州 2026</span>
   <div class="topbar__actions">
     <button class="icon-btn" id="fav-btn" title="只看最愛">☆</button>
     <button class="icon-btn" id="theme-btn">🌙</button>
@@ -385,7 +385,7 @@ function buildCard(p){
   const isFav=getFavs().includes(p.id);
   const sub = p.subcategory||p.category||'';
   el.innerHTML=`
-    <div class="card__img-placeholder">${catEmoji(p.category)}</div>
+    <div class="card__img-placeholder">${catEmoji(p.category, p.subcategory)}</div>
     <div class="card__body">
       <div class="card__tags">
         <span class="tag">${p.region||''}</span>
@@ -424,8 +424,24 @@ function buildCard(p){
   return el;
 }
 
-function catEmoji(c){
-  return {'景點':'🏛','餐廳':'🍜','住宿':'🏨','購物':'🛍','其他':'📌'}[c]||'📌';
+// 子類別細分 icon
+const SUB_EMOJI = {
+  // 景點
+  '神社':'⛩️','公園':'🌳','城堡':'🏯','博物館':'🗿','市場':'🏮',
+  '水族館':'🐡','動物園':'🦒','海灘':'🌊','溫泉':'🛁','展望台':'🔭','釣點':'🎣','其他景點':'🗺️',
+  // 餐廳
+  '拉麵店':'🍜','燒肉店':'🔥','壽司':'🍣','鰻魚料理':'🥢','居酒屋':'🍻',
+  '甜點':'🍰','咖啡廳':'☕','海鮮':'🦐','定食':'🍱','其他餐廳':'🍽️',
+  // 住宿
+  '溫泉飯店':'🛁','商務飯店':'🛎️','共居飯店':'🏠','民宿':'🏡','膠囊旅館':'💤',
+  // 購物
+  '釣具店':'🎣','百貨':'🏬','藥妝':'💊','超市':'🛒','伴手禮':'🎁','其他購物':'🛍️',
+  // 其他
+  '交通':'🚃','活動':'🎉','球賽':'⚾','釣魚體驗':'🎣','其他':'📌',
+};
+function catEmoji(category, subcategory){
+  if(subcategory && SUB_EMOJI[subcategory]) return SUB_EMOJI[subcategory];
+  return {'景點':'🗺️','餐廳':'🍽️','住宿':'🛎️','購物':'🛒','其他':'📌'}[category]||'📌';
 }
 
 // ── Render ──
