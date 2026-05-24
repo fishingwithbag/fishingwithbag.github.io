@@ -162,38 +162,62 @@
     }
   </style>
 
-  <!-- Firebase SDK -->
-  <script type="module">
-    import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-    import{getDatabase,ref,onValue,push,set,remove,update}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
-    const cfg={
-      apiKey:"AIzaSyApX90ynhEGP2uBgxMXOhNeM-Jbrvyzgps",
-      authDomain:"gen-lang-client-0162948406.firebaseapp.com",
-      databaseURL:"https://gen-lang-client-0162948406-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId:"gen-lang-client-0162948406",
-      storageBucket:"gen-lang-client-0162948406.firebasestorage.app",
-      messagingSenderId:"700325287638",
-      appId:"1:700325287638:web:541c2146fd62adcb789b77"
-    };
-    const app=initializeApp(cfg);
-    const db=getDatabase(app);
-    window.__db=db;window.__ref=ref;window.__push=push;
-    window.__set=set;window.__remove=remove;window.__update=update;
-    window.__onValue=onValue;
-    window.__firebaseReady=true;
-    window.dispatchEvent(new Event('firebase-ready'));
+  <style>
+  /* 日本自駕注意事項 */
+  .driving-tips{margin:.3rem 1rem .8rem;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--surface);}
+  .driving-tips__header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;cursor:pointer;-webkit-tap-highlight-color:transparent;min-height:44px;font-size:.84rem;font-weight:700;letter-spacing:.08em;}
+  .tips-toggle-icon{font-size:.75rem;opacity:.5;transition:transform .25s;}
+  .driving-tips.open .tips-toggle-icon{transform:rotate(90deg);}
+  .driving-tips__body{display:none;padding:.15rem 1rem .9rem;border-top:1px solid var(--border);}
+  .driving-tips.open .driving-tips__body{display:block;}
+  .tip-section{margin-top:.8rem;}
+  .tip-section:first-child{margin-top:.55rem;}
+  .tip-section__title{font-size:.8rem;font-weight:700;color:var(--accent2);margin-bottom:.45rem;letter-spacing:.04em;}
+  .tip-list{list-style:none;display:flex;flex-direction:column;gap:.4rem;}
+  .tip-list li{position:relative;padding-left:.8rem;font-size:.76rem;line-height:1.7;color:var(--text);}
+  .tip-list li::before{content:'•';position:absolute;left:0;top:0;opacity:.35;}
+  .tip-list li strong{color:var(--text);}
+  .tip-section--highlight{background:rgba(168,197,176,.08);border:1px solid rgba(168,197,176,.15);border-radius:10px;padding:.65rem .75rem;}
+  <script>
+    document.getElementById('tips-toggle')?.addEventListener('click',()=>{
+      document.getElementById('driving-tips')?.classList.toggle('open');
+    });
   </script>
-</head>
-<body>
-
-<!-- ══ Topbar ══ -->
-<header class="topbar">
-  <span class="topbar__title">九州福岡熊本旅遊 2026/9/30~10/7</span>
-  <div class="topbar__actions">
-    <button class="icon-btn" id="fav-btn" title="只看最愛">☆</button>
-    <button class="icon-btn" id="theme-btn">🌙</button>
-  </div>
-</header>
+  
+  </style>
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+      import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+      import{getDatabase,ref,onValue,push,set,remove,update}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+      const cfg={
+        apiKey:"AIzaSyApX90ynhEGP2uBgxMXOhNeM-Jbrvyzgps",
+        authDomain:"gen-lang-client-0162948406.firebaseapp.com",
+        databaseURL:"https://gen-lang-client-0162948406-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId:"gen-lang-client-0162948406",
+        storageBucket:"gen-lang-client-0162948406.firebasestorage.app",
+        messagingSenderId:"700325287638",
+        appId:"1:700325287638:web:541c2146fd62adcb789b77"
+      };
+      const app=initializeApp(cfg);
+      const db=getDatabase(app);
+      window.__db=db;window.__ref=ref;window.__push=push;
+      window.__set=set;window.__remove=remove;window.__update=update;
+      window.__onValue=onValue;
+      window.__firebaseReady=true;
+      window.dispatchEvent(new Event('firebase-ready'));
+    </script>
+  </head>
+  <body>
+  
+  <!-- ══ Topbar ══ -->
+  <header class="topbar">
+    <span class="topbar__title">九州福岡熊本旅遊 2026/9/30~10/7</span>
+    <div class="topbar__actions">
+      <button class="icon-btn" id="fav-btn" title="只看最愛">☆</button>
+      <button class="icon-btn" id="theme-btn">🌙</button>
+    </div>
+  </header>
 
 <!-- ══ 快速入口（頁面最上方）══ -->
 <div class="quick-actions">
@@ -325,6 +349,97 @@
     </div>
     <button class="btn-add-place" id="btn-save-rental" style="margin-top:.25rem;">儲存租車資訊</button>
     <span class="sync-badge" id="rental-sync-status"></span>
+  </div>
+</div>
+
+<!-- 日本自駕注意事項 -->
+<div class="driving-tips" id="driving-tips">
+  <div class="driving-tips__header" id="tips-toggle">
+    <span>🗾 日本自駕注意事項</span>
+    <span class="tips-toggle-icon">▸</span>
+  </div>
+  <div class="driving-tips__body">
+    <div class="tip-section">
+      <div class="tip-section__title">📄 出發前必備文件</div>
+      <ul class="tip-list">
+        <li>台灣駕照 + <strong>日本語譯本</strong>（台灣監理站辦理，需 2–3 工作天）</li>
+        <li>護照正本</li>
+        <li>租車確認書（印出或手機截圖）</li>
+        <li>國際信用卡（租車押金用，部分需 Visa/Master）</li>
+      </ul>
+    </div>
+    <div class="tip-section">
+      <div class="tip-section__title">🛣️ 行駛規則</div>
+      <ul class="tip-list">
+        <li><strong>靠左行駛</strong>，方向盤在右側（與台灣相反）</li>
+        <li>市區限速 <strong>40–60 km/h</strong>，郊區 <strong>60–80 km/h</strong>，高速 <strong>100 km/h</strong></li>
+        <li>「止まれ」標誌必須<strong>完全停車</strong>，不可滾動通過</li>
+        <li>轉彎時讓行人優先，斑馬線前必須停車</li>
+        <li>右轉需等對向來車完全通過</li>
+        <li>高速公路進出口在<strong>左側</strong></li>
+      </ul>
+    </div>
+    <div class="tip-section">
+      <div class="tip-section__title">🅿️ 停車</div>
+      <ul class="tip-list">
+        <li>多為<strong>自動繳費機</strong>，準備日幣硬幣或 IC 卡</li>
+        <li>路邊黃線禁停，白線可短暫停車（依標示）</li>
+        <li>推薦 <strong>Times Park</strong> 或 <strong>Navitime</strong> App 找停車場</li>
+        <li>觀光地停車場假日容易客滿，建議早去</li>
+      </ul>
+    </div>
+    <div class="tip-section">
+      <div class="tip-section__title">⛽ 加油</div>
+      <ul class="tip-list">
+        <li>一般車輛加 <strong>レギュラー（Regular）</strong></li>
+        <li>自助加油：選油種 → 插卡/投現 → 拿油槍 → 加完按「返金」</li>
+        <li>取車時確認油箱類型（汽油 or 柴油）</li>
+      </ul>
+    </div>
+    <div class="tip-section">
+      <div class="tip-section__title">🛣️ 高速公路 ETC</div>
+      <ul class="tip-list">
+        <li>租車時建議加租 <strong>ETC 車載機</strong>（日本 ETC ≠ 台灣 ETC）</li>
+        <li>沒有 ETC 走一般車道，準備日幣現金</li>
+        <li>九州熊本→福岡約 ¥2,000–2,800</li>
+        <li><strong>ドラぷら（Dra-pla）</strong> App 可查過路費</li>
+      </ul>
+    </div>
+    <div class="tip-section">
+      <div class="tip-section__title">📱 導航</div>
+      <ul class="tip-list">
+        <li>推薦 <strong>Google Maps</strong>（需行動數據）</li>
+        <li><strong>Navitime Japan</strong> 可離線，適合山區路段</li>
+        <li>輸入目的地建議用<strong>電話號碼</strong>或<strong>郵遞區號</strong></li>
+      </ul>
+    </div>
+    <div class="tip-section">
+      <div class="tip-section__title">🚨 緊急狀況</div>
+      <ul class="tip-list">
+        <li>報警：<strong>110</strong> / 救護車火災：<strong>119</strong></li>
+        <li>JAF 道路救援：<strong>0570-00-8139</strong></li>
+        <li>發生事故先拍照，不移動車輛，等警察到場</li>
+        <li>取車時確認租車公司緊急聯絡電話並存入手機</li>
+      </ul>
+    </div>
+    <div class="tip-section">
+      <div class="tip-section__title">🚫 嚴禁事項</div>
+      <ul class="tip-list">
+        <li><strong>飲酒駕車</strong>：血液酒精 0.03% 以上即違法</li>
+        <li><strong>手持手機</strong>：罰款 ¥18,000，記點</li>
+        <li><strong>超速 30 km/h 以上</strong>：可能被逮捕</li>
+        <li>全車乘客都必須繫安全帶（含後座）</li>
+      </ul>
+    </div>
+    <div class="tip-section tip-section--highlight">
+      <div class="tip-section__title">📍 本次行程租車重點</div>
+      <ul class="tip-list">
+        <li>熊本機場取車 → 阿蘇、天草、芦北方向行駛</li>
+        <li>天草公路多山路彎道，單線道會車需禮讓</li>
+        <li>福岡市區停車費高，建議停郊區轉地鐵</li>
+        <li>異地還車（熊本取→福岡還）需確認是否收異地費</li>
+      </ul>
+    </div>
   </div>
 </div>
 
