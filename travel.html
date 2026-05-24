@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>九州旅遊 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --bg:#0D0D0D; --text:#E8E8E8; --muted:rgba(232,232,232,0.45);
+      --border:rgba(255,255,255,0.09);
+      --c-k:#A8C5B0; --c-f:#F4A88A; --c-o:#B8AFFF;
+      --serif:'Noto Serif JP',serif; --sans:'Noto Sans TC',sans-serif;
+      --ease:cubic-bezier(.4,0,.2,1);
+      --safe-t:env(safe-area-inset-top,0px);
+      --safe-b:env(safe-area-inset-bottom,0px);
+    }
+    html { -webkit-text-size-adjust:100%; }
+    body {
+      font-family:var(--sans); background:var(--bg); color:var(--text);
+      overflow-x:hidden;
+      padding-bottom:calc(60px + var(--safe-b));
+    }
+
+    /* ── Hero Cards（手機垂直堆疊）── */
+    .hero { display:flex; flex-direction:column; }
+
+    .hero__card {
+      position:relative; overflow:hidden;
+      min-height:32svh;
+      display:flex; flex-direction:column; justify-content:flex-end;
+      padding:calc(var(--safe-t) + 1.5rem) 1.25rem 1.5rem;
+      text-decoration:none; color:var(--text);
+      -webkit-tap-highlight-color:transparent;
+    }
+    .hero__card--k { background:linear-gradient(155deg,#0D1A11,#1A3325 60%,#0D1A11); }
+    .hero__card--f { background:linear-gradient(155deg,#1A0A05,#2D1810 60%,#1A1A2E); }
+    .hero__card--o { background:linear-gradient(155deg,#0D0D1F,#1A1535 60%,#0D0D1A); }
+    .hero__card--b { background:linear-gradient(155deg,#0A0F14,#152030 60%,#0A0F14); }
+
+    .hero__card::before {
+      content:''; position:absolute; inset:0; pointer-events:none;
+    }
+    .hero__card--k::before { background:radial-gradient(ellipse at 20% 90%,rgba(61,90,71,.5),transparent 65%); }
+    .hero__card--f::before { background:radial-gradient(ellipse at 50% 80%,rgba(232,115,74,.4),transparent 65%); }
+    .hero__card--o::before { background:radial-gradient(ellipse at 70% 85%,rgba(123,104,238,.45),transparent 65%); }
+    .hero__card--b::before { background:radial-gradient(ellipse at 30% 80%,rgba(80,160,200,.35),transparent 65%); }
+
+    .hero__content { position:relative; z-index:2; }
+    .hero__tag { font-size:.6rem; letter-spacing:.28em; text-transform:uppercase; opacity:.5; margin-bottom:.35rem; display:block; }
+    .hero__title {
+      font-family:var(--serif);
+      font-size:clamp(2.4rem,11vw,4rem);
+      font-weight:700; line-height:1;
+    }
+    .hero__card--k .hero__title { color:var(--c-k); }
+    .hero__card--f .hero__title { color:var(--c-f); }
+    .hero__card--o .hero__title { color:var(--c-o); }
+    .hero__card--b .hero__title { color:#7EC8E3; }
+
+    .hero__en { display:block; font-family:var(--serif); font-size:.68rem; letter-spacing:.3em; font-weight:300; opacity:.3; margin-bottom:.5rem; }
+    .hero__highlights { display:flex; flex-direction:column; gap:.18rem; margin-bottom:.6rem; }
+    .hero__hl { font-size:.73rem; opacity:.6; }
+    .hero__arrow { font-size:.7rem; letter-spacing:.15em; opacity:.5; }
+
+    .hero__num {
+      position:absolute; right:1rem; top:50%; transform:translateY(-50%);
+      font-family:var(--serif); font-size:5.5rem; font-weight:700;
+      opacity:.05; line-height:1; pointer-events:none; user-select:none;
+    }
+    .hero__card--k .hero__num { color:var(--c-k); }
+    .hero__card--f .hero__num { color:var(--c-f); }
+    .hero__card--o .hero__num { color:var(--c-o); }
+    .hero__card--b .hero__num { color:#7EC8E3; }
+
+    .hero__sep { height:1px; background:var(--border); }
+
+    /* ── Stats ── */
+    .stats {
+      display:grid; grid-template-columns:repeat(2,1fr);
+      border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+    }
+    .stat {
+      padding:1.1rem 1rem;
+      border-right:1px solid var(--border);
+      border-bottom:1px solid var(--border);
+    }
+    .stat:nth-child(2n) { border-right:none; }
+    .stat:nth-last-child(-n+2) { border-bottom:none; }
+    .stat__n { font-family:var(--serif); font-size:1.9rem; font-weight:700; display:block; line-height:1; }
+    .stat__l { font-size:.63rem; letter-spacing:.14em; opacity:.4; margin-top:.28rem; display:block; }
+
+    /* ── Trip Info ── */
+    .trip-info {
+      padding:1rem 1.25rem;
+      border-bottom:1px solid var(--border);
+      display:flex; flex-direction:column; gap:.45rem;
+    }
+    .trip-info__row { display:flex; align-items:center; gap:.6rem; font-size:.75rem; opacity:.55; }
+    .trip-info__row span:first-child { font-size:.9rem; }
+
+    /* ── Quick Links ── */
+    .quick-links {
+      display:grid; grid-template-columns:1fr 1fr; gap:.6rem;
+      padding:1rem 1.25rem;
+    }
+    .quick-link {
+      display:flex; align-items:center; gap:.5rem;
+      padding:.75rem .9rem;
+      background:#141414; border:1px solid var(--border);
+      border-radius:10px; font-size:.78rem;
+      text-decoration:none; color:var(--text);
+      -webkit-tap-highlight-color:transparent;
+      transition:border-color .2s;
+    }
+    .quick-link:active { border-color:rgba(255,255,255,.25); }
+    .quick-link__icon { font-size:1.1rem; }
+    .quick-link__label { font-size:.72rem; opacity:.7; }
+
+    /* ── Bottom Nav ── */
+    .bottom-nav {
+      position:fixed; bottom:0; left:0; right:0; z-index:100;
+      display:flex;
+      background:rgba(13,13,13,.97);
+      backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+      border-top:1px solid var(--border);
+      padding-bottom:var(--safe-b);
+    }
+    .bottom-nav__item {
+      flex:1; display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      gap:3px; padding:.6rem 0; min-height:44px;
+      opacity:.4; transition:opacity .2s;
+      text-decoration:none; color:var(--text);
+      -webkit-tap-highlight-color:transparent;
+    }
+    .bottom-nav__item.active { opacity:1; }
+    .bottom-nav__item span:first-child { font-size:1.15rem; line-height:1; }
+    .bottom-nav__item span:last-child  { font-size:.58rem; letter-spacing:.08em; }
+
+    /* ── Desktop ── */
+    @media (min-width:1024px) {
+      body { padding-bottom:0; }
+      .hero { flex-direction:row; height:100svh; min-height:520px; }
+      .hero__card {
+        flex:1; min-height:unset; padding:3rem;
+        transition:flex .7s var(--ease);
+      }
+      .hero__card:hover { flex:1.8; }
+      .hero__sep { display:none; }
+      .hero__num { font-size:clamp(4rem,7vw,8rem); opacity:.06; }
+      .hero__title { font-size:clamp(3rem,5.5vw,5.5rem); }
+      .hero__arrow { opacity:0; transform:translateY(6px); transition:opacity .4s,transform .4s; }
+      .hero__card:hover .hero__arrow { opacity:.6; transform:none; }
+      .stats { grid-template-columns:repeat(4,1fr); }
+      .stat { border-bottom:none; }
+      .stat:nth-child(2n) { border-right:1px solid var(--border); }
+      .stat:last-child { border-right:none; }
+      .trip-info { flex-direction:row; flex-wrap:wrap; gap:0; padding:1rem 2rem; }
+      .trip-info__row { padding:0 1.2rem; border-left:1px solid var(--border); }
+      .trip-info__row:first-child { border-left:none; }
+      .quick-links { grid-template-columns:repeat(4,1fr); padding:1rem 2rem; }
+      .bottom-nav { display:none; }
+    }
+  </style>
+</head>
+<body>
+
+<section class="hero">
+  <a href="kumamoto.html" class="hero__card hero__card--k">
+    <span class="hero__num">熊</span>
+    <div class="hero__content">
+      <span class="hero__tag">Kumamoto · 9/30 – 10/2</span>
+      <h2 class="hero__title">熊本</h2>
+      <span class="hero__en">KUMAMOTO</span>
+      <div class="hero__highlights">
+        <span class="hero__hl">⛩ 上色見熊野座神社</span>
+        <span class="hero__hl">🎣 天草海上釣堀</span>
+        <span class="hero__hl">🌊 芦北海濱公園</span>
+      </div>
+      <span class="hero__arrow">探索熊本 →</span>
+    </div>
+  </a>
+  <div class="hero__sep"></div>
+
+  <a href="fukuoka.html" class="hero__card hero__card--f">
+    <span class="hero__num">福</span>
+    <div class="hero__content">
+      <span class="hero__tag">Fukuoka · 10/3 – 10/7</span>
+      <h2 class="hero__title">福岡</h2>
+      <span class="hero__en">FUKUOKA</span>
+      <div class="hero__highlights">
+        <span class="hero__hl">🍜 博多らーめん ShinShin</span>
+        <span class="hero__hl">🐟 柳橋連合市場</span>
+        <span class="hero__hl">⛩ 太宰府天満宮</span>
+      </div>
+      <span class="hero__arrow">探索福岡 →</span>
+    </div>
+  </a>
+  <div class="hero__sep"></div>
+
+  <a href="oita.html" class="hero__card hero__card--o">
+    <span class="hero__num">大</span>
+    <div class="hero__content">
+      <span class="hero__tag">Ōita · 10/1 – 10/2</span>
+      <h2 class="hero__title">大分</h2>
+      <span class="hero__en">ŌITA</span>
+      <div class="hero__highlights">
+        <span class="hero__hl">⚔️ 進撃の巨人ミュージアム</span>
+        <span class="hero__hl">🦒 African Safari</span>
+        <span class="hero__hl">♨️ ゆふいん椿</span>
+      </div>
+      <span class="hero__arrow">探索大分 →</span>
+    </div>
+  </a>
+  <div class="hero__sep"></div>
+
+  <a href="oita.html" class="hero__card hero__card--b">
+    <span class="hero__num">別</span>
+    <div class="hero__content">
+      <span class="hero__tag">Beppu · 9/30 – 10/1</span>
+      <h2 class="hero__title">別府</h2>
+      <span class="hero__en">BEPPU</span>
+      <div class="hero__highlights">
+        <span class="hero__hl">♨️ Mt. Steam HOME</span>
+        <span class="hero__hl">🏨 御宿 野乃別府</span>
+        <span class="hero__hl">🌋 地獄巡り</span>
+      </div>
+      <span class="hero__arrow">探索別府 →</span>
+    </div>
+  </a>
+</section>
+
+<section class="stats">
+  <div class="stat"><span class="stat__n" data-t="8">0</span><span class="stat__l">旅遊天數</span></div>
+  <div class="stat"><span class="stat__n" data-t="72">0</span><span class="stat__l">景點／餐廳／住宿</span></div>
+  <div class="stat"><span class="stat__n" data-t="3">0</span><span class="stat__l">釣魚體驗</span></div>
+  <div class="stat"><span class="stat__n" data-t="4">0</span><span class="stat__l">同行人數</span></div>
+</section>
+
+<div class="trip-info">
+  <div class="trip-info__row"><span>✈️</span><span>星宇航空 JX846 / JX847</span></div>
+  <div class="trip-info__row"><span>📅</span><span>2026.09.30 — 10.07</span></div>
+  <div class="trip-info__row"><span>🗾</span><span>熊本 · 福岡 · 大分 · 別府</span></div>
+  <div class="trip-info__row"><span>💴</span><span>機票 TWD 18,632</span></div>
+</div>
+
+<div class="quick-links">
+  <a href="index.html" class="quick-link">
+    <span class="quick-link__icon">🔍</span>
+    <span class="quick-link__label">景點總覽</span>
+  </a>
+  <a href="fukuoka.html" class="quick-link">
+    <span class="quick-link__icon">🌆</span>
+    <span class="quick-link__label">福岡</span>
+  </a>
+  <a href="kumamoto.html" class="quick-link">
+    <span class="quick-link__icon">⛰️</span>
+    <span class="quick-link__label">熊本</span>
+  </a>
+  <a href="oita.html" class="quick-link">
+    <span class="quick-link__icon">⚔️</span>
+    <span class="quick-link__label">大分／別府</span>
+  </a>
+</div>
+
+<nav class="bottom-nav">
+  <a href="travel.html" class="bottom-nav__item active"><span>🏠</span><span>首頁</span></a>
+  <a href="kumamoto.html" class="bottom-nav__item"><span>⛰️</span><span>熊本</span></a>
+  <a href="fukuoka.html" class="bottom-nav__item"><span>🌆</span><span>福岡</span></a>
+  <a href="oita.html" class="bottom-nav__item"><span>⚔️</span><span>大分</span></a>
+</nav>
+
+<script>
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(({isIntersecting, target}) => {
+    if (!isIntersecting) return;
+    const end = +target.dataset.t;
+    const s = performance.now();
+    const tick = n => {
+      const p = Math.min((n-s)/900,1);
+      target.textContent = Math.round((1-Math.pow(1-p,3))*end);
+      if(p<1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+    obs.unobserve(target);
+  });
+},{threshold:.5});
+document.querySelectorAll('[data-t]').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
