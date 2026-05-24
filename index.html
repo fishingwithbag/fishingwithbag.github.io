@@ -490,6 +490,14 @@ function render(){
   });
 
   document.getElementById('cards-count').textContent=`共 ${list.length} 個地點`;
+  const statShown=document.getElementById('stat-shown');
+  const statStay=document.getElementById('stat-stay');
+  const statRegion=document.getElementById('stat-region');
+  const statCat=document.getElementById('stat-cat');
+  if(statShown) statShown.textContent = list.length;
+  if(statStay) statStay.textContent = list.filter(p=>(p.category||'')==='住宿').length;
+  if(statRegion) statRegion.textContent = new Set(list.map(p=>p.region).filter(Boolean)).size;
+  if(statCat) statCat.textContent = new Set(list.map(p=>p.category).filter(Boolean)).size;
   if(!list.length){
     wrap.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;opacity:.3;font-size:.9rem;">沒有符合條件的地點</div>';
     return;
