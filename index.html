@@ -375,6 +375,98 @@
       .bottom-nav { display:none; }
       body { padding-bottom:0; }
     }
+
+    /* ── Rental Block ── */
+    .rental-block {
+      margin:.25rem 1rem .5rem;
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:var(--r); overflow:hidden;
+    }
+    .rental-block__header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:.75rem 1rem; cursor:pointer;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .rental-block__title { font-family:var(--serif); font-size:.95rem; font-weight:700; }
+    .rental-block__toggle { font-size:.8rem; opacity:.5; transition:transform .3s; }
+    .rental-block.open .rental-block__toggle { transform:rotate(180deg); }
+    .rental-block__body { display:none; padding:0 1rem 1rem; }
+    .rental-block.open .rental-block__body { display:block; }
+    
+    .rental-field-row {
+      display:flex; flex-direction:column; gap:.3rem; margin-bottom:.6rem;
+    }
+    .rental-field-row label { font-size:.72rem; opacity:.55; letter-spacing:.08em; }
+    .rental-field-row input,
+    .rental-field-row textarea {
+      padding:.55rem .75rem;
+      background:var(--surface2); border:1px solid var(--border);
+      border-radius:8px; color:var(--text); font-size:.84rem;
+      outline:none; transition:border-color .2s; font-family:inherit;
+      width:100%; resize:vertical;
+    }
+    .rental-field-row input:focus,
+    .rental-field-row textarea:focus { border-color:var(--accent); }
+    .rental-field-row--full { grid-column:1/-1; }
+    .btn-save-rental {
+      padding:.6rem 1.2rem; border-radius:8px;
+      background:var(--accent); color:#fff; font-size:.82rem;
+      letter-spacing:.08em; margin-top:.25rem;
+      transition:opacity .2s; -webkit-tap-highlight-color:transparent;
+    }
+    .btn-save-rental:active { opacity:.75; }
+    
+    /* 已儲存的租車卡片 */
+    .rental-card {
+      background:var(--surface2); border:1px solid var(--border);
+      border-radius:var(--r); padding:.85rem 1rem; margin-top:.75rem;
+    }
+    .rental-card__row {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:.3rem 0; border-bottom:1px solid var(--border); font-size:.8rem;
+    }
+    .rental-card__row:last-of-type { border-bottom:none; }
+    .rental-card__label { opacity:.45; font-size:.72rem; flex-shrink:0; width:80px; }
+    .rental-card__val { text-align:right; flex:1; }
+    .rental-card__del {
+      width:100%; margin-top:.6rem; padding:.4rem;
+      font-size:.72rem; letter-spacing:.1em; opacity:.4;
+      border:1px solid var(--border); border-radius:6px;
+      transition:opacity .2s,border-color .2s; -webkit-tap-highlight-color:transparent;
+    }
+    .rental-card__del:active { opacity:1; border-color:#ff6b6b; color:#ff6b6b; }
+    
+    /* 自駕注意事項 */
+    .driving-tips {
+      margin-top:1rem; border:1px solid var(--border);
+      border-radius:var(--r); overflow:hidden;
+    }
+    .driving-tips__header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:.7rem .9rem; cursor:pointer; font-size:.82rem;
+      font-weight:700; letter-spacing:.08em;
+      background:var(--surface2);
+      -webkit-tap-highlight-color:transparent;
+    }
+    .tips-toggle-icon { font-size:.75rem; opacity:.5; transition:transform .3s; }
+    .driving-tips.open .tips-toggle-icon { transform:rotate(90deg); }
+    .driving-tips__body { display:none; padding:.75rem .9rem; }
+    .driving-tips.open .driving-tips__body { display:block; }
+    
+    .tip-section { margin-bottom:.9rem; }
+    .tip-section__title {
+      font-size:.78rem; font-weight:700; letter-spacing:.08em;
+      margin-bottom:.4rem; color:var(--accent);
+    }
+    .tip-list { list-style:none; display:flex; flex-direction:column; gap:.35rem; }
+    .tip-list li {
+      font-size:.76rem; line-height:1.65; color:var(--muted);
+      padding-left:.9rem; position:relative;
+    }
+    .tip-list li::before { content:'—'; position:absolute; left:0; opacity:.35; }
+    .tip-list li strong { color:var(--text); opacity:1; }
+    .tip-section--highlight { background:rgba(168,197,176,.07); border-radius:8px; padding:.65rem .75rem; }
+    .tip-section--highlight .tip-section__title { color:var(--accent); }
   </style>
     <!-- Firebase SDK -->
     <script type="module">
@@ -474,6 +566,166 @@
   </div>
 </div>
 
+<!-- 租車資訊 -->
+<div class="rental-block" id="rental-block">
+  <div class="rental-block__header" id="rental-toggle">
+    <span class="rental-block__title">🚗 租車資訊</span>
+    <span class="rental-block__toggle">▾</span>
+  </div>
+  <div class="rental-block__body" id="rental-body">
+
+    <!-- 租車紀錄表單 -->
+    <div class="rental-form" id="rental-form-wrap">
+      <div class="rental-field-row">
+        <label>租車公司</label>
+        <input id="r-company" type="text" placeholder="例：Times Car / OTS / Nippon">
+      </div>
+      <div class="rental-field-row">
+        <label>車型</label>
+        <input id="r-cartype" type="text" placeholder="例：Toyota Voxy / Honda Fit">
+      </div>
+      <div class="rental-field-row">
+        <label>取車日期</label>
+        <input id="r-pickup-date" type="date">
+      </div>
+      <div class="rental-field-row">
+        <label>取車地點</label>
+        <input id="r-pickup-loc" type="text" placeholder="例：熊本機場店">
+      </div>
+      <div class="rental-field-row">
+        <label>還車日期</label>
+        <input id="r-return-date" type="date">
+      </div>
+      <div class="rental-field-row">
+        <label>還車地點</label>
+        <input id="r-return-loc" type="text" placeholder="例：福岡博多站前店（異地還車）">
+      </div>
+      <div class="rental-field-row">
+        <label>費用 (TWD)</label>
+        <input id="r-cost" type="number" placeholder="0" min="0">
+      </div>
+      <div class="rental-field-row">
+        <label>訂單編號</label>
+        <input id="r-booking" type="text" placeholder="預約確認碼">
+      </div>
+      <div class="rental-field-row rental-field-row--full">
+        <label>備註</label>
+        <textarea id="r-note" rows="2" placeholder="例：ETC 租借、兒童座椅、保險方案…"></textarea>
+      </div>
+      <button class="btn-save-rental" id="btn-save-rental">💾 儲存租車資訊</button>
+      <span id="rental-sync-status" style="font-size:.65rem;opacity:.4;margin-left:.5rem;">⏳ 連線中…</span>
+    </div>
+
+    <!-- 顯示已儲存的租車資訊 -->
+    <div id="rental-saved"></div>
+
+    <!-- 日本自駕注意事項 -->
+    <div class="driving-tips">
+      <div class="driving-tips__header" id="tips-toggle">
+        <span>🗾 日本自駕注意事項</span>
+        <span class="tips-toggle-icon">▸</span>
+      </div>
+      <div class="driving-tips__body" id="tips-body">
+
+        <div class="tip-section">
+          <div class="tip-section__title">📄 出發前必備文件</div>
+          <ul class="tip-list">
+            <li>台灣駕照 + <strong>日本語譯本</strong>（台灣監理站辦理，需 2–3 工作天）</li>
+            <li>護照正本</li>
+            <li>租車確認書（印出或手機截圖）</li>
+            <li>國際信用卡（租車押金用，部分需 Visa/Master）</li>
+          </ul>
+        </div>
+
+        <div class="tip-section">
+          <div class="tip-section__title">🛣️ 行駛規則</div>
+          <ul class="tip-list">
+            <li><strong>靠左行駛</strong>，方向盤在右側（與台灣相反）</li>
+            <li>市區一般限速 <strong>40–60 km/h</strong>，郊區 <strong>60–80 km/h</strong>，高速公路 <strong>100 km/h</strong></li>
+            <li>路口停止線前有「止まれ」標誌必須<strong>完全停車</strong>，不可滾動通過</li>
+            <li>轉彎時讓行人優先，斑馬線前必須停車</li>
+            <li>右轉（相當於台灣左轉）需等對向來車完全通過</li>
+            <li>高速公路進出口在<strong>左側</strong></li>
+          </ul>
+        </div>
+
+        <div class="tip-section">
+          <div class="tip-section__title">🅿️ 停車</div>
+          <ul class="tip-list">
+            <li>日本停車場多為<strong>自動繳費機</strong>，準備日幣硬幣或 IC 卡</li>
+            <li>路邊黃線禁停，白線可短暫停車（依標示）</li>
+            <li>建議使用 <strong>Times Park</strong> 或 <strong>Navitime</strong> App 找停車場</li>
+            <li>觀光地停車場假日容易客滿，建議早去</li>
+            <li>部分飯店提供免費停車，取車前確認</li>
+          </ul>
+        </div>
+
+        <div class="tip-section">
+          <div class="tip-section__title">⛽ 加油</div>
+          <ul class="tip-list">
+            <li>日本加油站分<strong>全服務（有人幫加）</strong>和<strong>自助（セルフ）</strong></li>
+            <li>一般車輛加 <strong>レギュラー（Regular）</strong>，勿加ハイオク</li>
+            <li>自助加油：先選油種 → 插卡或投現 → 拿起油槍 → 加完按「返金」退找零</li>
+            <li>租車時確認油箱類型（汽油 or 柴油）</li>
+          </ul>
+        </div>
+
+        <div class="tip-section">
+          <div class="tip-section__title">🛣️ 高速公路 ETC</div>
+          <ul class="tip-list">
+            <li>租車時建議加租 <strong>ETC 車載機</strong>（日 ETC 卡 ≠ 台灣 ETC）</li>
+            <li>沒有 ETC 走一般車道，準備日幣現金</li>
+            <li>九州高速公路費用參考：熊本→福岡約 ¥2,000–2,800</li>
+            <li>可用 <strong>ドラぷら（Dra-pla）</strong> App 查過路費</li>
+          </ul>
+        </div>
+
+        <div class="tip-section">
+          <div class="tip-section__title">📱 導航</div>
+          <ul class="tip-list">
+            <li>推薦 <strong>Google Maps</strong>（需開啟行動數據）</li>
+            <li>或租車時加租<strong>車用導航</strong>（日文界面，可輸入電話號碼搜尋）</li>
+            <li><strong>Navitime Japan</strong> 可離線使用，適合山區訊號差的路段</li>
+            <li>輸入目的地建議用<strong>電話號碼</strong>或<strong>郵遞區號</strong>，比地址準確</li>
+          </ul>
+        </div>
+
+        <div class="tip-section">
+          <div class="tip-section__title">🚨 緊急狀況</div>
+          <ul class="tip-list">
+            <li>事故報警：<strong>110</strong>（警察）</li>
+            <li>救護車／火災：<strong>119</strong></li>
+            <li>租車公司緊急聯絡電話：取車時確認並存入手機</li>
+            <li>發生事故先拍照記錄，不移動車輛，等警察到場</li>
+            <li>JAF 道路救援：<strong>0570-00-8139</strong>（需確認租車保險是否含此服務）</li>
+          </ul>
+        </div>
+
+        <div class="tip-section">
+          <div class="tip-section__title">🚫 嚴禁事項</div>
+          <ul class="tip-list">
+            <li><strong>飲酒駕車</strong>：日本零容忍，血液酒精 0.03% 以上即違法，罰款＋吊照</li>
+            <li><strong>手持手機</strong>：罰款 ¥18,000，記點</li>
+            <li><strong>超速</strong>：超速 30 km/h 以上可能被逮捕</li>
+            <li>安全帶：全車乘客都必須繫，後座也不例外</li>
+          </ul>
+        </div>
+
+        <div class="tip-section tip-section--highlight">
+          <div class="tip-section__title">📍 本次行程租車重點</div>
+          <ul class="tip-list">
+            <li>熊本機場取車 → 阿蘇、天草、芦北方向行駛</li>
+            <li>天草公路多山路彎道，限速留意，單線道會車禮讓</li>
+            <li>福岡市區停車費高，建議停郊區轉地鐵進市區</li>
+            <li>異地還車（熊本取 → 福岡還）需確認租車公司是否收異地費</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+  
 <!-- Result bar + Grid -->
 <div class="result-bar">
   <span id="result-count">載入中…</span>
@@ -941,7 +1193,81 @@ function initCostFirebase() {
         <span class="cost-total__num">TWD ${total.toLocaleString()}</span>
       </div>`;
   }
-
+  // ── 租車資訊（Firebase）──
+  function initRentalFirebase() {
+    const db        = window.__db;
+    const rentalRef = window.__ref(db, 'rental_info');
+    const statusEl  = document.getElementById('rental-sync-status');
+    const savedEl   = document.getElementById('rental-saved');
+  
+    // 折疊開關
+    document.getElementById('rental-toggle').addEventListener('click', () => {
+      document.getElementById('rental-block').classList.toggle('open');
+    });
+    document.getElementById('tips-toggle').addEventListener('click', () => {
+      document.querySelector('.driving-tips').classList.toggle('open');
+    });
+  
+    // 顯示已儲存
+    function renderRental(data) {
+      if (!data || !Object.keys(data).length) {
+        savedEl.innerHTML = '<p style="font-size:.75rem;opacity:.35;padding:.5rem 0;">尚未儲存租車資訊</p>';
+        return;
+      }
+      savedEl.innerHTML = '';
+      Object.entries(data).forEach(([key, r]) => {
+        const card = document.createElement('div');
+        card.className = 'rental-card';
+        card.innerHTML = `
+          ${r.company    ? `<div class="rental-card__row"><span class="rental-card__label">租車公司</span><span class="rental-card__val">${r.company}</span></div>` : ''}
+          ${r.cartype    ? `<div class="rental-card__row"><span class="rental-card__label">車型</span><span class="rental-card__val">${r.cartype}</span></div>` : ''}
+          ${r.pickupDate ? `<div class="rental-card__row"><span class="rental-card__label">取車</span><span class="rental-card__val">${r.pickupDate} ${r.pickupLoc||''}</span></div>` : ''}
+          ${r.returnDate ? `<div class="rental-card__row"><span class="rental-card__label">還車</span><span class="rental-card__val">${r.returnDate} ${r.returnLoc||''}</span></div>` : ''}
+          ${r.cost       ? `<div class="rental-card__row"><span class="rental-card__label">費用</span><span class="rental-card__val" style="color:var(--accent);font-weight:700;">TWD ${Number(r.cost).toLocaleString()}</span></div>` : ''}
+          ${r.booking    ? `<div class="rental-card__row"><span class="rental-card__label">訂單編號</span><span class="rental-card__val">${r.booking}</span></div>` : ''}
+          ${r.note       ? `<div class="rental-card__row"><span class="rental-card__label">備註</span><span class="rental-card__val">${r.note}</span></div>` : ''}
+          <button class="rental-card__del" data-key="${key}">✕ 刪除此筆</button>`;
+        savedEl.appendChild(card);
+      });
+    }
+  
+    // 監聽 Firebase
+    import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js').then(m => {
+      m.onValue(rentalRef, snap => {
+        renderRental(snap.val());
+        if (statusEl) statusEl.textContent = '✅ 已同步';
+      });
+    });
+  
+    // 刪除
+    savedEl.addEventListener('click', e => {
+      const del = e.target.closest('[data-key]'); if (!del) return;
+      window.__remove(window.__ref(db, `rental_info/${del.dataset.key}`));
+    });
+  
+    // 儲存
+    document.getElementById('btn-save-rental').addEventListener('click', () => {
+      const r = {
+        company:    document.getElementById('r-company').value.trim(),
+        cartype:    document.getElementById('r-cartype').value.trim(),
+        pickupDate: document.getElementById('r-pickup-date').value,
+        pickupLoc:  document.getElementById('r-pickup-loc').value.trim(),
+        returnDate: document.getElementById('r-return-date').value,
+        returnLoc:  document.getElementById('r-return-loc').value.trim(),
+        cost:       parseFloat(document.getElementById('r-cost').value) || 0,
+        booking:    document.getElementById('r-booking').value.trim(),
+        note:       document.getElementById('r-note').value.trim(),
+        createdAt:  new Date().toISOString()
+      };
+      if (!r.company && !r.cartype) { alert('請至少填寫租車公司或車型'); return; }
+      window.__push(rentalRef, r);
+      document.querySelectorAll('#rental-form-wrap input, #rental-form-wrap textarea').forEach(el => el.value = '');
+      if (statusEl) statusEl.textContent = '☁️ 儲存中…';
+    });
+  }
+  
+  // 加進 waitFirebase callback
+  // initRentalFirebase();  ← 加在 initAddPlaceFirebase(); 後面
   function renderEntries() {
     entriesEl.innerHTML = '';
     Object.entries(entries).forEach(([key, entry]) => {
@@ -1052,6 +1378,7 @@ function initAddPlaceFirebase() {
 waitFirebase(() => {
   initCostFirebase();
   initAddPlaceFirebase();
+  initRentalFirebase();
 });
   
 // ── Search & filter events
