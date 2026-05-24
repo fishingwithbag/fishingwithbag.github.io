@@ -42,8 +42,8 @@
     .qa-btn__sub{font-size:.62rem;opacity:.45;display:block;margin-top:.15rem;}
 
     /* ── Search & Filter ── */
-    
-    .stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem;padding:.75rem 1rem;}
+    .search-bar{padding:.5rem 1rem .4rem;display:flex;flex-direction:column;gap:.45rem;}
+.stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem;padding:.75rem 1rem;}
     .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.85rem 1rem;}
     .stat-card__num{font-family:var(--serif);font-size:1.6rem;font-weight:700;line-height:1;display:block;}
     .stat-card__num.orange{color:var(--accent);}
@@ -52,7 +52,6 @@
 
     /* Filter */
     .filter-panel{padding:0 1rem .5rem;display:flex;flex-direction:column;gap:.6rem;}
-    .search-bar{padding:.5rem 1rem .4rem;display:flex;flex-direction:column;gap:.45rem;}
     .search-wrap{position:relative;}
     .search-icon{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);opacity:.4;font-size:.9rem;pointer-events:none;}
     #search-input{width:100%;padding:.65rem .75rem .65rem 2.2rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:.88rem;outline:none;transition:border-color .2s;}
@@ -162,8 +161,7 @@
       body{padding-bottom:0;}
       .bottom-nav{display:none;}
     }
-  
-    .driving-tips{margin-top:1rem;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+      .driving-tips{margin-top:1rem;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
     .driving-tips__header{display:flex;align-items:center;justify-content:space-between;padding:.7rem .9rem;cursor:pointer;font-size:.82rem;font-weight:700;letter-spacing:.08em;background:var(--surface2);-webkit-tap-highlight-color:transparent;}
     .tips-toggle-icon{font-size:.75rem;opacity:.5;transition:transform .3s;}
     .driving-tips.open .tips-toggle-icon{transform:rotate(90deg);}
@@ -176,9 +174,7 @@
     .tip-list li::before{content:"—";position:absolute;left:0;opacity:.35;}
     .tip-list li strong{color:var(--text);}
     .tip-section--highlight{background:rgba(168,197,176,.07);border-radius:8px;padding:.65rem .75rem;}
-
-    /* Card grid */
-    </style>
+  </style>
 
   <!-- Firebase SDK -->
   <script type="module">
@@ -232,7 +228,6 @@
 </div>
 
 <!-- ══ 搜尋與篩選 ══ -->
-
 <div class="stats-row">
   <div class="stat-card"><span class="stat-card__num orange" id="stat-shown">0</span><span class="stat-card__label">顯示筆數</span></div>
   <div class="stat-card"><span class="stat-card__num" id="stat-stay">0</span><span class="stat-card__label">住宿筆數</span></div>
@@ -803,6 +798,7 @@ waitFirebase(()=>{
   initRentalFirebase();
   initAddPlaceFirebase();
 });
+  document.getElementById('tips-toggle').addEventListener('click',()=>document.getElementById('driving-tips').classList.toggle('open'));
 </script>
 </body>
 </html
@@ -1221,11 +1217,6 @@ waitFirebase(()=>{
   window.__onValue(window.__ref(db,'rental_info'),snap=>{
     if(snap.val()) loadRentalUI(snap.val());
   });
-
-
-  document.getElementById('tips-toggle').addEventListener('click',()=>document.getElementById('driving-tips').classList.toggle('open'));
-document.getElementById('add-toggle').addEventListener('click',()=>document.getElementById('add-section').classList.toggle('open'));
-
 });
 </script>
 </body>
