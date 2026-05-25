@@ -154,16 +154,16 @@
     }
 
     /* 日本自駕注意事項 */
-    .driving-section{margin:1rem 0;border:1px solid var(--border);border-radius:12px;overflow:hidden}
-    .driving-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.2rem;background:var(--card);cursor:pointer;user-select:none;gap:.5rem}
-    .driving-header h3{margin:0;font-size:1rem;font-weight:600;color:var(--text)}
-    .driving-toggle-icon{font-size:.9rem;color:var(--muted);transition:transform .25s ease}
+    .driving-section{margin:.3rem 1rem .5rem;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--surface)}
+    .driving-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;background:var(--surface);cursor:pointer;user-select:none;gap:.5rem;min-height:44px;-webkit-tap-highlight-color:transparent}
+    .driving-header h3{margin:0;font-size:.84rem;font-weight:700;color:var(--text);letter-spacing:.08em}
+    .driving-toggle-icon{font-size:.75rem;color:var(--muted);transition:transform .25s ease}
     .driving-section.open .driving-toggle-icon{transform:rotate(180deg)}
-    .driving-body{display:none;padding:0 1.2rem 1.2rem}
+    .driving-body{display:none;padding:.5rem 1rem .85rem;border-top:1px solid var(--border)}
     .driving-section.open .driving-body{display:block}
-    .driving-tips-grid{display:grid;grid-template-columns:1fr;gap:.8rem;margin-top:.8rem}
+    .driving-tips-grid{display:grid;grid-template-columns:1fr;gap:.65rem}
     @media(min-width:640px){.driving-tips-grid{grid-template-columns:1fr 1fr}}
-    .driving-tip-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.9rem 1rem}
+    .driving-tip-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:.85rem .9rem}
     .driving-tip-card h4{margin:0 0 .5rem;font-size:.85rem;color:var(--accent)}
     .driving-tip-card ul{margin:0;padding-left:1.2rem;font-size:.82rem;color:var(--text);line-height:1.7}
     .driving-tip-card ul li strong{color:var(--text)}    
@@ -408,6 +408,15 @@
         </ul>
       </div>
       <div class="driving-tip-card">
+        <h4>👶 嬰幼兒乘車規定</h4>
+        <ul>
+          <li><strong>6 歲未滿</strong>乘車原則上必須使用兒童安全座椅</li>
+          <li>租車時需事先預約嬰兒座椅、幼童座椅或增高墊</li>
+          <li>6 歲以上若身高未達約 <strong>150 cm</strong>，仍建議使用兒童座椅或增高墊</li>
+          <li>不要抱著嬰幼兒乘車，急煞或碰撞時無法有效保護</li>
+        </ul>
+      </div>
+      <div class="driving-tip-card">
         <h4>📍 本次行程租車重點</h4>
         <ul>
           <li>熊本機場取車 → 阿蘇、天草、芦北方向行駛</li>
@@ -464,6 +473,13 @@ let filterCat = '';
 let filterSub = '';
 
 function allPlaces(){ return [...PLACES, ...CLOUD_PLACES]; }
+function escapeHTML(v){
+  return String(v ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function showDataError(message){
+  document.getElementById('cards-count').textContent=message;
+  document.getElementById('cards').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;opacity:.45;font-size:.9rem;">資料連線失敗，請稍後重新整理</div>';
+}
 
 // ── Intersection Observer ──
 const revObs = new IntersectionObserver(entries=>{
@@ -493,27 +509,28 @@ function buildCard(p){
   el.className='card'; el.dataset.id=p.id;
   const q=encodeURIComponent(p.name+' '+p.region+' Japan');
   const FISH_KW=['釣','路亞','釣具'];
-  const tags=(p.tags||[]).map(t=>`<span class="tag${FISH_KW.some(k=>t.includes(k))?' tag--fish':''}">${t}</span>`).join('');
+  const tags=(p.tags||[]).map(t=>`<span class="tag${FISH_KW.some(k=>String(t).includes(k))?' tag--fish':''}">${escapeHTML(t)}</span>`).join('');
   const isFav=getFavs().includes(String(p.id));
   const sub = p.subcategory||p.category||'';
+  const canDelete=p._src==='custom'&&p._key;
   el.innerHTML=`
     <div class="card__img-placeholder">${catEmoji(p.category, p.subcategory)}</div>
     <div class="card__body">
       <div class="card__tags">
-        <span class="tag">${p.region||''}</span>
-        <span class="tag">${sub}</span>
+        <span class="tag">${escapeHTML(p.region)}</span>
+        <span class="tag">${escapeHTML(sub)}</span>
         ${tags}
       </div>
-      <div class="card__name">${p.name}</div>
-      ${p.hours?`<div class="card__hours">🕐 ${p.hours}</div>`:''}
-      ${p.note?`<p class="card__note">${p.note}</p>`:''}
+      <div class="card__name">${escapeHTML(p.name)}</div>
+      ${p.hours?`<div class="card__hours">🕐 ${escapeHTML(p.hours)}</div>`:''}
+      ${p.note?`<p class="card__note">${escapeHTML(p.note)}</p>`:''}
     </div>
     <div class="card__footer">
       <span class="card__cost">${p.twd?'NT$'+Number(p.twd).toLocaleString():''}</span>
       <div class="card__actions">
-        <button class="card__btn card__fav" data-id="${p.id}">${isFav?'⭐':'☆'}</button>
+        <button class="card__btn card__fav" data-id="${escapeHTML(p.id)}">${isFav?'⭐':'☆'}</button>
         <a class="card__btn" href="https://www.google.com/maps/search/?api=1&query=${q}" target="_blank" rel="noopener">🗺</a>
-        <button class="card__btn btn-del-place" data-id="${p.id}" data-src="${p._src||'base'}">🗑</button>
+        ${canDelete?`<button class="card__btn btn-del-place" data-id="${escapeHTML(p.id)}">🗑</button>`:''}
       </div>
     </div>`;
   // fav
@@ -522,14 +539,11 @@ function buildCard(p){
     if(favOnly) render();
   });
   // del
-  el.querySelector('.btn-del-place').addEventListener('click',function(){
+  el.querySelector('.btn-del-place')?.addEventListener('click',function(){
     if(!confirm('確定刪除「'+p.name+'」？'))return;
-    const src=this.dataset.src;
     const key=p._key;
-    if(src==='custom'&&key){
+    if(key){
       window.__remove(window.__ref(window.__db,'custom_places/'+key));
-    } else if(src==='base'&&key){
-      window.__remove(window.__ref(window.__db,'base_places/'+key));
     }
   });
   revObs.observe(el);
@@ -713,6 +727,9 @@ document.getElementById('add-place-form').addEventListener('submit',e=>{
     e.target.reset();
     document.getElementById('add-sub').innerHTML='<option value="">請先選擇類別</option>';
     setTimeout(()=>status.textContent='',2500);
+  }).catch(()=>{
+    status.textContent='儲存失敗，請稍後再試';
+    setTimeout(()=>status.textContent='',3500);
   });
 });
 
@@ -754,7 +771,7 @@ function renderCostEntries(){
   wrap.innerHTML='';
   costItems.forEach((item,idx)=>{
     const row=document.createElement('div'); row.className='cost-entry';
-    row.innerHTML=`<input class="cost-entry__name" value="${item.name||''}" placeholder="項目名稱">
+    row.innerHTML=`<input class="cost-entry__name" value="${escapeHTML(item.name)}" placeholder="項目名稱">
       <input class="cost-entry__amount" type="number" value="${item.amount||0}" min="0">
       <button class="cost-entry__del">✕</button>`;
     row.querySelector('.cost-entry__name').addEventListener('change',e=>{
@@ -821,11 +838,15 @@ waitFirebase(()=>{
   window.__onValue(window.__ref(db,'base_places'),snap=>{
     PLACES=snap.val()?Object.entries(snap.val()).map(([k,v])=>({...v,_key:k,_src:'base'})):[];
     buildRegionSelect(); buildRegionTags(); render();
+  },()=>{
+    showDataError('基準資料連線失敗');
   });
   // Custom places
   window.__onValue(window.__ref(db,'custom_places'),snap=>{
     CLOUD_PLACES=snap.val()?Object.entries(snap.val()).map(([k,v])=>({...v,_key:k,_src:'custom'})):[];
     buildRegionSelect(); buildRegionTags(); render();
+  },()=>{
+    showDataError('新增資料連線失敗');
   });
   // Favs
   window.__onValue(window.__ref(db,'favs'),snap=>{
@@ -835,16 +856,20 @@ waitFirebase(()=>{
     _favsCache = nextFavs;
     localStorage.setItem('kyushu_favs', JSON.stringify(_favsCache));
     if(!same) render();
-  });
+  },()=>{});
   // Cost
   window.__onValue(window.__ref(db,'cost_items'),snap=>{
     costItems=snap.val()||[];
     document.getElementById('cost-sync-status').textContent='';
     renderCostEntries();
+  },()=>{
+    document.getElementById('cost-sync-status').textContent='費用資料連線失敗';
   });
   // Rental
   window.__onValue(window.__ref(db,'rental_info'),snap=>{
     if(snap.val()) loadRentalUI(snap.val());
+  },()=>{
+    document.getElementById('rental-sync-status').textContent='租車資料連線失敗';
   });
 });
 
