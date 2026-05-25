@@ -186,8 +186,24 @@
 </nav>
 
 <script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import{getDatabase,ref,onValue}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+
 const REGION = '熊本';
 const FISHING = ['釣','路亞','釣具'];
+const firebaseConfig={
+  apiKey:"AIzaSyApX90ynhEGP2uBgxMXOhNeM-Jbrvyzgps",
+  authDomain:"gen-lang-client-0162948406.firebaseapp.com",
+  databaseURL:"https://gen-lang-client-0162948406-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"gen-lang-client-0162948406",
+  storageBucket:"gen-lang-client-0162948406.firebasestorage.app",
+  messagingSenderId:"700325287638",
+  appId:"1:700325287638:web:541c2146fd62adcb789b77"
+};
+const db=getDatabase(initializeApp(firebaseConfig));
+let basePlaces=[];
+let customPlaces=[];
+let activeCat='全部';
 
 function animN(el, end) {
   const s = performance.now();
@@ -208,7 +224,7 @@ function buildCard(p) {
   el.className = 'card'; el.dataset.id = p.id;
   const q = encodeURIComponent(p.name+' '+p.region+' Japan');
   const tags = (p.tags||[]).map(t=>`<span class="tag${FISHING.some(k=>t.includes(k))?' tag--fishing':''}">${t}</span>`).join('');
-  const fav = JSON.parse(localStorage.getItem('kyushu_favs')||'[]').includes(p.id);
+  const fav = (JSON.parse(localStorage.getItem('kyushu_favs')||'[]')||[]).map(String).includes(String(p.id));
   el.innerHTML=`
     <div class="card__top">
       <div class="card__left">
@@ -238,11 +254,11 @@ function render(places) {
   grid.innerHTML='';
   if(!places.length){grid.innerHTML='<p class="empty">此分類暫無資料</p>';return;}
   places.forEach(p=>{const c=buildCard(p);grid.appendChild(c);revObs.observe(c);});
-  grid.addEventListener('click', e=>{
+  grid.onclick=e=>{
     const fav=e.target.closest('[data-fav]');
     if(fav){
-      const id=+fav.dataset.fav;
-      const saved=JSON.parse(localStorage.getItem('kyushu_favs')||'[]');
+      const id=String(fav.dataset.fav);
+      const saved=(JSON.parse(localStorage.getItem('kyushu_favs')||'[]')||[]).map(String);
       const idx=saved.indexOf(id);
       idx>-1?saved.splice(idx,1):saved.push(id);
       localStorage.setItem('kyushu_favs',JSON.stringify(saved));
@@ -255,38 +271,40 @@ function render(places) {
       const t=card.querySelector('.card__note-toggle');
       if(t)t.textContent=open?'▾ 收合備註':'▸ 展開備註';
     }
-  },{passive:true});
+  };
 }
 
 function buildFilters(places) {
   const bar=document.getElementById('filter-bar');
+  bar.innerHTML='';
   const cats=['全部',...new Set(places.map(p=>p.category))];
+  if(!cats.includes(activeCat)) activeCat='全部';
   cats.forEach(cat=>{
     const btn=document.createElement('button');
-    btn.className=`filter-btn${cat==='全部'?' active':''}`;
+    btn.className=`filter-btn${cat===activeCat?' active':''}`;
     btn.textContent=cat==='全部'?`全部 ${places.length}`:cat;
     btn.dataset.cat=cat; bar.appendChild(btn);
   });
-  bar.addEventListener('click',e=>{
+  bar.onclick=e=>{
     const btn=e.target.closest('.filter-btn'); if(!btn)return;
     bar.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    const c=btn.dataset.cat;
-    render(c==='全部'?places:places.filter(p=>p.category===c));
-  });
+    btn.classList.add('active'); activeCat=btn.dataset.cat;
+    render(activeCat==='全部'?places:places.filter(p=>p.category===activeCat));
+  };
 }
 
-const res = await fetch('./data/trips.json');
-const {places:all} = await res.json();
-const places = all.filter(p=>p.region===REGION);
+function paint(){
+  const places=[...basePlaces,...customPlaces].filter(p=>p.region===REGION);
+  document.getElementById('s-total').textContent=places.length;
+  document.getElementById('s-spot').textContent=places.filter(p=>p.category==='景點').length;
+  document.getElementById('s-food').textContent=places.filter(p=>p.category==='餐廳').length;
+  document.getElementById('s-stay').textContent=places.filter(p=>p.category==='住宿').length;
+  buildFilters(places);
+  render(activeCat==='全部'?places:places.filter(p=>p.category===activeCat));
+}
 
-animN(document.getElementById('s-total'), places.length);
-animN(document.getElementById('s-spot'),  places.filter(p=>p.category==='景點').length);
-animN(document.getElementById('s-food'),  places.filter(p=>p.category==='餐廳').length);
-animN(document.getElementById('s-stay'),  places.filter(p=>p.category==='住宿').length);
-
-buildFilters(places);
-render(places);
+onValue(ref(db,'base_places'),snap=>{basePlaces=snap.val()?Object.values(snap.val()):[];paint();});
+onValue(ref(db,'custom_places'),snap=>{customPlaces=snap.val()?Object.values(snap.val()):[];paint();});
 </script>
 </body>
 </html>

@@ -190,8 +190,23 @@
 </nav>
 
 <script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import{getDatabase,ref,onValue}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+
 const REGIONS = ['大分','別府'];
+const firebaseConfig={
+  apiKey:"AIzaSyApX90ynhEGP2uBgxMXOhNeM-Jbrvyzgps",
+  authDomain:"gen-lang-client-0162948406.firebaseapp.com",
+  databaseURL:"https://gen-lang-client-0162948406-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"gen-lang-client-0162948406",
+  storageBucket:"gen-lang-client-0162948406.firebasestorage.app",
+  messagingSenderId:"700325287638",
+  appId:"1:700325287638:web:541c2146fd62adcb789b77"
+};
+const db=getDatabase(initializeApp(firebaseConfig));
 let allPlaces = [];
+let basePlaces = [];
+let customPlaces = [];
 let activeRegion = '全部';
 let activeCat = '全部';
 
@@ -209,8 +224,9 @@ const revObs = new IntersectionObserver(entries=>{
   });
 },{threshold:.04,rootMargin:'0px 0px -8px 0px'});
 
-function getFavs(){ return JSON.parse(localStorage.getItem('kyushu_favs')||'[]'); }
+function getFavs(){ return (JSON.parse(localStorage.getItem('kyushu_favs')||'[]')||[]).map(String); }
 function setFav(id){
+  id=String(id);
   const saved=getFavs(); const idx=saved.indexOf(id);
   idx>-1?saved.splice(idx,1):saved.push(id);
   localStorage.setItem('kyushu_favs',JSON.stringify(saved));
@@ -222,7 +238,7 @@ function buildCard(p) {
   el.className='card'; el.dataset.id=p.id;
   const q=encodeURIComponent(p.name+' '+p.region+' Japan');
   const tags=(p.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('');
-  const fav=getFavs().includes(p.id);
+  const fav=getFavs().includes(String(p.id));
   el.innerHTML=`
     <div class="card__top">
       <div class="card__left">
@@ -255,10 +271,10 @@ function getFiltered() {
 }
 
 function updateStats(places) {
-  animN(document.getElementById('s-total'), places.length);
-  animN(document.getElementById('s-spot'),  places.filter(p=>p.category==='景點').length);
-  animN(document.getElementById('s-food'),  places.filter(p=>p.category==='餐廳').length);
-  animN(document.getElementById('s-stay'),  places.filter(p=>p.category==='住宿').length);
+  document.getElementById('s-total').textContent=places.length;
+  document.getElementById('s-spot').textContent=places.filter(p=>p.category==='景點').length;
+  document.getElementById('s-food').textContent=places.filter(p=>p.category==='餐廳').length;
+  document.getElementById('s-stay').textContent=places.filter(p=>p.category==='住宿').length;
 }
 
 function render() {
@@ -270,7 +286,7 @@ function render() {
   places.forEach(p=>{const c=buildCard(p);grid.appendChild(c);revObs.observe(c);});
   grid.onclick=e=>{
     const fav=e.target.closest('[data-fav]');
-    if(fav){fav.textContent=setFav(+fav.dataset.fav);return;}
+    if(fav){fav.textContent=setFav(fav.dataset.fav);return;}
     const tog=e.target.closest('.card__note-toggle')||e.target.closest('.card__name');
     if(tog){
       const card=tog.closest('.card');
@@ -285,9 +301,10 @@ function buildFilters() {
   const bar=document.getElementById('filter-bar');
   bar.innerHTML='';
   const cats=['全部',...new Set(allPlaces.map(p=>p.category))];
+  if(!cats.includes(activeCat)) activeCat='全部';
   cats.forEach(cat=>{
     const btn=document.createElement('button');
-    btn.className=`filter-btn${cat==='全部'?' active':''}`;
+    btn.className=`filter-btn${cat===activeCat?' active':''}`;
     btn.textContent=cat; btn.dataset.cat=cat; bar.appendChild(btn);
   });
   bar.onclick=e=>{
@@ -306,12 +323,15 @@ document.getElementById('region-tabs').addEventListener('click',e=>{
   updateStats(getFiltered());
 });
 
-const res=await fetch('./data/trips.json');
-const {places:all}=await res.json();
-allPlaces=all.filter(p=>REGIONS.includes(p.region));
-updateStats(allPlaces);
-buildFilters();
-render();
+function paint(){
+  allPlaces=[...basePlaces,...customPlaces].filter(p=>REGIONS.includes(p.region));
+  updateStats(getFiltered());
+  buildFilters();
+  render();
+}
+
+onValue(ref(db,'base_places'),snap=>{basePlaces=snap.val()?Object.values(snap.val()):[];paint();});
+onValue(ref(db,'custom_places'),snap=>{customPlaces=snap.val()?Object.values(snap.val()):[];paint();});
 </script>
 </body>
 </html>

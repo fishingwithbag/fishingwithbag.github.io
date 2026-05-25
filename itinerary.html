@@ -325,7 +325,7 @@ let dayRegionMap = {};
 let editingKey = null;
 
 function allPlaces(){ return [...allBasePlaces, ...allCustomPlaces]; }
-function getFavs(){ return JSON.parse(localStorage.getItem('kyushu_favs')||'[]'); }
+function getFavs(){ return (JSON.parse(localStorage.getItem('kyushu_favs')||'[]')||[]).map(String); }
 
 
 function getDayRegion(date){
@@ -403,6 +403,8 @@ function autofillPlaceFields(){
 function setupTimeInput(id){
   const el = document.getElementById(id);
   if(!el) return;
+  if(el.dataset.timeReady)return;
+  el.dataset.timeReady = '1';
   el.addEventListener('input', e=>{
     let v = e.target.value.replace(/[^0-9]/g,'');
     if(v.length >= 3) v = v.slice(0,2) + ':' + v.slice(2,4);
@@ -570,10 +572,10 @@ function renderDay(){
 }
 
 // ── AI 自動排程 ──
-function autoScheduleDay(){
+async function autoScheduleDay(dayIndex=currentDay,{silent=false}={}){
   const btn=document.getElementById('btn-auto-schedule');
-  btn.disabled=true; btn.textContent='⏳ 排程中…';
-  const day = TRIP_DAYS[currentDay];
+  if(!silent){ btn.disabled=true; btn.textContent='⏳ 排程中…'; }
+  const day = TRIP_DAYS[dayIndex];
   const favs = getFavs();
   const region = getDayRegion(day.date);
   function extractHours(note){
@@ -588,11 +590,11 @@ function autoScheduleDay(){
       if(item.type==='spot'||item.type==='meal') usedNames.add(item.name);
     });
   });
-  let candidates = allPlaces().filter(p=>favs.includes(p.id)&&p.category!=='住宿');
+  let candidates = allPlaces().filter(p=>favs.includes(String(p.id))&&p.category!=='住宿');
   if(region) candidates = candidates.filter(p=>p.region===region);
   let fresh = candidates.filter(p=>!usedNames.has(p.name));
   let pool = fresh.length ? fresh.concat(candidates.filter(p=>usedNames.has(p.name))) : candidates;
-  if(!pool.length) pool = allPlaces().filter(p=>favs.includes(p.id)&&p.category!=='住宿').slice(0,6);
+  if(!pool.length) pool = allPlaces().filter(p=>favs.includes(String(p.id))&&p.category!=='住宿').slice(0,6);
   const meals = pool.filter(p=>p.category==='餐廳');
   const spots = pool.filter(p=>p.category!=='餐廳');
   let schedule = [];
@@ -616,10 +618,10 @@ function autoScheduleDay(){
   if(stayPlace){ currentMin=Math.max(currentMin,20*60); addItem(stayPlace,'stay'); }
   const date = day.date;
   const ref = window.__ref(window.__db,`itinerary/${date}`);
-  window.__remove(ref).then(()=>{
-    schedule.forEach(item=>window.__push(ref,item));
-    btn.disabled=false; btn.textContent='🪄 自動排這天';
-  });
+  await window.__remove(ref);
+  await Promise.all(schedule.map(item=>window.__push(ref,item)));
+  if(!silent){ btn.disabled=false; btn.textContent='🪄 自動排這天'; }
+  return schedule.length;
 }
 // ── Modal 開關 ──
 document.getElementById('btn-add-item').addEventListener('click',()=>{
@@ -677,10 +679,14 @@ document.getElementById('btn-modal-save').addEventListener('click',()=>{
 
 // ── AI 按鈕 ──
 document.getElementById('btn-auto-schedule').addEventListener('click', autoScheduleDay);
-document.getElementById('btn-auto-all').addEventListener('click',()=>{
+document.getElementById('btn-auto-all').addEventListener('click',async()=>{
   if(!confirm('排全程會清空所有現有行程，確定嗎？')) return;
-  TRIP_DAYS.forEach((_,i)=>{ currentDay=i; autoScheduleDay(); });
-  currentDay=0; buildTabs(); renderDay();
+  const btn=document.getElementById('btn-auto-all');
+  btn.disabled=true; btn.textContent='⏳ 排程中…';
+  const keepDay=currentDay;
+  for(let i=0;i<TRIP_DAYS.length;i++) await autoScheduleDay(i,{silent:true});
+  currentDay=keepDay; buildTabs(); buildDayRegionSelect(); updateAiDesc(); renderDay();
+  btn.disabled=false; btn.textContent='排全程';
 });
 document.getElementById('btn-clear-day').addEventListener('click',()=>{
   if(!confirm('確定清空這天的行程？'))return;
@@ -716,6 +722,7 @@ waitFirebase(()=>{
   // 載入景點資料
   window.__onValue(window.__ref(db,'base_places'),snap=>{
     allBasePlaces=snap.val()?Object.values(snap.val()):[];
+    buildPlaceSuggestions();
   });
   window.__onValue(window.__ref(db,'custom_places'),snap=>{
     allCustomPlaces=snap.val()?Object.values(snap.val()):[];
