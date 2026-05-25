@@ -152,6 +152,21 @@
       body{padding-bottom:0;}
       .bottom-nav{display:none;}
     }
+
+    /* 日本自駕注意事項 */
+    .driving-section{margin:1rem 0;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+    .driving-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.2rem;background:var(--card);cursor:pointer;user-select:none;gap:.5rem}
+    .driving-header h3{margin:0;font-size:1rem;font-weight:600;color:var(--text)}
+    .driving-toggle-icon{font-size:.9rem;color:var(--muted);transition:transform .25s ease}
+    .driving-section.open .driving-toggle-icon{transform:rotate(180deg)}
+    .driving-body{display:none;padding:0 1.2rem 1.2rem}
+    .driving-section.open .driving-body{display:block}
+    .driving-tips-grid{display:grid;grid-template-columns:1fr;gap:.8rem;margin-top:.8rem}
+    @media(min-width:640px){.driving-tips-grid{grid-template-columns:1fr 1fr}}
+    .driving-tip-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.9rem 1rem}
+    .driving-tip-card h4{margin:0 0 .5rem;font-size:.85rem;color:var(--accent)}
+    .driving-tip-card ul{margin:0;padding-left:1.2rem;font-size:.82rem;color:var(--text);line-height:1.7}
+    .driving-tip-card ul li strong{color:var(--text)}    
   </style>
 
   <!-- Firebase SDK -->
@@ -311,6 +326,99 @@
     <span class="sync-badge" id="rental-sync-status"></span>
   </div>
 </div>
+
+<!-- 日本自駕注意事項 -->
+<div class="driving-section" id="driving-section">
+  <div class="driving-header" id="driving-toggle">
+    <h3>🗾 日本自駕注意事項</h3>
+    <span class="driving-toggle-icon">▼</span>
+  </div>
+  <div class="driving-body">
+    <div class="driving-tips-grid">
+      <div class="driving-tip-card">
+        <h4>📄 出發前必備文件</h4>
+        <ul>
+          <li>台灣駕照 + <strong>日本語譯本</strong>（台灣監理站辦理，需 2–3 工作天）</li>
+          <li>護照正本</li>
+          <li>租車確認書（印出或手機截圖）</li>
+          <li>國際信用卡（租車押金用，部分需 Visa/Master）</li>
+        </ul>
+      </div>
+      <div class="driving-tip-card">
+        <h4>🛣️ 行駛規則</h4>
+        <ul>
+          <li><strong>靠左行駛</strong>，方向盤在右側（與台灣相反）</li>
+          <li>市區限速 <strong>40–60 km/h</strong>，郊區 <strong>60–80 km/h</strong>，高速 <strong>100 km/h</strong></li>
+          <li>「止まれ」標誌必須<strong>完全停車</strong>，不可滾動通過</li>
+          <li>轉彎時讓行人優先，斑馬線前必須停車</li>
+          <li>右轉需等對向來車完全通過</li>
+          <li>高速公路進出口在<strong>左側</strong></li>
+        </ul>
+      </div>
+      <div class="driving-tip-card">
+        <h4>🅿️ 停車</h4>
+        <ul>
+          <li>多為<strong>自動繳費機</strong>，準備日幣硬幣或 IC 卡</li>
+          <li>路邊黃線禁停，白線可短暫停車（依標示）</li>
+          <li>推薦 <strong>Times Park</strong> 或 <strong>Navitime</strong> App 找停車場</li>
+          <li>觀光地停車場假日容易客滿，建議早去</li>
+        </ul>
+      </div>
+      <div class="driving-tip-card">
+        <h4>⛽ 加油</h4>
+        <ul>
+          <li>一般車輛加 <strong>レギュラー（Regular）</strong></li>
+          <li>自助加油：選油種 → 插卡/投現 → 拿油槍 → 加完按「返金」</li>
+          <li>取車時確認油箱類型（汽油 or 柴油）</li>
+        </ul>
+      </div>
+      <div class="driving-tip-card">
+        <h4>🛣️ 高速公路 ETC</h4>
+        <ul>
+          <li>租車時建議加租 <strong>ETC 車載機</strong>（日本 ETC ≠ 台灣 ETC）</li>
+          <li>沒有 ETC 走一般車道，準備日幣現金</li>
+          <li>九州熊本→福岡約 ¥2,000–2,800</li>
+          <li><strong>ドラぷら（Dra-pla）</strong> App 可查過路費</li>
+        </ul>
+      </div>
+      <div class="driving-tip-card">
+        <h4>📱 導航</h4>
+        <ul>
+          <li>推薦 <strong>Google Maps</strong>（需行動數據）</li>
+          <li><strong>Navitime Japan</strong> 可離線，適合山區路段</li>
+          <li>輸入目的地建議用<strong>電話號碼</strong>或<strong>郵遞區號</strong></li>
+        </ul>
+      </div>
+      <div class="driving-tip-card">
+        <h4>🚨 緊急狀況</h4>
+        <ul>
+          <li>報警：<strong>110</strong> / 救護車火災：<strong>119</strong></li>
+          <li>JAF 道路救援：<strong>0570-00-8139</strong></li>
+          <li>發生事故先拍照，不移動車輛，等警察到場</li>
+          <li>取車時確認租車公司緊急聯絡電話並存入手機</li>
+        </ul>
+      </div>
+      <div class="driving-tip-card">
+        <h4>🚫 嚴禁事項</h4>
+        <ul>
+          <li><strong>飲酒駕車</strong>：血液酒精 0.03% 以上即違法</li>
+          <li><strong>手持手機</strong>：罰款 ¥18,000，記點</li>
+          <li><strong>超速 30 km/h 以上</strong>：可能被逮捕</li>
+          <li>全車乘客都必須繫安全帶（含後座）</li>
+        </ul>
+      </div>
+      <div class="driving-tip-card">
+        <h4>📍 本次行程租車重點</h4>
+        <ul>
+          <li>熊本機場取車 → 阿蘇、天草、芦北方向行駛</li>
+          <li>天草公路多山路彎道，單線道會車需禮讓</li>
+          <li>福岡市區停車費高，建議停郊區轉地鐵</li>
+          <li>異地還車（熊本取→福岡還）需確認是否收異地費</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>  
 
 <!-- ══ 地點卡片 ══ -->
 <div class="cards-header">
@@ -739,6 +847,10 @@ waitFirebase(()=>{
     if(snap.val()) loadRentalUI(snap.val());
   });
 });
+
+document.getElementById('driving-toggle').addEventListener('click',()=>{
+document.getElementById('driving-section').classList.toggle('open');
+});  
 </script>
 </body>
 </html>
