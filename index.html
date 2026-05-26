@@ -157,25 +157,75 @@
     .rental-field select option{color:#1A1A1A;background:#FFF;}
 
     /* ── Cards ── */
-    .cards-header{display:flex;align-items:center;justify-content:space-between;padding:.3rem 1rem .2rem;}
-    .cards-count{font-size:.72rem;opacity:.35;letter-spacing:.08em;}
-    .cards-sort{font-size:.72rem;opacity:.5;padding:.3rem .6rem;border:1px solid var(--border);border-radius:20px;background:var(--surface);}
-    .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.6rem;padding:.3rem 1rem .5rem;}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;opacity:0;transform:translateY(8px);transition:opacity .35s var(--ease),transform .35s var(--ease),border-color .2s;}
-    .card.visible{opacity:1;transform:none;}
-    .card:active{border-color:var(--accent);}
-    .card__img{width:100%;aspect-ratio:4/3;object-fit:cover;background:var(--surface2);display:block;}
-    .card__img-placeholder{width:100%;aspect-ratio:4/3;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:1.8rem;}
-    .card__body{padding:.55rem .65rem .5rem;}
-    .card__tags{display:flex;flex-wrap:wrap;gap:.25rem;margin-bottom:.28rem;}
-    .tag{font-size:.58rem;padding:.1rem .4rem;border-radius:20px;border:1px solid var(--border);opacity:.55;white-space:nowrap;}
-    .tag--fish{border-color:var(--accent2);color:var(--accent2);opacity:.9;}
-    .card__name{font-family:var(--serif);font-size:.9rem;font-weight:700;line-height:1.35;word-break:break-word;}
-    .card__hours{font-size:.68rem;color:var(--accent2);margin-top:.18rem;}
-    .card__note{font-size:.72rem;color:var(--muted);margin-top:.25rem;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-    .card__footer{display:flex;align-items:center;justify-content:space-between;padding:.3rem .65rem .5rem;border-top:1px solid var(--border);margin-top:.3rem;}
-    .card__cost{font-size:.72rem;color:var(--accent);font-weight:700;}
-    .card__actions{display:flex;gap:.3rem;}
+      .cards-header{display:flex;align-items:center;justify}  justify-content:space-between;
+      .cards-count{font-size:.72rem;opacity:.35;letter-spacing:.08em;}
+      .cards-sort{font-size:.72rem;opacity:.5;padding:.3rem .6rem;border:1px solid var(--border);border-radius:20px;background:var(--surface);}
+      
+  /* 卡片容器：每張卡片撐滿同列高度 */
+      .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.6rem;padding:.3rem 1rem .5rem;align-items:stretch;}
+      
+    /* 卡片本體：改成直向 flex，讓 footer 可以固定到底部 */
+      .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden; opacity:0;transform:translateY(8px);transition:opacity .35s var(--ease),transform .35s var(--ease),border-color .2s;height:100%;display:flex;flex-direction:column;}
+      .card.visible{opacity:1;transform:none;}
+      .card:active{border-color:var(--accent);}
+      .card__img{width:100%;aspect-ratio:4/3;object-fit:cover;background:var(--surface2);display:block;flex-shrink:0;}
+      .card__img-placeholder{width:100%;aspect-ratio:4/3;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0;}
+      /* 內容區吃掉剩餘高度，將 footer 推到底 */
+      .card__body{padding:.55rem .65rem .5rem;flex:1 1 auto;display:flex;flex-direction:column;}
+      .card__tags{display:flex;flex-wrap:wrap;gap:.25rem;margin-bottom:.28rem;}
+      .tag{font-size:.58rem;padding:.1rem .4rem;border-radius:20px;border:1px solid var(--border);opacity:.55;white-space:nowrap;}
+      .tag--fish{border-color:var(--accent2);color:var(--accent2);opacity:.9;}      
+      .card__name{font-family:var(--serif);font-size:.9rem;font-weight:700;line-height:1.35;word-break:break-word;}
+      .card__hours{font-size:.68rem;color:var(--accent2);margin-top:.18rem;}
+      .card__note{
+        font-size:.72rem;
+        color:var(--muted);
+        margin-top:.25rem;
+        line-height:1.6;
+        display:-webkit-box;
+        -webkit-line-clamp:2;
+        -webkit-box-orient:vertical;
+        overflow:hidden;
+      }
+      
+      /* Footer 固定在卡片底部 */
+      .card__footer{
+        display:grid;
+        grid-template-columns:minmax(0,1fr) auto;
+        align-items:center;
+        gap:.45rem;
+      
+        padding:.42rem .65rem .58rem;
+        border-top:1px solid var(--border);
+      
+        margin-top:auto;
+        min-height:46px;
+      }
+      
+      /* 價格區固定左側，沒有價格也保留空間 */
+      .card__cost{
+        font-size:.72rem;
+        color:var(--accent);
+        font-weight:700;
+        min-height:1em;
+        line-height:1.2;
+        overflow:hidden;
+        white-space:nowrap;
+        text-overflow:ellipsis;
+      }
+      
+      /* 右下角 icon 區固定寬度與位置 */
+      .card__actions{
+        display:flex;
+        align-items:center;
+        justify-content:flex-end;
+        gap:.38rem;
+      
+        min-width:78px;
+        flex-shrink:0;
+      }
+        padding:.3rem 1rem .2rem;
+
     /* ── Card Actions：收藏與地圖 icon 顯眼化 ── */
     .card__btn{
       min-width:32px;
