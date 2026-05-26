@@ -275,20 +275,26 @@
 </nav>
 
 <script>
+function animateNumber(target, end){
+  const s = performance.now();
+
+  const tick = n => {
+    const p = Math.min((n - s) / 900, 1);
+    target.textContent = Math.round((1 - Math.pow(1 - p, 3)) * end);
+
+    if(p < 1){
+      requestAnimationFrame(tick);
+    }
+  };
+
+  requestAnimationFrame(tick);
+}
+
 const obs = new IntersectionObserver(entries => {
   entries.forEach(({isIntersecting, target}) => {
     if(!isIntersecting) return;
 
-    const end = +target.dataset.t;
-    const s = performance.now();
-
-    const tick = n => {
-      const p = Math.min((n - s) / 900, 1);
-      target.textContent = Math.round((1 - Math.pow(1 - p, 3)) * end);
-      if(p < 1) requestAnimationFrame(tick);
-    };
-
-    requestAnimationFrame(tick);
+    animateNumber(target, +target.dataset.t);
     obs.unobserve(target);
   });
 },{threshold:.5});
@@ -320,12 +326,15 @@ function normalizeFirebaseList(raw){
 
 function updatePlaceTotal(basePlaces, customPlaces){
   const total = [...basePlaces, ...customPlaces].length;
-  const target = document.querySelector('.stat__n[data-t]');
 
-  if(!target) return;
+  // travel.html 第 2 個 stat__n 才是「景點／餐廳／住宿」
+  const statNumbers = document.querySelectorAll('.stat__n');
+  const placeTotalEl = statNumbers[1];
 
-  target.dataset.t = String(total);
-  target.textContent = String(total);
+  if(!placeTotalEl) return;
+
+  placeTotalEl.dataset.t = String(total);
+  placeTotalEl.textContent = String(total);
 }
 
 waitFirebase(() => {
@@ -342,17 +351,16 @@ waitFirebase(() => {
     basePlaces = normalizeFirebaseList(snap.val());
     paint();
   }, err => {
-    console.error('travel base_places 讀取失敗:', err);
+    console.error('travel.html base_places 讀取失敗:', err);
   });
 
   window.__onValue(window.__ref(db, 'custom_places'), snap => {
     customPlaces = normalizeFirebaseList(snap.val());
     paint();
   }, err => {
-    console.error('travel custom_places 讀取失敗:', err);
+    console.error('travel.html custom_places 讀取失敗:', err);
   });
 });
 </script>
-``
 </body>
 </html>
