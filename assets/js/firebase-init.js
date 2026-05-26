@@ -73,4 +73,4 @@ signInAnonymously(auth)
   .catch(err => {
     console.error('Firebase 匿名登入失敗:', err);
     exposeFirebase();
-  });
+  });*/
