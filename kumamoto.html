@@ -150,6 +150,7 @@
       .section-heading { padding:.5rem 2rem .75rem; }
     }
   </style>
+  <script type="module" src="assets/js/firebase-init.js"></script>
 </head>
 <body>
 
@@ -186,21 +187,22 @@
 </nav>
 
 <script type="module">
-import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import{getDatabase,ref,onValue}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+// 等待 firebase-init.js 初始化完成
+function waitFirebase(cb) {
+  if (window.__firebaseReady) { cb(); return; }
+  window.addEventListener('firebase-ready', cb, { once: true });
+}
 
+waitFirebase(() => {
+  const db = window.__db;
+  let basePlaces = [];
+  let customPlaces = [];
+  // ... 以下其他邏輯完全不動
+  window.__onValue(window.__ref(db, 'base_places'), snap => { ... });
+  window.__onValue(window.__ref(db, 'custom_places'), snap => { ... });
+});
 const REGION = '熊本';
 const FISHING = ['釣','路亞','釣具'];
-const firebaseConfig={
-  apiKey:"AIzaSyApX90ynhEGP2uBgxMXOhNeM-Jbrvyzgps",
-  authDomain:"gen-lang-client-0162948406.firebaseapp.com",
-  databaseURL:"https://gen-lang-client-0162948406-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId:"gen-lang-client-0162948406",
-  storageBucket:"gen-lang-client-0162948406.firebasestorage.app",
-  messagingSenderId:"700325287638",
-  appId:"1:700325287638:web:541c2146fd62adcb789b77"
-};
-const db=getDatabase(initializeApp(firebaseConfig));
 let basePlaces=[];
 let customPlaces=[];
 let activeCat='全部';
