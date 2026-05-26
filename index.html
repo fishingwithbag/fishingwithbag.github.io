@@ -840,58 +840,86 @@ document.getElementById('btn-save-rental').addEventListener('click',()=>{
 // ════════════════════════════════════════
 //  Firebase 初始化
 // ════════════════════════════════════════
-function waitFirebase(cb){ if(window.__firebaseReady){cb();return;} window.addEventListener('firebase-ready',cb,{once:true}); }
+function waitFirebase(cb){
+  if(window.__firebaseReady){
+    cb();
+    return;
+  }
 
-waitFirebase(()=>{
-  const db=window.__db;
-  console.log('[index.html] firebase-ready received
+  window.addEventListener('firebase-ready', cb, { once:true });
+}
+
+waitFirebase(() => {
+  const db = window.__db;
+  console.log('[index.html] firebase-ready received:', !!db);
+
   // Base places
-  window.__onValue(window.__ref(db,'base_places'),snap=>{
-    PLACES=snap.val()?Object.entries(snap.val()).map(([k,v])=>({...v,_key:k,_src:'base'})):[];
-    buildRegionSelect(); buildRegionTags(); render();
-  },()=>{
+  window.__onValue(window.__ref(db, 'base_places'), snap => {
+    PLACES = snap.val()
+      ? Object.entries(snap.val()).map(([k, v]) => ({ ...v, _key:k, _src:'base' }))
+      : [];
+
+    buildRegionSelect();
+    buildRegionTags();
+    render();
+  }, err => {
+    console.error('base_places 讀取失敗:', err);
     showDataError('基準資料連線失敗');
   });
+
   // Custom places
-  window.__onValue(window.__ref(db,'custom_places'),snap=>{
-    CLOUD_PLACES=snap.val()?Object.entries(snap.val()).map(([k,v])=>({...v,_key:k,_src:'custom'})):[];
-    buildRegionSelect(); buildRegionTags(); render();
-  },()=>{
+  window.__onValue(window.__ref(db, 'custom_places'), snap => {
+    CLOUD_PLACES = snap.val()
+      ? Object.entries(snap.val()).map(([k, v]) => ({ ...v, _key:k, _src:'custom' }))
+      : [];
+
+    buildRegionSelect();
+    buildRegionTags();
+    render();
+  }, err => {
+    console.error('custom_places 讀取失敗:', err);
     showDataError('新增資料連線失敗');
   });
+
   // Favs：Firebase Realtime Database 即時同步
-  window.__onValue(window.__ref(db,'favs'),snap=>{
+  window.__onValue(window.__ref(db, 'favs'), snap => {
     const raw = snap.val() || {};
     const nextFavs = Object.keys(raw).map(String);
-  
+
     const same =
       JSON.stringify([...nextFavs].sort()) ===
       JSON.stringify([..._favsCache].sort());
-  
+
     _favsCache = nextFavs;
     _favsReady = true;
-  
+
     if(!same || favOnly) render();
-  },()=>{});
-  // Cost
-  window.__onValue(window.__ref(db,'cost_items'),snap=>{
-    costItems=snap.val()||[];
-    document.getElementById('cost-sync-status').textContent='';
-    renderCostEntries();
-  },()=>{
-    document.getElementById('cost-sync-status').textContent='費用資料連線失敗';
+  }, err => {
+    console.error('favs 讀取失敗:', err);
   });
+
+  // Cost
+  window.__onValue(window.__ref(db, 'cost_items'), snap => {
+    costItems = snap.val() || [];
+    document.getElementById('cost-sync-status').textContent = '';
+    renderCostEntries();
+  }, err => {
+    console.error('cost_items 讀取失敗:', err);
+    document.getElementById('cost-sync-status').textContent = '費用資料連線失敗';
+  });
+
   // Rental
-  window.__onValue(window.__ref(db,'rental_info'),snap=>{
+  window.__onValue(window.__ref(db, 'rental_info'), snap => {
     if(snap.val()) loadRentalUI(snap.val());
-  },()=>{
-    document.getElementById('rental-sync-status').textContent='租車資料連線失敗';
+  }, err => {
+    console.error('rental_info 讀取失敗:', err);
+    document.getElementById('rental-sync-status').textContent = '租車資料連線失敗';
   });
 });
 
-document.getElementById('driving-toggle').addEventListener('click',()=>{
-document.getElementById('driving-section').classList.toggle('open');
-});  
+  document.getElementById('driving-toggle').addEventListener('click', () => {
+  document.getElementById('driving-section').classList.toggle('open');
+});
 </script>
 </body>
 </html>
