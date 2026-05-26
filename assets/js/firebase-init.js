@@ -16,7 +16,7 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-signInAnonymously(auth).then(() => {
+function exposeFirebase() {
   window.__db = db;
   window.__ref = ref;
   window.__push = push;
@@ -26,6 +26,13 @@ signInAnonymously(auth).then(() => {
   window.__onValue = onValue;
   window.__firebaseReady = true;
   window.dispatchEvent(new Event('firebase-ready'));
-}).catch(err => {
-  console.error('Firebase 匿名登入失敗:', err);
-});
+}
+
+signInAnonymously(auth)
+  .then(() => {
+    exposeFirebase();
+  })
+  .catch(err => {
+    console.error('Firebase 匿名登入失敗:', err);
+    exposeFirebase();
+  });
