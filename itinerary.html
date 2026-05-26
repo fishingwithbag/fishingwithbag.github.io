@@ -289,7 +289,7 @@ const DURATION_DEFAULT = {
   '住宿':0,'釣點':240,'釣具店':30,'購物':60,'其他':30
 };
 
-const ALL_REGIONS = ['別府','大分','熊本','阿蘇','福岡','北九州','長崎','佐賀','移動日'];
+\*const ALL_REGIONS = ['別府','大分','熊本','阿蘇','福岡','北九州','長崎','佐賀','移動日'];*/
 
 let currentDay   = 0;
 let allBasePlaces   = [];
@@ -345,15 +345,21 @@ function getDayRegion(date) {
 function buildDayRegionSelect() {
   const sel = document.getElementById('day-region-select');
   const current = getDayRegion();
+
+  // 從 Firebase 已載入的景點動態抓城市清單
+  const regions = [...new Set(allPlaces().map(p => p.region).filter(Boolean))].sort((a, b) =>
+    a.localeCompare(b, 'zh-Hant')
+  );
+
   sel.innerHTML = '<option value="">請選擇城市</option>';
-  ALL_REGIONS.forEach(r => {
+  regions.forEach(r => {
     const opt = document.createElement('option');
     opt.value = r; opt.textContent = r;
     if (r === current) opt.selected = true;
     sel.appendChild(opt);
   });
 }
-
+  
 function updateAiDesc() {
   const val = getDayRegion();
   document.getElementById('ai-bar-desc').textContent = val
