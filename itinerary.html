@@ -41,6 +41,12 @@
     .date-tab__day { font-family:var(--serif); font-size:1.1rem; font-weight:700; line-height:1; }
     .date-tab__label { font-size:.6rem; letter-spacing:.1em; }
     .date-tab.active { opacity:1; border-bottom-color:var(--accent); color:var(--accent); }
+    /* 深色模式：非 active tab 文字提升可讀性 */
+    [data-theme="dark"] .date-tab {color: rgba(232, 232, 232, 0.75);}
+    [data-theme="dark"] .date-tab.active {color: var(--accent);opacity: 1;}
+    /* 淺色模式：非 active tab 文字改用深色 */
+    [data-theme="light"] .date-tab {color: rgba(26, 26, 26, 0.65);}
+    [data-theme="light"] .date-tab.active {color: var(--accent);opacity: 1;}
 
     /* Region picker */
     .region-picker { display:flex; align-items:center; gap:.55rem; padding:.55rem 1rem; border-bottom:1px solid var(--border); background:var(--surface2); }
