@@ -54,9 +54,50 @@
     .filter-select option{color:#1A1A1A;background:#FFFFFF;}
     .filter-select:focus{border-color:var(--accent);}
     .region-tags{display:flex;flex-direction:row;flex-wrap:nowrap;gap:.4rem;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px;align-items:center;}
-    .region-tags::-webkit-scrollbar{display:none;}
-    .region-tag{flex:0 0 auto;scroll-snap-align:start;padding:.35rem .85rem;border-radius:20px;border:1px solid var(--border);font-size:.72rem;letter-spacing:.06em;white-space:nowrap;-webkit-tap-highlight-color:transparent;cursor:pointer;transition:background .15s,border-color .15s,color .15s;}
-    .region-tag.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+    .region-tags::-webkit-scrollbar{display:none;}  
+      /* ── Region Tags：深色模式可讀性強化 ── */
+      .region-tag{
+        flex:0 0 auto;
+        scroll-snap-align:start;
+        padding:.35rem .85rem;
+        border-radius:20px;
+        border:1px solid rgba(255,255,255,.16);
+        font-size:.72rem;
+        letter-spacing:.06em;
+        white-space:nowrap;
+        -webkit-tap-highlight-color:transparent;
+        cursor:pointer;
+        color:rgba(232,232,232,.78);
+        background:rgba(255,255,255,.035);
+        transition:background .15s,border-color .15s,color .15s,opacity .15s;
+      }
+      
+      .region-tag.active{
+        background:var(--accent);
+        border-color:var(--accent);
+        color:#fff;
+        opacity:1;
+      }
+      
+      .region-tag:active{
+        border-color:var(--accent);
+        color:#fff;
+        background:rgba(232,115,74,.18);
+      }
+      
+      /* Light mode：避免淺色模式太重 */
+      [data-theme="light"] .region-tag{
+        color:rgba(26,26,26,.72);
+        background:rgba(0,0,0,.035);
+        border-color:rgba(0,0,0,.12);
+      }
+      
+      [data-theme="light"] .region-tag.active{
+        color:#fff;
+        background:var(--accent);
+        border-color:var(--accent);
+      }
+
     .fav-toggle{padding:.38rem 1rem;border-radius:20px;border:1px solid var(--border);font-size:.72rem;letter-spacing:.06em;white-space:nowrap;-webkit-tap-highlight-color:transparent;cursor:pointer;background:var(--surface);color:var(--text);transition:background .15s,border-color .15s;}
     .fav-toggle.on{background:var(--accent);border-color:var(--accent);color:#fff;}
 
@@ -135,11 +176,92 @@
     .card__footer{display:flex;align-items:center;justify-content:space-between;padding:.3rem .65rem .5rem;border-top:1px solid var(--border);margin-top:.3rem;}
     .card__cost{font-size:.72rem;color:var(--accent);font-weight:700;}
     .card__actions{display:flex;gap:.3rem;}
-    .card__btn{font-size:.65rem;padding:.22rem .55rem;border:1px solid var(--border);border-radius:20px;opacity:.55;-webkit-tap-highlight-color:transparent;white-space:nowrap;}
-    .card__btn:active{opacity:1;border-color:var(--accent);}
-    .card__fav{font-size:.9rem;line-height:1;padding:.2rem;}
-    .card__fav:disabled{opacity:.45;pointer-events:none;} 
-    .pulse{animation:favPulse .22s var(--ease);}
+    /* ── Card Actions：收藏與地圖 icon 顯眼化 ── */
+    .card__btn{
+      min-width:32px;
+      min-height:32px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:.82rem;
+      padding:.28rem .58rem;
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:999px;
+      opacity:1;
+      color:rgba(232,232,232,.86);
+      background:rgba(255,255,255,.045);
+      -webkit-tap-highlight-color:transparent;
+      white-space:nowrap;
+      transition:
+        transform .16s var(--ease),
+        background .16s var(--ease),
+        border-color .16s var(--ease),
+        color .16s var(--ease),
+        opacity .16s var(--ease);
+    }
+    
+    .card__btn:active{
+      transform:scale(.94);
+      opacity:1;
+      border-color:var(--accent);
+    }
+    
+    /* 收藏愛心 */
+    .card__fav{
+      font-size:1rem;
+      line-height:1;
+      padding:.22rem;
+      color:rgba(232,232,232,.72);
+    }
+    
+    .card__fav.is-fav{
+      color:#ff5c8a;
+      border-color:rgba(255,92,138,.45);
+      background:rgba(255,92,138,.12);
+    }
+    
+    .card__fav:disabled{
+      opacity:.45;
+      pointer-events:none;
+    }
+    
+    /* Map icon：獨立加強，避免跟一般按鈕一樣太暗 */
+    .card__map{
+      color:#7EC8E3;
+      border-color:rgba(126,200,227,.45);
+      background:rgba(126,200,227,.12);
+      font-size:.9rem;
+    }
+    
+    .card__map:active{
+      color:#fff;
+      background:rgba(126,200,227,.22);
+      border-color:#7EC8E3;
+    }
+    
+    /* Light mode icon */
+    [data-theme="light"] .card__btn{
+      color:rgba(26,26,26,.76);
+      background:rgba(0,0,0,.035);
+      border-color:rgba(0,0,0,.14);
+    }
+    
+    [data-theme="light"] .card__fav.is-fav{
+      color:#d9366a;
+      background:rgba(217,54,106,.1);
+      border-color:rgba(217,54,106,.35);
+    }
+    
+    [data-theme="light"] .card__map{
+      color:#006d95;
+      background:rgba(0,109,149,.08);
+      border-color:rgba(0,109,149,.28);
+    }
+    
+    .pulse{
+      animation:favPulse .22s var(--ease);
+    }
+
     @keyframes favPulse{0%{transform:scale(1);}50%{transform:scale(1.28);}100%{transform:scale(1);}}
     
     /* ── Bottom Nav ── */
@@ -181,7 +303,7 @@
 <header class="topbar">
   <span class="topbar__title">九州福岡熊本旅遊 2026/9/30~10/7</span>
   <div class="topbar__actions">
-    <button class="icon-btn" id="fav-btn" title="只看最愛">☆</button>
+    <button class="icon-btn" id="fav-btn" title="只看最愛">♡</button>
     <button class="icon-btn" id="theme-btn">🌙</button>
   </div>
 </header>
@@ -499,11 +621,11 @@ async function toggleFav(id){
 
   if(exists){
     await window.__remove(favRef);
-    return '☆';
+    return '♡';
   }
 
   await window.__set(favRef, true);
-  return '⭐';
+  return '♥';
 }
 
 // ── 建卡片 ──
@@ -531,23 +653,53 @@ function buildCard(p){
     <div class="card__footer">
       <span class="card__cost">${p.twd?'NT$'+Number(p.twd).toLocaleString():''}</span>
       <div class="card__actions">
-        <button class="card__btn card__fav" data-id="${escapeHTML(p.id)}">${isFav?'⭐':'☆'}</button>
-        <a class="card__btn" href="https://www.google.com/maps/search/?api=1&query=${q}" target="_blank" rel="noopener">🗺</a>
+        <button
+          class="card__btn card__fav ${isFav ? '♥' : '♡'}"
+          data-id="${escapeHTML(p.id)}"
+          title="${isFav ? '取消收藏' : '加入收藏'}"
+          aria-label="${isFav ? '取消收藏' : '加入收藏'}"
+        >
+          ${isFav ? '♥' : '♡'}
+        </button>
+        
+        <a
+          class="card__btn card__map"
+          href="https://www.google.com/maps/search/?api=1&query=${q}"
+          target="_blank"
+          rel="noopener"
+          title="開啟 Google Maps"
+          aria-label="開啟 Google Maps"
+        >
+          🧭
+        </a>
         ${canDelete?`<button class="card__btn btn-del-place" data-id="${escapeHTML(p.id)}">🗑</button>`:''}
       </div>
     </div>`;
   // fav
-   el.querySelector('.card__fav').addEventListener('click',async function(){
-    this.disabled = true;
-  
-    try{
-      this.textContent = await toggleFav(p.id);
-      this.classList.add('pulse');
-      setTimeout(()=>this.classList.remove('pulse'),220);
-    }finally{
-      this.disabled = false;
-    }
-  });
+      el.querySelector('.card__fav').addEventListener('click',async function(){
+      this.disabled = true;
+    
+      try{
+        const nextIcon = await toggleFav(p.id);
+    
+        this.textContent = nextIcon;
+    
+        if(nextIcon === '♥'){
+          this.classList.add('is-fav');
+          this.title = '取消收藏';
+          this.setAttribute('aria-label', '取消收藏');
+        }else{
+          this.classList.remove('is-fav');
+          this.title = '加入收藏';
+          this.setAttribute('aria-label', '加入收藏');
+        }
+    
+        this.classList.add('pulse');
+        setTimeout(()=>this.classList.remove('pulse'),220);
+      }finally{
+        this.disabled = false;
+      }
+    });
   // del
   el.querySelector('.btn-del-place')?.addEventListener('click',function(){
     if(!confirm('確定刪除「'+p.name+'」？'))return;
@@ -696,8 +848,8 @@ document.getElementById('sort-select').addEventListener('change',render);
 
 // Fav toggle（topbar icon）
 document.getElementById('fav-btn').addEventListener('click',()=>{
-  favOnly=!favOnly;
-  document.getElementById('fav-btn').textContent=favOnly?'⭐':'☆';
+  favOnly = !favOnly;
+  document.getElementById('fav-btn').textContent = favOnly ? '♥' : '♡';
   render();
 });
 
