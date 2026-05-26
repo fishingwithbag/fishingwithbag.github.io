@@ -225,37 +225,109 @@
       pointer-events:none;
     }
     
-    /* Map icon：獨立加強，避免跟一般按鈕一樣太暗 */
+
+   /* ── Google Maps 風格 icon：共用基礎 ── */
     .card__map{
-      color:#7EC8E3;
-      border-color:rgba(126,200,227,.45);
-      background:rgba(126,200,227,.12);
-      font-size:.9rem;
+      width:36px;
+      height:36px;
+      min-width:36px;
+      min-height:36px;
+      padding:0;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:999px;
+      opacity:1;
+      -webkit-tap-highlight-color:transparent;
+      transition:
+        transform .16s var(--ease),
+        background .16s var(--ease),
+        border-color .16s var(--ease),
+        box-shadow .16s var(--ease);
     }
     
-    .card__map:active{
-      color:#fff;
-      background:rgba(126,200,227,.22);
-      border-color:#7EC8E3;
+    .gmap-icon{
+      width:26px;
+      height:26px;
+      display:block;
     }
     
-    /* Light mode icon */
-    [data-theme="light"] .card__btn{
-      color:rgba(26,26,26,.76);
-      background:rgba(0,0,0,.035);
-      border-color:rgba(0,0,0,.14);
+    .gmap-icon__bg{
+      fill:#ffffff;
     }
     
-    [data-theme="light"] .card__fav.is-fav{
-      color:#d9366a;
-      background:rgba(217,54,106,.1);
-      border-color:rgba(217,54,106,.35);
+    .gmap-icon__green{
+      fill:#34A853;
     }
     
+    .gmap-icon__blue{
+      fill:#4285F4;
+    }
+    
+    .gmap-icon__yellow{
+      fill:#FBBC05;
+    }
+    
+    .gmap-icon__red{
+      fill:#EA4335;
+    }
+    
+    .gmap-icon__center{
+      fill:#ffffff;
+    }
+    
+    /* ── 深色模式：白底 icon 要更浮出來 ── */
+    [data-theme="dark"] .card__map{
+      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.28);
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,.04) inset,
+        0 0 10px rgba(255,255,255,.08),
+        0 2px 8px rgba(0,0,0,.45);
+    }
+    
+    [data-theme="dark"] .gmap-icon{
+      filter:
+        drop-shadow(0 1px 2px rgba(0,0,0,.45))
+        drop-shadow(0 0 4px rgba(255,255,255,.16));
+    }
+    
+    /* ── 淺色模式：降低外框，避免白底消失 ── */
     [data-theme="light"] .card__map{
-      color:#006d95;
-      background:rgba(0,109,149,.08);
-      border-color:rgba(0,109,149,.28);
+      background:#ffffff;
+      border:1px solid rgba(0,0,0,.14);
+      box-shadow:
+        0 1px 4px rgba(0,0,0,.12),
+        0 0 0 1px rgba(255,255,255,.65) inset;
+    }
+    
+    [data-theme="light"] .gmap-icon{
+      filter:drop-shadow(0 1px 2px rgba(0,0,0,.18));
+    }
+    
+    /* 點擊效果 */
+    .card__map:active{
+      transform:scale(.94);
+    }
+    
+    /* 桌機 hover 效果 */
+    @media (hover:hover){
+      [data-theme="dark"] .card__map:hover{
+        background:rgba(255,255,255,.18);
+        border-color:rgba(255,255,255,.42);
+        box-shadow:
+          0 0 0 1px rgba(255,255,255,.08) inset,
+          0 0 12px rgba(255,255,255,.12),
+          0 3px 10px rgba(0,0,0,.5);
+      }
+    
+      [data-theme="light"] .card__map:hover{
+        background:#ffffff;
+        border-color:rgba(0,0,0,.2);
+        box-shadow:
+          0 2px 8px rgba(0,0,0,.16),
+          0 0 0 1px rgba(255,255,255,.75) inset;
+      }
     }
     
     .pulse{
@@ -670,7 +742,23 @@ function buildCard(p){
           title="開啟 Google Maps"
           aria-label="開啟 Google Maps"
         >
-          🧭
+          <svg class="gmap-icon" viewBox="0 0 36 36" aria-hidden="true">
+            <circle class="gmap-icon__bg" cx="18" cy="18" r="16"/>
+        
+            <path class="gmap-icon__green"
+              d="M18 6.2c-5.05 0-9.15 4.05-9.15 9.05 0 6.8 9.15 14.55 9.15 14.55V19.1l-3.75-3.75L18 6.2z"/>
+        
+            <path class="gmap-icon__blue"
+              d="M18 29.8s9.15-7.75 9.15-14.55c0-2.45-.98-4.67-2.57-6.3L18 15.5v14.3z"/>
+        
+            <path class="gmap-icon__yellow"
+              d="M8.85 15.25c0 2.8 1.55 5.95 3.38 8.6L18 18.1v-2.6l-5.95-5.95a8.95 8.95 0 0 0-3.2 5.7z"/>
+        
+            <path class="gmap-icon__red"
+              d="M24.58 8.95A9.08 9.08 0 0 0 18 6.2a9.02 9.02 0 0 0-5.95 2.25L18 14.4l6.58-5.45z"/>
+        
+            <circle class="gmap-icon__center" cx="18" cy="15.35" r="3.15"/>
+          </svg>
         </a>
         ${canDelete?`<button class="card__btn btn-del-place" data-id="${escapeHTML(p.id)}">🗑</button>`:''}
       </div>
