@@ -346,10 +346,12 @@ function buildDayRegionSelect() {
   const sel = document.getElementById('day-region-select');
   const current = getDayRegion();
 
-  // 從 Firebase 已載入的景點動態抓城市清單
-  const regions = [...new Set(allPlaces().map(p => p.region).filter(Boolean))].sort((a, b) =>
-    a.localeCompare(b, 'zh-Hant')
-  );
+  // Firebase 還沒載入時 fallback 到 dayRegionMap 已有的城市 + TRIP_DAYS 預設
+  const fromPlaces = allPlaces().map(p => p.region).filter(Boolean);
+  const fromTrip   = Object.values(dayRegionMap).filter(Boolean);
+  const fromDays   = TRIP_DAYS.map(d => d.region).filter(Boolean);
+  const regions    = [...new Set([...fromPlaces, ...fromTrip, ...fromDays])]
+                       .sort((a, b) => a.localeCompare(b, 'zh-Hant'));
 
   sel.innerHTML = '<option value="">請選擇城市</option>';
   regions.forEach(r => {
