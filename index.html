@@ -849,25 +849,26 @@ function waitFirebase(cb){
   window.addEventListener('firebase-ready', cb, { once:true });
 }
 
+// Firebase list 資料正規化：支援 Array / Object / null
 function normalizeFirebaseList(raw, source){
   if(!raw) return [];
 
   if(Array.isArray(raw)){
     return raw
       .filter(Boolean)
-      .map((v, i) => ({
-        ...v,
-        _key: String(i),
+      .map((item, index) => ({
+        ...item,
+        _key: String(index),
         _src: source
       }));
   }
 
   if(typeof raw === 'object'){
     return Object.entries(raw)
-      .filter(([, v]) => v && typeof v === 'object')
-      .map(([k, v]) => ({
-        ...v,
-        _key: k,
+      .filter(([, item]) => item && typeof item === 'object')
+      .map(([key, item]) => ({
+        ...item,
+        _key: key,
         _src: source
       }));
   }
@@ -875,12 +876,17 @@ function normalizeFirebaseList(raw, source){
   return [];
 }
 
+// Favs 正規化：支援 { id:true } / ["id"] / [true,false,true] / null
 function normalizeFavs(raw){
   if(!raw) return [];
 
   if(Array.isArray(raw)){
     return raw
-      .map(String)
+      .flatMap((value, index) => {
+        if(value === true) return [String(index)];
+        if(typeof value === 'string' || typeof value === 'number') return [String(value)];
+        return [];
+      })
       .filter(Boolean);
   }
 
@@ -893,38 +899,42 @@ function normalizeFavs(raw){
   return [];
 }
 
+// Cost 正規化：保證 renderCostEntries() 永遠拿到 Array
 function normalizeCostItems(raw){
   if(!raw) return [];
+
+  const normalizeItem = item => ({
+    name: item && item.name ? String(item.name) : '',
+    amount: item && item.amount ? Number(item.amount) || 0 : 0
+  });
 
   if(Array.isArray(raw)){
     return raw
       .filter(Boolean)
-      .map(item => ({
-        name: item.name || '',
-        amount: Number(item.amount) || 0
-      }));
+      .map(normalizeItem);
   }
 
   if(typeof raw === 'object'){
     return Object.values(raw)
       .filter(Boolean)
-      .map(item => ({
-        name: item.name || '',
-        amount: Number(item.amount) || 0
-      }));
+      .map(normalizeItem);
   }
 
   return [];
 }
 
+// Rental 正規化：rental_info 應維持單一 Object，不轉 Array
 function normalizeRentalInfo(raw){
-  return raw && typeof raw === 'object' && !Array.isArray(raw)
-    ? raw
-    : null;
+  if(raw && typeof raw === 'object' && !Array.isArray(raw)){
+    return raw;
+  }
+
+  return null;
 }
 
 waitFirebase(() => {
   const db = window.__db;
+
   console.log('[index.html] firebase-ready received:', !!db);
 
   // Base places
@@ -957,61 +967,39 @@ waitFirebase(() => {
 
   // Favs：Firebase Realtime Database 即時同步
   window.__onValue(window.__ref(db, 'favs'), snap => {
-    const raw = snap.val();
-  
-    const nextFavs = raw
-      ? (Array.isArray(raw)
-          ? raw.map(String).filter(Boolean)
-          : Object.keys(raw).filter(key => raw[key]).map(String)
-        )
-      : [];
-  
+    const nextFavs = normalizeFavs(snap.val());
+
     const same =
       JSON.stringify([...nextFavs].sort()) ===
       JSON.stringify([..._favsCache].sort());
-  
+
     _favsCache = nextFavs;
     _favsReady = true;
-  
-    if(!same || favOnly) render();
+
+    if(!same || favOnly){
+      render();
+    }
   }, err => {
     console.error('favs 讀取失敗:', err);
   });
-  
+
   // Cost
   window.__onValue(window.__ref(db, 'cost_items'), snap => {
-    const raw = snap.val();
-  
-    costItems = raw
-      ? (Array.isArray(raw)
-          ? raw
-              .filter(Boolean)
-              .map(item => ({
-                name: item.name || '',
-                amount: Number(item.amount) || 0
-              }))
-          : Object.values(raw)
-              .filter(Boolean)
-              .map(item => ({
-                name: item.name || '',
-                amount: Number(item.amount) || 0
-              }))
-        )
-      : [];
-  
+    costItems = normalizeCostItems(snap.val());
+
     document.getElementById('cost-sync-status').textContent = '';
     renderCostEntries();
   }, err => {
     console.error('cost_items 讀取失敗:', err);
     document.getElementById('cost-sync-status').textContent = '費用資料連線失敗';
   });
-  
+
   // Rental
   window.__onValue(window.__ref(db, 'rental_info'), snap => {
-    const raw = snap.val();
-  
-    if(raw && typeof raw === 'object' && !Array.isArray(raw)){
-      loadRentalUI(raw);
+    const rentalInfo = normalizeRentalInfo(snap.val());
+
+    if(rentalInfo){
+      loadRentalUI(rentalInfo);
     }
   }, err => {
     console.error('rental_info 讀取失敗:', err);
