@@ -187,126 +187,256 @@
 </nav>
 
 <script type="module">
-// 等待 firebase-init.js 初始化完成
-function waitFirebase(cb) {
-  if (window.__firebaseReady) { cb(); return; }
-  window.addEventListener('firebase-ready', cb, { once: true });
-}
-
-waitFirebase(() => {
-  const db = window.__db;
-  let basePlaces = [];
-  let customPlaces = [];
-  // ... 以下其他邏輯完全不動
-  window.__onValue(window.__ref(db, 'base_places'), snap => { ... });
-  window.__onValue(window.__ref(db, 'custom_places'), snap => { ... });
-});
 const REGION = '熊本';
 const FISHING = ['釣','路亞','釣具'];
-let basePlaces=[];
-let customPlaces=[];
-let activeCat='全部';
 
-function animN(el, end) {
-  const s = performance.now();
-  const t = n => { const p=Math.min((n-s)/800,1); el.textContent=Math.round((1-Math.pow(1-p,3))*end); if(p<1)requestAnimationFrame(t); };
-  requestAnimationFrame(t);
+let basePlaces = [];
+let customPlaces = [];
+let favIds = [];
+let activeCat = '全部';
+
+function waitFirebase(cb){
+  if(window.__firebaseReady){
+    cb();
+    return;
+  }
+
+  window.addEventListener('firebase-ready', cb, { once:true });
 }
 
-const revObs = new IntersectionObserver(entries=>{
-  entries.forEach(({isIntersecting,target},i)=>{
-    if(!isIntersecting)return;
-    setTimeout(()=>target.classList.add('visible'),i*35);
+function normalizeFirebaseList(raw, source){
+  if(!raw) return [];
+
+  if(Array.isArray(raw)){
+    return raw
+      .filter(Boolean)
+      .map((item, index) => ({
+        ...item,
+        _key:String(index),
+        _src:source
+      }));
+  }
+
+  if(typeof raw === 'object'){
+    return Object.entries(raw)
+      .filter(([, item]) => item && typeof item === 'object')
+      .map(([key, item]) => ({
+        ...item,
+        _key:key,
+        _src:source
+      }));
+  }
+
+  return [];
+}
+
+function normalizeFavs(raw){
+  if(!raw) return [];
+
+  if(Array.isArray(raw)){
+    return raw
+      .flatMap((value, index) => {
+        if(value === true) return [String(index)];
+        if(typeof value === 'string' || typeof value === 'number') return [String(value)];
+        return [];
+      })
+      .filter(Boolean);
+  }
+
+  if(typeof raw === 'object'){
+    return Object.keys(raw)
+      .filter(key => raw[key])
+      .map(String);
+  }
+
+  return [];
+}
+
+function isFav(id){
+  return favIds.includes(String(id));
+}
+
+async function toggleFav(id){
+  const key = String(id);
+  const favRef = window.__ref(window.__db, `favs/${key}`);
+
+  if(isFav(key)){
+    await window.__remove(favRef);
+    return;
+  }
+
+  await window.__set(favRef, true);
+}
+
+const revObs = new IntersectionObserver(entries => {
+  entries.forEach(({isIntersecting,target}, i) => {
+    if(!isIntersecting) return;
+    setTimeout(() => target.classList.add('visible'), i * 35);
     revObs.unobserve(target);
   });
 },{threshold:.04,rootMargin:'0px 0px -8px 0px'});
 
-function buildCard(p) {
+function buildCard(p){
   const el = document.createElement('article');
-  el.className = 'card'; el.dataset.id = p.id;
-  const q = encodeURIComponent(p.name+' '+p.region+' Japan');
-  const tags = (p.tags||[]).map(t=>`<span class="tag${FISHING.some(k=>t.includes(k))?' tag--fishing':''}">${t}</span>`).join('');
-  const fav = (JSON.parse(localStorage.getItem('kyushu_favs')||'[]')||[]).map(String).includes(String(p.id));
-  el.innerHTML=`
+  el.className = 'card';
+  el.dataset.id = p.id;
+
+  const q = encodeURIComponent(p.name + ' ' + p.region + ' Japan');
+  const tags = (p.tags || [])
+    .map(t => `<span class="tag${FISHING.some(k => String(t).includes(k)) ? ' tag--fishing' : ''}">${t}</span>`)
+    .join('');
+
+  el.innerHTML = `
     <div class="card__top">
       <div class="card__left">
         <div class="card__meta">
-          <span class="card__sub">${p.subcategory}</span>
-          <span class="card__cat">${p.category}</span>
+          <span class="card__sub">${p.subcategory || ''}</span>
+          <span class="card__cat">${p.category || ''}</span>
         </div>
-        <div class="card__name">${p.name}</div>
+        <div class="card__name">${p.name || ''}</div>
       </div>
       <div class="card__actions">
-        <button class="fav-btn" data-fav="${p.id}">${fav?'⭐':'☆'}</button>
+        <button class="fav-btn" data-fav="${p.id}">${isFav(p.id) ? '⭐' : '☆'}</button>
         <a class="maps-btn" href="https://www.google.com/maps/search/?api=1&query=${q}" target="_blank" rel="noopener">🗺 Maps</a>
       </div>
     </div>
     <div class="card__note-wrap">
       <button class="card__note-toggle">▸ 展開備註</button>
-      <p class="card__note">${p.note}</p>
+      <p class="card__note">${p.note || ''}</p>
     </div>
-    <div class="card__tags">${tags}</div>`;
+    <div class="card__tags">${tags}</div>
+  `;
+
   if(p.note) el.classList.add('has-note');
+
   return el;
 }
 
-function render(places) {
-  const grid = document.getElementById('card-grid');
-  document.getElementById('result-count').textContent = `${places.length} 筆`;
-  grid.innerHTML='';
-  if(!places.length){grid.innerHTML='<p class="empty">此分類暫無資料</p>';return;}
-  places.forEach(p=>{const c=buildCard(p);grid.appendChild(c);revObs.observe(c);});
-  grid.onclick=e=>{
-    const fav=e.target.closest('[data-fav]');
-    if(fav){
-      const id=String(fav.dataset.fav);
-      const saved=(JSON.parse(localStorage.getItem('kyushu_favs')||'[]')||[]).map(String);
-      const idx=saved.indexOf(id);
-      idx>-1?saved.splice(idx,1):saved.push(id);
-      localStorage.setItem('kyushu_favs',JSON.stringify(saved));
-      fav.textContent=idx>-1?'☆':'⭐'; return;
-    }
-    const tog=e.target.closest('.card__note-toggle')||e.target.closest('.card__name');
-    if(tog){
-      const card=tog.closest('.card');
-      const open=card.classList.toggle('note-open');
-      const t=card.querySelector('.card__note-toggle');
-      if(t)t.textContent=open?'▾ 收合備註':'▸ 展開備註';
-    }
-  };
+function currentPlaces(){
+  return [...basePlaces, ...customPlaces].filter(p => p.region === REGION);
 }
 
-function buildFilters(places) {
-  const bar=document.getElementById('filter-bar');
-  bar.innerHTML='';
-  const cats=['全部',...new Set(places.map(p=>p.category))];
-  if(!cats.includes(activeCat)) activeCat='全部';
-  cats.forEach(cat=>{
-    const btn=document.createElement('button');
-    btn.className=`filter-btn${cat===activeCat?' active':''}`;
-    btn.textContent=cat==='全部'?`全部 ${places.length}`:cat;
-    btn.dataset.cat=cat; bar.appendChild(btn);
+function currentVisiblePlaces(){
+  const places = currentPlaces();
+  return activeCat === '全部'
+    ? places
+    : places.filter(p => p.category === activeCat);
+}
+
+function render(places){
+  const grid = document.getElementById('card-grid');
+
+  document.getElementById('result-count').textContent = `${places.length} 筆`;
+  grid.innerHTML = '';
+
+  if(!places.length){
+    grid.innerHTML = '<p class="empty">此分類暫無資料</p>';
+    return;
+  }
+
+  places.forEach(p => {
+    const card = buildCard(p);
+    grid.appendChild(card);
+    revObs.observe(card);
   });
-  bar.onclick=e=>{
-    const btn=e.target.closest('.filter-btn'); if(!btn)return;
-    bar.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active'); activeCat=btn.dataset.cat;
-    render(activeCat==='全部'?places:places.filter(p=>p.category===activeCat));
-  };
+}
+
+function buildFilters(places){
+  const bar = document.getElementById('filter-bar');
+  bar.innerHTML = '';
+
+  const cats = ['全部', ...new Set(places.map(p => p.category).filter(Boolean))];
+
+  if(!cats.includes(activeCat)) activeCat = '全部';
+
+  cats.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = `filter-btn${cat === activeCat ? ' active' : ''}`;
+    btn.textContent = cat === '全部' ? `全部 ${places.length}` : cat;
+    btn.dataset.cat = cat;
+    bar.appendChild(btn);
+  });
+}
+
+function updateStats(places){
+  document.getElementById('s-total').textContent = places.length;
+  document.getElementById('s-spot').textContent = places.filter(p => p.category === '景點').length;
+  document.getElementById('s-food').textContent = places.filter(p => p.category === '餐廳').length;
+  document.getElementById('s-stay').textContent = places.filter(p => p.category === '住宿').length;
 }
 
 function paint(){
-  const places=[...basePlaces,...customPlaces].filter(p=>p.region===REGION);
-  document.getElementById('s-total').textContent=places.length;
-  document.getElementById('s-spot').textContent=places.filter(p=>p.category==='景點').length;
-  document.getElementById('s-food').textContent=places.filter(p=>p.category==='餐廳').length;
-  document.getElementById('s-stay').textContent=places.filter(p=>p.category==='住宿').length;
+  const places = currentPlaces();
+
+  updateStats(places);
   buildFilters(places);
-  render(activeCat==='全部'?places:places.filter(p=>p.category===activeCat));
+  render(currentVisiblePlaces());
 }
 
-onValue(ref(db,'base_places'),snap=>{basePlaces=snap.val()?Object.values(snap.val()):[];paint();});
-onValue(ref(db,'custom_places'),snap=>{customPlaces=snap.val()?Object.values(snap.val()):[];paint();});
+document.getElementById('filter-bar').addEventListener('click', e => {
+  const btn = e.target.closest('.filter-btn');
+  if(!btn) return;
+
+  activeCat = btn.dataset.cat;
+
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  render(currentVisiblePlaces());
+});
+
+document.getElementById('card-grid').addEventListener('click', async e => {
+  const fav = e.target.closest('[data-fav]');
+
+  if(fav){
+    fav.disabled = true;
+
+    try{
+      await toggleFav(fav.dataset.fav);
+    }catch(err){
+      console.error('收藏更新失敗:', err);
+    }finally{
+      fav.disabled = false;
+    }
+
+    return;
+  }
+
+  const tog = e.target.closest('.card__note-toggle') || e.target.closest('.card__name');
+
+  if(tog){
+    const card = tog.closest('.card');
+    const open = card.classList.toggle('note-open');
+    const t = card.querySelector('.card__note-toggle');
+
+    if(t) t.textContent = open ? '▾ 收合備註' : '▸ 展開備註';
+  }
+});
+
+waitFirebase(() => {
+  const db = window.__db;
+
+  window.__onValue(window.__ref(db, 'base_places'), snap => {
+    basePlaces = normalizeFirebaseList(snap.val(), 'base');
+    paint();
+  }, err => {
+    console.error('base_places 讀取失敗:', err);
+  });
+
+  window.__onValue(window.__ref(db, 'custom_places'), snap => {
+    customPlaces = normalizeFirebaseList(snap.val(), 'custom');
+    paint();
+  }, err => {
+    console.error('custom_places 讀取失敗:', err);
+  });
+
+  window.__onValue(window.__ref(db, 'favs'), snap => {
+    favIds = normalizeFavs(snap.val());
+    paint();
+  }, err => {
+    console.error('favs 讀取失敗:', err);
+  });
+});
 </script>
 </body>
 </html>
