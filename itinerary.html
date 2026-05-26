@@ -573,7 +573,7 @@ function setupTimeInput(id) {
 }
 
 // ── AI Auto-schedule ──
-  const count = await autoScheduleDay(i, { silent: true });
+async function autoScheduleDay(dayIndex = currentDay, { silent = false } = {}) {
   const btn = document.getElementById('btn-auto-schedule');
   if (!silent) { btn.disabled = true; btn.textContent = '⏳ 排程中…'; }
 
@@ -695,17 +695,7 @@ document.getElementById('btn-modal-save').addEventListener('click', () => {
 });
 
 // ── AI Buttons ──
-document.getElementById('btn-auto-schedule').addEventListener('click', async () => {
-  try {
-    await autoScheduleDay();
-  } catch (err) {
-    console.error('autoScheduleDay 失敗:', err);
-    const btn = document.getElementById('btn-auto-schedule');
-    btn.disabled = false;
-    btn.textContent = '🪄 自動排這天';
-    alert('排程時發生錯誤，請確認收藏清單是否有相對應城市的景點。');
-  }
-});
+document.getElementById('btn-auto-schedule').addEventListener('click', autoScheduleDay);
 
 document.getElementById('btn-auto-all').addEventListener('click', async () => {
   if (!confirm('排全程會清空所有現有行程，確定嗎？')) return;
@@ -714,7 +704,7 @@ document.getElementById('btn-auto-all').addEventListener('click', async () => {
   const keepDay = currentDay;
   let skipped = 0;
   for (let i = 0; i < TRIP_DAYS.length; i++) {
-    async function autoScheduleDay(dayIndex = currentDay, { silent = false } = {})
+    const count = await autoScheduleDay(i, { silent: true });
     if (count === 0) skipped++;
   }
   currentDay = keepDay; buildTabs(); buildDayRegionSelect(); updateAiDesc(); renderDay();
