@@ -855,13 +855,14 @@ waitFirebase(() => {
 
   // Base places
   window.__onValue(window.__ref(db, 'base_places'), snap => {
-    PLACES = snap.val()
-  ? (Array.isArray(snap.val())
-      ? snap.val().map((v, i) => ({ ...v, _key: i, _src:'base' }))
-      : Object.entries(snap.val()).map(([k, v]) => ({ ...v, _key:k, _src:'base' }))
-    )
-  : [];
+  const raw = snap.val();
 
+  PLACES = raw
+    ? (Array.isArray(raw)
+        ? raw.map((v, i) => ({ ...v, _key:String(i), _src:'base' }))
+        : Object.entries(raw).map(([k, v]) => ({ ...v, _key:k, _src:'base' }))
+      )
+    : [];
 
     buildRegionSelect();
     buildRegionTags();
@@ -872,14 +873,16 @@ waitFirebase(() => {
   });
 
   // Custom places
-  window.__onValue(window.__ref(db, 'custom_places'), snap => {
-    CLOUD_PLACES = snap.val()
-  ?  (Array.isArray(snap.val())
-      ? snap.val().map((v, i) => ({ ...v, _key: i, _src:'custom' }))
-      : Object.entries(snap.val()).map(([k, v]) => ({ ...v, _key:k, _src:'custom' }))
-    )
-  : [];
-
+    window.__onValue(window.__ref(db, 'custom_places'), snap => {
+    const raw = snap.val();
+  
+    CLOUD_PLACES = raw
+      ? (Array.isArray(raw)
+          ? raw.map((v, i) => ({ ...v, _key:String(i), _src:'custom' }))
+          : Object.entries(raw).map(([k, v]) => ({ ...v, _key:k, _src:'custom' }))
+        )
+      : [];
+  
     buildRegionSelect();
     buildRegionTags();
     render();
