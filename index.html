@@ -844,6 +844,7 @@ function waitFirebase(cb){ if(window.__firebaseReady){cb();return;} window.addEv
 
 waitFirebase(()=>{
   const db=window.__db;
+  console.log('[index.html] firebase-ready received
   // Base places
   window.__onValue(window.__ref(db,'base_places'),snap=>{
     PLACES=snap.val()?Object.entries(snap.val()).map(([k,v])=>({...v,_key:k,_src:'base'})):[];
