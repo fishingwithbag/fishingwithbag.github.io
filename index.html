@@ -170,13 +170,52 @@
       letter-spacing:.08em;
     }
     
-    .cards-sort{
+      .cards-sort{
       font-size:.72rem;
-      opacity:.5;
-      padding:.3rem .6rem;
-      border:1px solid var(--border);
+      opacity:1;
+      padding:.36rem 1.75rem .36rem .75rem;
+      border:1px solid rgba(255,255,255,.18);
       border-radius:20px;
-      background:var(--surface);
+      background-color:rgba(255,255,255,.06);
+      color:rgba(232,232,232,.86);
+      outline:none;
+      appearance:none;
+      -webkit-appearance:none;
+      cursor:pointer;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%23E8E8E8' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;
+      background-position:right .65rem center;
+      background-size:12px 8px;
+      transition:
+        color .16s var(--ease),
+        background-color .16s var(--ease),
+        border-color .16s var(--ease),
+        box-shadow .16s var(--ease);
+    }
+    
+    [data-theme="dark"] .cards-sort{
+      color:rgba(232,232,232,.92);
+      background-color:rgba(255,255,255,.075);
+      border-color:rgba(255,255,255,.22);
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%23E8E8E8' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    }
+    
+    [data-theme="light"] .cards-sort{
+      color:rgba(26,26,26,.82);
+      background-color:#ffffff;
+      border-color:rgba(0,0,0,.14);
+      box-shadow:0 1px 4px rgba(0,0,0,.05);
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%231A1A1A' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    }
+    
+    .cards-sort:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 2px rgba(232,115,74,.16);
+    }
+    
+    .cards-sort option{
+      color:#1A1A1A;
+      background:#ffffff;
     }
     
     /* 卡片容器：每張卡片撐滿同列高度 */
