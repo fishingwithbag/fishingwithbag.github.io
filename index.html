@@ -256,19 +256,67 @@
       border-color:var(--accent);
     }
     
-    /* 收藏愛心 */
-     .card__fav{
-      font-size:1rem;
-      line-height:1;
-      color:rgba(232,232,232,.72);
-    }
-    
-    .card__fav.is-fav{
-      color:#ff5c8a;
-      border-color:rgba(255,92,138,.45);
-      background:rgba(255,92,138,.12);
-    }
-    
+    /* ── 收藏 icon：空心愛心 / 發亮愛心 ── */
+      .card__fav{
+        font-size:1.15rem;
+        line-height:1;
+        color:rgba(120,120,120,.95);
+        background:rgba(255,255,255,.88);
+        border-color:rgba(0,0,0,.14);
+        text-shadow:none;
+      }
+      
+      /* 已收藏：發亮愛心 */
+      .card__fav.is-fav{
+        color:#ff3f7f;
+        background:rgba(255,63,127,.14);
+        border-color:rgba(255,63,127,.55);
+        text-shadow:
+          0 0 4px rgba(255,63,127,.45),
+          0 0 8px rgba(255,63,127,.28);
+        box-shadow:
+          0 0 0 1px rgba(255,63,127,.12) inset,
+          0 0 8px rgba(255,63,127,.22);
+      }
+      
+      /* 深色模式：未收藏也要看得清楚 */
+      [data-theme="dark"] .card__fav{
+        color:rgba(255,255,255,.82);
+        background:rgba(255,255,255,.08);
+        border-color:rgba(255,255,255,.22);
+      }
+      
+      [data-theme="dark"] .card__fav.is-fav{
+        color:#ff6fa3;
+        background:rgba(255,111,163,.16);
+        border-color:rgba(255,111,163,.6);
+        text-shadow:
+          0 0 5px rgba(255,111,163,.6),
+          0 0 12px rgba(255,111,163,.35);
+        box-shadow:
+          0 0 0 1px rgba(255,111,163,.18) inset,
+          0 0 12px rgba(255,111,163,.28);
+      }
+      
+      /* 淺色模式：空心愛心不要太淡 */
+      [data-theme="light"] .card__fav{
+        color:rgba(50,50,50,.72);
+        background:#fff;
+        border-color:rgba(0,0,0,.16);
+      }
+      
+      [data-theme="light"] .card__fav.is-fav{
+        color:#e72f75;
+        background:rgba(231,47,117,.1);
+        border-color:rgba(231,47,117,.42);
+        text-shadow:
+          0 0 3px rgba(231,47,117,.35),
+          0 0 7px rgba(231,47,117,.18);
+        box-shadow:
+          0 1px 4px rgba(0,0,0,.08),
+          0 0 8px rgba(231,47,117,.16);
+      }
+          
     .card__fav:disabled{
       opacity:.45;
       pointer-events:none;
@@ -421,7 +469,7 @@
 <header class="topbar">
   <span class="topbar__title">九州福岡熊本旅遊 2026/9/30~10/7</span>
   <div class="topbar__actions">
-    <button class="icon-btn" id="fav-btn" title="只看最愛">♡</button>
+    <button class="icon-btn" id="fav-btn" title="只看最愛">💖</button>
     <button class="icon-btn" id="theme-btn">🌙</button>
   </div>
 </header>
@@ -731,20 +779,20 @@ function waitFirebaseReady(){
 }
 
 async function toggleFav(id){
-  await waitFirebaseReady();
+  await waitFirebase);  await waitFirebaseReady();
+    return '🤍';
+  }
+
+  await window.__set(favRef, true);
+  return '💖';
+}
 
   const key = String(id);
   const exists = _favsCache.includes(key);
   const favRef = window.__ref(window.__db, `favs/${key}`);
 
   if(exists){
-    await window.__remove(favRef);
-    return '♡';
-  }
 
-  await window.__set(favRef, true);
-  return '♥';
-}
 
 // ── 建卡片 ──
 function buildCard(p){
@@ -772,12 +820,12 @@ function buildCard(p){
       <span class="card__cost">${p.twd?'NT$'+Number(p.twd).toLocaleString():''}</span>
       <div class="card__actions">
         <button
-          class="card__btn card__fav ${isFav ? '♥' : '♡'}"
+          class="card__btn card__fav ${isFav ? 'is-fav' : ''}"
           data-id="${escapeHTML(p.id)}"
           title="${isFav ? '取消收藏' : '加入收藏'}"
           aria-label="${isFav ? '取消收藏' : '加入收藏'}"
         >
-          ${isFav ? '♥' : '♡'}
+          ${isFav ? '💖' : '🤍'}
         </button>
         
         <a
@@ -818,7 +866,7 @@ function buildCard(p){
     
         this.textContent = nextIcon;
     
-        if(nextIcon === '♥'){
+        if(nextIcon === '💖'){
           this.classList.add('is-fav');
           this.title = '取消收藏';
           this.setAttribute('aria-label', '取消收藏');
@@ -983,7 +1031,7 @@ document.getElementById('sort-select').addEventListener('change',render);
 // Fav toggle（topbar icon）
 document.getElementById('fav-btn').addEventListener('click',()=>{
   favOnly = !favOnly;
-  document.getElementById('fav-btn').textContent = favOnly ? '♥' : '♡';
+  document.getElementById('fav-btn').textContent = favOnly ? '💖' :
   render();
 });
 
