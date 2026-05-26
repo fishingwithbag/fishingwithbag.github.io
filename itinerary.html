@@ -598,8 +598,20 @@ async function autoScheduleDay(dayIndex = currentDay, { silent = false } = {}) {
   if (region) candidates = candidates.filter(p => p.region === region);
   const fresh = candidates.filter(p => !usedNames.has(p.name));
   let pool = fresh.length ? fresh.concat(candidates.filter(p => usedNames.has(p.name))) : candidates;
-  if (!pool.length) pool = allPlaces().filter(p => favs.includes(String(p.id)) && p.category !== '住宿').slice(0, 6);
-
+  if (!pool.length) pool = allPlaces().filter(p =>
+  favs.includes(String(p.id)) && p.category !== '住宿'
+  ).slice(0, 6);
+  
+  // ── 防呆：pool 仍為空 → 跳出提示，中止排程 ──
+  if (!pool.length) {
+    if (!silent) {
+      const regionLabel = region || '此行程日';
+      alert(`「${regionLabel}」目前沒有可用的收藏景點。\n請先到總覽頁面，對${regionLabel}的地點按 ❤️ 加入收藏，再執行自動排程。`);
+      btn.disabled = false;
+      btn.textContent = '🪄 自動排這天';
+    }
+    return 0;
+  }
   const meals = pool.filter(p => p.category === '餐廳');
   const spots = pool.filter(p => p.category !== '餐廳');
   const schedule = [];
@@ -690,9 +702,16 @@ document.getElementById('btn-auto-all').addEventListener('click', async () => {
   const btn = document.getElementById('btn-auto-all');
   btn.disabled = true; btn.textContent = '⏳ 排程中…';
   const keepDay = currentDay;
-  for (let i = 0; i < TRIP_DAYS.length; i++) await autoScheduleDay(i, { silent: true });
+  let skipped = 0;
+  for (let i = 0; i < TRIP_DAYS.length; i++) {
+    const count = await autoScheduleDay(i, { silent: true });
+    if (count === 0) skipped++;
+  }
   currentDay = keepDay; buildTabs(); buildDayRegionSelect(); updateAiDesc(); renderDay();
   btn.disabled = false; btn.textContent = '排全程';
+  if (skipped > 0) {
+    alert(`完成排程！\n其中 ${skipped} 天因無對應城市收藏而略過，請到總覽頁面補充收藏後再重新排程。`);
+  }
 });
 
 document.getElementById('btn-clear-day').addEventListener('click', () => {
