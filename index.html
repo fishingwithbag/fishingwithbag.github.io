@@ -849,20 +849,89 @@ function waitFirebase(cb){
   window.addEventListener('firebase-ready', cb, { once:true });
 }
 
+function normalizeFirebaseList(raw, source){
+  if(!raw) return [];
+
+  if(Array.isArray(raw)){
+    return raw
+      .filter(Boolean)
+      .map((v, i) => ({
+        ...v,
+        _key: String(i),
+        _src: source
+      }));
+  }
+
+  if(typeof raw === 'object'){
+    return Object.entries(raw)
+      .filter(([, v]) => v && typeof v === 'object')
+      .map(([k, v]) => ({
+        ...v,
+        _key: k,
+        _src: source
+      }));
+  }
+
+  return [];
+}
+
+function normalizeFavs(raw){
+  if(!raw) return [];
+
+  if(Array.isArray(raw)){
+    return raw
+      .map(String)
+      .filter(Boolean);
+  }
+
+  if(typeof raw === 'object'){
+    return Object.keys(raw)
+      .filter(key => raw[key])
+      .map(String);
+  }
+
+  return [];
+}
+
+function normalizeCostItems(raw){
+  if(!raw) return [];
+
+  if(Array.isArray(raw)){
+    return raw
+      .filter(Boolean)
+      .map(item => ({
+        name: item.name || '',
+        amount: Number(item.amount) || 0
+      }));
+  }
+
+  if(typeof raw === 'object'){
+    return Object.values(raw)
+      .filter(Boolean)
+      .map(item => ({
+        name: item.name || '',
+        amount: Number(item.amount) || 0
+      }));
+  }
+
+  return [];
+}
+
+function normalizeRentalInfo(raw){
+  return raw && typeof raw === 'object' && !Array.isArray(raw)
+    ? raw
+    : null;
+}
+
 waitFirebase(() => {
   const db = window.__db;
   console.log('[index.html] firebase-ready received:', !!db);
 
   // Base places
   window.__onValue(window.__ref(db, 'base_places'), snap => {
-  const raw = snap.val();
+    const raw = snap.val();
 
-  PLACES = raw
-    ? (Array.isArray(raw)
-        ? raw.map((v, i) => ({ ...v, _key:String(i), _src:'base' }))
-        : Object.entries(raw).map(([k, v]) => ({ ...v, _key:k, _src:'base' }))
-      )
-    : [];
+    PLACES = normalizeFirebaseList(raw, 'base');
 
     buildRegionSelect();
     buildRegionTags();
@@ -873,16 +942,11 @@ waitFirebase(() => {
   });
 
   // Custom places
-    window.__onValue(window.__ref(db, 'custom_places'), snap => {
+  window.__onValue(window.__ref(db, 'custom_places'), snap => {
     const raw = snap.val();
-  
-    CLOUD_PLACES = raw
-      ? (Array.isArray(raw)
-          ? raw.map((v, i) => ({ ...v, _key:String(i), _src:'custom' }))
-          : Object.entries(raw).map(([k, v]) => ({ ...v, _key:k, _src:'custom' }))
-        )
-      : [];
-  
+
+    CLOUD_PLACES = normalizeFirebaseList(raw, 'custom');
+
     buildRegionSelect();
     buildRegionTags();
     render();
@@ -893,41 +957,69 @@ waitFirebase(() => {
 
   // Favs：Firebase Realtime Database 即時同步
   window.__onValue(window.__ref(db, 'favs'), snap => {
-    const raw = snap.val() || {};
-    const nextFavs = Object.keys(raw).map(String);
-
+    const raw = snap.val();
+  
+    const nextFavs = raw
+      ? (Array.isArray(raw)
+          ? raw.map(String).filter(Boolean)
+          : Object.keys(raw).filter(key => raw[key]).map(String)
+        )
+      : [];
+  
     const same =
       JSON.stringify([...nextFavs].sort()) ===
       JSON.stringify([..._favsCache].sort());
-
+  
     _favsCache = nextFavs;
     _favsReady = true;
-
+  
     if(!same || favOnly) render();
   }, err => {
     console.error('favs 讀取失敗:', err);
   });
-
+  
   // Cost
   window.__onValue(window.__ref(db, 'cost_items'), snap => {
-    costItems = snap.val() || [];
+    const raw = snap.val();
+  
+    costItems = raw
+      ? (Array.isArray(raw)
+          ? raw
+              .filter(Boolean)
+              .map(item => ({
+                name: item.name || '',
+                amount: Number(item.amount) || 0
+              }))
+          : Object.values(raw)
+              .filter(Boolean)
+              .map(item => ({
+                name: item.name || '',
+                amount: Number(item.amount) || 0
+              }))
+        )
+      : [];
+  
     document.getElementById('cost-sync-status').textContent = '';
     renderCostEntries();
   }, err => {
     console.error('cost_items 讀取失敗:', err);
     document.getElementById('cost-sync-status').textContent = '費用資料連線失敗';
   });
-
+  
   // Rental
   window.__onValue(window.__ref(db, 'rental_info'), snap => {
-    if(snap.val()) loadRentalUI(snap.val());
+    const raw = snap.val();
+  
+    if(raw && typeof raw === 'object' && !Array.isArray(raw)){
+      loadRentalUI(raw);
+    }
   }, err => {
     console.error('rental_info 讀取失敗:', err);
     document.getElementById('rental-sync-status').textContent = '租車資料連線失敗';
   });
 });
 
-  document.getElementById('driving-toggle').addEventListener('click', () => {
+document.getElementById('driving-toggle').addEventListener('click', () => {
   document.getElementById('driving-section').classList.toggle('open');
 });
 </script>
