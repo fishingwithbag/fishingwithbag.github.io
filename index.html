@@ -138,6 +138,9 @@
     .card__btn{font-size:.65rem;padding:.22rem .55rem;border:1px solid var(--border);border-radius:20px;opacity:.55;-webkit-tap-highlight-color:transparent;white-space:nowrap;}
     .card__btn:active{opacity:1;border-color:var(--accent);}
     .card__fav{font-size:.9rem;line-height:1;padding:.2rem;}
+    .card__fav:disabled{opacity:.45;pointer-events:none;}
+    .pulse{animation:favPulse .22s var(--ease);}
+    @keyframes favPulse{0%{transform:scale(1);}50%{transform:scale(1.28);}100%{transform
 
     /* ── Bottom Nav ── */
     .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:200;display:flex;background:rgba(13,13,13,.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);padding-bottom:var(--safe-b);}
@@ -471,17 +474,36 @@ const revObs = new IntersectionObserver(entries=>{
   });
 },{threshold:.04,rootMargin:'0px 0px -6px 0px'});
 
-// ── Favs ──
-let _favsCache = (JSON.parse(localStorage.getItem('kyushu_favs')||'[]')||[]).map(String);
-function getFavs(){ return _favsCache; }
-function toggleFav(id){
-  id=String(id);
-  const s=[...getFavs()],i=s.indexOf(id);
-  i>-1?s.splice(i,1):s.push(id);
-  _favsCache = s;
-  localStorage.setItem('kyushu_favs',JSON.stringify(s));
-  if(window.__db) window.__set(window.__ref(window.__db,'favs'), s.length ? s.reduce((o,v)=>{o[v]=true;return o;},{}) : null);
-  return i>-1?'☆':'⭐';
+// ── Favs：Firebase Realtime Database only ──
+let _favsCache = [];
+let _favsReady = false;
+
+function getFavs(){
+  return _favsCache;
+}
+
+function waitFirebaseReady(){
+  if(window.__firebaseReady) return Promise.resolve();
+
+  return new Promise(resolve => {
+    window.addEventListener('firebase-ready', resolve, { once:true });
+  });
+}
+
+async function toggleFav(id){
+  await waitFirebaseReady();
+
+  const key = String(id);
+  const exists = _favsCache.includes(key);
+  const favRef = window.__ref(window.__db, `favs/${key}`);
+
+  if(exists){
+    await window.__remove(favRef);
+    return '☆';
+  }
+
+  await window.__set(favRef, true);
+  return '⭐';
 }
 
 // ── 建卡片 ──
@@ -515,9 +537,16 @@ function buildCard(p){
       </div>
     </div>`;
   // fav
-  el.querySelector('.card__fav').addEventListener('click',function(){
-    this.textContent=toggleFav(p.id);
-    if(favOnly) render();
+   el.querySelector('.card__fav').addEventListener('click',async function(){
+    this.disabled = true;
+  
+    try{
+      this.textContent = await toggleFav(p.id);
+      this.classList.add('pulse');
+      setTimeout(()=>this.classList.remove('pulse'),220);
+    }finally{
+      this.disabled = false;
+    }
   });
   // del
   el.querySelector('.btn-del-place')?.addEventListener('click',function(){
@@ -829,14 +858,19 @@ waitFirebase(()=>{
   },()=>{
     showDataError('新增資料連線失敗');
   });
-  // Favs
+  // Favs：Firebase Realtime Database 即時同步
   window.__onValue(window.__ref(db,'favs'),snap=>{
-    const raw = snap.val();
-    const nextFavs = raw ? Object.keys(raw).map(String) : [];
-    const same = JSON.stringify([...nextFavs].sort())===JSON.stringify([..._favsCache].sort());
+    const raw = snap.val() || {};
+    const nextFavs = Object.keys(raw).map(String);
+  
+    const same =
+      JSON.stringify([...nextFavs].sort()) ===
+      JSON.stringify([..._favsCache].sort());
+  
     _favsCache = nextFavs;
-    localStorage.setItem('kyushu_favs', JSON.stringify(_favsCache));
-    if(!same) render();
+    _favsReady = true;
+  
+    if(!same || favOnly) render();
   },()=>{});
   // Cost
   window.__onValue(window.__ref(db,'cost_items'),snap=>{
