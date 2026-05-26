@@ -573,7 +573,7 @@ function setupTimeInput(id) {
 }
 
 // ── AI Auto-schedule ──
-async function autoScheduleDay(dayIndex = currentDay, { silent = false } = {}) {
+  const count = await autoScheduleDay(i, { silent: true });
   const btn = document.getElementById('btn-auto-schedule');
   if (!silent) { btn.disabled = true; btn.textContent = '⏳ 排程中…'; }
 
