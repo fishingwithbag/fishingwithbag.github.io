@@ -236,7 +236,7 @@
 
 <section class="stats">
   <div class="stat"><span class="stat__n" data-t="8">0</span><span class="stat__l">旅遊天數</span></div>
-  <div class="stat"><span class="stat__n" data-t="72">0</span><span class="stat__l">景點／餐廳／住宿</span></div>
+  <div class="stat"><span class="stat__n" id="place-total-stat" data-t="0">—</span><span class>
   <div class="stat"><span class="stat__n" data-t="3">0</span><span class="stat__l">釣魚體驗</span></div>
   <div class="stat"><span class="stat__n" data-t="4">0</span><span class="stat__l">同行人數</span></div>
 </section>
@@ -290,16 +290,30 @@ function animateNumber(target, end){
   requestAnimationFrame(tick);
 }
 
+// 固定統計：旅遊天數、釣魚體驗、同行人數仍照常動畫
+// Firebase 統計：景點／餐廳／住宿不先動畫，避免 72 → 74 閃爍
+const placeTotalEl = document.getElementById('place-total-stat');
+
 const obs = new IntersectionObserver(entries => {
   entries.forEach(({isIntersecting, target}) => {
     if(!isIntersecting) return;
+
+    // placeTotalEl 由 Firebase 更新，不走靜態 data-t 動畫
+    if(target === placeTotalEl){
+      obs.unobserve(target);
+      return;
+    }
 
     animateNumber(target, +target.dataset.t);
     obs.unobserve(target);
   });
 },{threshold:.5});
 
-document.querySelectorAll('[data-t]').forEach(el => obs.observe(el));
+document.querySelectorAll('[data-t]').forEach(el => {
+  if(el !== placeTotalEl){
+    obs.observe(el);
+  }
+});
 
 function waitFirebase(cb){
   if(window.__firebaseReady){
@@ -324,41 +338,45 @@ function normalizeFirebaseList(raw){
   return [];
 }
 
-function updatePlaceTotal(basePlaces, customPlaces){
-  const total = [...basePlaces, ...customPlaces].length;
-
-  // travel.html 第 2 個 stat__n 才是「景點／餐廳／住宿」
-  const statNumbers = document.querySelectorAll('.stat__n');
-  const placeTotalEl = statNumbers[1];
-
-  if(!placeTotalEl) return;
-
-  placeTotalEl.dataset.t = String(total);
-  placeTotalEl.textContent = String(total);
-}
-
 waitFirebase(() => {
   const db = window.__db;
 
   let basePlaces = [];
   let customPlaces = [];
+  let baseLoaded = false;
+  let customLoaded = false;
 
   function paint(){
-    updatePlaceTotal(basePlaces, customPlaces);
+    // 等 base_places 和 custom_places 都回來後再顯示總數
+    // 避免先顯示 72，再變 74
+    if(!baseLoaded || !customLoaded) return;
+
+    const total = [...basePlaces, ...customPlaces].length;
+
+    if(placeTotalEl){
+      placeTotalEl.dataset.t = String(total);
+      placeTotalEl.textContent = String(total);
+    }
   }
 
   window.__onValue(window.__ref(db, 'base_places'), snap => {
     basePlaces = normalizeFirebaseList(snap.val());
+    baseLoaded = true;
     paint();
   }, err => {
     console.error('travel.html base_places 讀取失敗:', err);
+    baseLoaded = true;
+    paint();
   });
 
   window.__onValue(window.__ref(db, 'custom_places'), snap => {
     customPlaces = normalizeFirebaseList(snap.val());
+    customLoaded = true;
     paint();
   }, err => {
     console.error('travel.html custom_places 讀取失敗:', err);
+    customLoaded = true;
+    paint();
   });
 });
 </script>
