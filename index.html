@@ -780,7 +780,7 @@ function waitFirebaseReady(){
 
 async function toggleFav(id){
   await waitFirebase);  await waitFirebaseReady();
-    return '🤍';
+    return '❤️';
   }
 
   await window.__set(favRef, true);
@@ -825,7 +825,7 @@ function buildCard(p){
           title="${isFav ? '取消收藏' : '加入收藏'}"
           aria-label="${isFav ? '取消收藏' : '加入收藏'}"
         >
-          ${isFav ? '💖' : '🤍'}
+          ${isFav ? '💖' : '❤️'}
         </button>
         
         <a
@@ -1031,7 +1031,7 @@ document.getElementById('sort-select').addEventListener('change',render);
 // Fav toggle（topbar icon）
 document.getElementById('fav-btn').addEventListener('click',()=>{
   favOnly = !favOnly;
-  document.getElementById('fav-btn').textContent = favOnly ? '💖' :
+  document.getElementById('fav-btn').textContent = favOnly ? '💖' : '❤️';
   render();
 });
 
