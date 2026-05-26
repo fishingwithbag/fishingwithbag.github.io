@@ -165,6 +165,7 @@
       .bottom-nav { display:none; }
     }
   </style>
+  <script type="module" src="assets/js/firebase-init.js"></script>
 </head>
 <body>
 
@@ -276,19 +277,82 @@
 <script>
 const obs = new IntersectionObserver(entries => {
   entries.forEach(({isIntersecting, target}) => {
-    if (!isIntersecting) return;
+    if(!isIntersecting) return;
+
     const end = +target.dataset.t;
     const s = performance.now();
+
     const tick = n => {
-      const p = Math.min((n-s)/900,1);
-      target.textContent = Math.round((1-Math.pow(1-p,3))*end);
-      if(p<1) requestAnimationFrame(tick);
+      const p = Math.min((n - s) / 900, 1);
+      target.textContent = Math.round((1 - Math.pow(1 - p, 3)) * end);
+      if(p < 1) requestAnimationFrame(tick);
     };
+
     requestAnimationFrame(tick);
     obs.unobserve(target);
   });
 },{threshold:.5});
-document.querySelectorAll('[data-t]').forEach(el=>obs.observe(el));
+
+document.querySelectorAll('[data-t]').forEach(el => obs.observe(el));
+
+function waitFirebase(cb){
+  if(window.__firebaseReady){
+    cb();
+    return;
+  }
+
+  window.addEventListener('firebase-ready', cb, { once:true });
+}
+
+function normalizeFirebaseList(raw){
+  if(!raw) return [];
+
+  if(Array.isArray(raw)){
+    return raw.filter(Boolean);
+  }
+
+  if(typeof raw === 'object'){
+    return Object.values(raw).filter(Boolean);
+  }
+
+  return [];
+}
+
+function updatePlaceTotal(basePlaces, customPlaces){
+  const total = [...basePlaces, ...customPlaces].length;
+  const target = document.querySelector('.stat__n[data-t]');
+
+  if(!target) return;
+
+  target.dataset.t = String(total);
+  target.textContent = String(total);
+}
+
+waitFirebase(() => {
+  const db = window.__db;
+
+  let basePlaces = [];
+  let customPlaces = [];
+
+  function paint(){
+    updatePlaceTotal(basePlaces, customPlaces);
+  }
+
+  window.__onValue(window.__ref(db, 'base_places'), snap => {
+    basePlaces = normalizeFirebaseList(snap.val());
+    paint();
+  }, err => {
+    console.error('travel base_places 讀取失敗:', err);
+  });
+
+  window.__onValue(window.__ref(db, 'custom_places'), snap => {
+    customPlaces = normalizeFirebaseList(snap.val());
+    paint();
+  }, err => {
+    console.error('travel custom_places 讀取失敗:', err);
+  });
+});
 </script>
+``
 </body>
 </html>
