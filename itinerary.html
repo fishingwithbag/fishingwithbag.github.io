@@ -289,7 +289,7 @@ const DURATION_DEFAULT = {
   '住宿':0,'釣點':240,'釣具店':30,'購物':60,'其他':30
 };
 
-\*const ALL_REGIONS = ['別府','大分','熊本','阿蘇','福岡','北九州','長崎','佐賀','移動日'];*/
+const ALL_REGIONS = ['別府','大分','熊本','阿蘇','福岡','北九州','長崎','佐賀','移動日'];
 
 let currentDay   = 0;
 let allBasePlaces   = [];
@@ -345,23 +345,15 @@ function getDayRegion(date) {
 function buildDayRegionSelect() {
   const sel = document.getElementById('day-region-select');
   const current = getDayRegion();
-
-  // Firebase 還沒載入時 fallback 到 dayRegionMap 已有的城市 + TRIP_DAYS 預設
-  const fromPlaces = allPlaces().map(p => p.region).filter(Boolean);
-  const fromTrip   = Object.values(dayRegionMap).filter(Boolean);
-  const fromDays   = TRIP_DAYS.map(d => d.region).filter(Boolean);
-  const regions    = [...new Set([...fromPlaces, ...fromTrip, ...fromDays])]
-                       .sort((a, b) => a.localeCompare(b, 'zh-Hant'));
-
   sel.innerHTML = '<option value="">請選擇城市</option>';
-  regions.forEach(r => {
+  ALL_REGIONS.forEach(r => {
     const opt = document.createElement('option');
     opt.value = r; opt.textContent = r;
     if (r === current) opt.selected = true;
     sel.appendChild(opt);
   });
 }
-  
+
 function updateAiDesc() {
   const val = getDayRegion();
   document.getElementById('ai-bar-desc').textContent = val
@@ -711,7 +703,7 @@ document.getElementById('btn-auto-schedule').addEventListener('click', async () 
     const btn = document.getElementById('btn-auto-schedule');
     btn.disabled = false;
     btn.textContent = '🪄 自動排這天';
-    alert('排程時發生錯誤，請確認收藏清單是否有對應城市的景點。');
+    alert('排程時發生錯誤，請確認收藏清單是否有相對應城市的景點。');
   }
 });
 
@@ -722,7 +714,7 @@ document.getElementById('btn-auto-all').addEventListener('click', async () => {
   const keepDay = currentDay;
   let skipped = 0;
   for (let i = 0; i < TRIP_DAYS.length; i++) {
-    const count = await autoScheduleDay(i, { silent: true });
+    async function autoScheduleDay(dayIndex = currentDay, { silent = false } = {})
     if (count === 0) skipped++;
   }
   currentDay = keepDay; buildTabs(); buildDayRegionSelect(); updateAiDesc(); renderDay();
