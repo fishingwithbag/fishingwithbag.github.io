@@ -298,6 +298,9 @@ let itineraryData   = {};
 let dayRegionMap    = {};
 let favsCache       = [];
 let editingKey      = null;
+let favsReady       = false;
+let basePlacesReady = false;
+let customPlacesReady = false;
 
 function allPlaces() { return [...allBasePlaces, ...allCustomPlaces]; }
 function getFavs()   { return favsCache; }
@@ -316,6 +319,22 @@ function getPlaceFavKey(place) {
   if (place.placeId !== undefined && place.placeId !== null && String(place.placeId).trim()) return String(place.placeId);
   if (place._key !== undefined && place._key !== null && String(place._key).trim()) return String(place._key);
   return '';
+}
+function normalizeFavToken(v) {
+  if (v === undefined || v === null) return '';
+  const s = String(v).trim();
+  if (!s) return '';
+  return /^\d+$/.test(s) ? String(Number(s)) : s;
+}
+function hasFavForPlace(place, favSet) {
+  const key = normalizeFavToken(getPlaceFavKey(place));
+  if (key && favSet.has(key)) return true;
+  const fallbackId = normalizeFavToken(place?.id);
+  if (fallbackId && favSet.has(fallbackId)) return true;
+  return false;
+}
+function isDataReadyForAutoSchedule() {
+  return favsReady && basePlacesReady && customPlacesReady;
 }
 
 // ── Theme（與 index 一致，持久化）──
@@ -592,11 +611,21 @@ function setupTimeInput(id) {
 async function autoScheduleDay(dayIndex = currentDay, { silent = false } = {}) {
   const btn = document.getElementById('btn-auto-schedule');
   if (!silent) { btn.disabled = true; btn.textContent = '⏳ 排程中…'; }
+  await waitFirebaseReady();
+
+  if (!isDataReadyForAutoSchedule()) {
+    if (!silent) {
+      alert('資料同步中，請稍候 1-2 秒再試一次自動排程。');
+      btn.disabled = false;
+      btn.textContent = '🪄 自動排這天';
+    }
+    return 0;
+  }
 
   const day    = TRIP_DAYS[dayIndex];
   const favs   = getFavs();
   const region = getDayRegion(day.date);
-  const favSet = new Set(favs.map(v => String(v)));
+  const favSet = new Set(favs.map(v => normalizeFavToken(v)).filter(Boolean));
 
   function extractHours(note) {
     const m = (note || '').match(/(\d{1,2}:\d{2})[–\-~～至到](\d{1,2}:\d{2})/);
@@ -611,12 +640,12 @@ async function autoScheduleDay(dayIndex = currentDay, { silent = false } = {}) {
     });
   });
 
-  let candidates = allPlaces().filter(p => favSet.has(getPlaceFavKey(p)) && p.category !== '住宿');
+  let candidates = allPlaces().filter(p => hasFavForPlace(p, favSet) && p.category !== '住宿');
   if (region) candidates = candidates.filter(p => regionMatches(p.region, region));
   const fresh = candidates.filter(p => !usedNames.has(p.name));
   let pool = fresh.length ? fresh.concat(candidates.filter(p => usedNames.has(p.name))) : candidates;
   if (!pool.length && !region) {
-    pool = allPlaces().filter(p => favSet.has(getPlaceFavKey(p)) && p.category !== '住宿').slice(0, 6);
+    pool = allPlaces().filter(p => hasFavForPlace(p, favSet) && p.category !== '住宿').slice(0, 6);
   }
   
   // ── 防呆：pool 仍為空 → 跳出提示，中止排程 ──
@@ -774,12 +803,23 @@ waitFirebase(() => {
 
   window.__onValue(window.__ref(db, 'favs'), snap => {
     const raw = snap.val();
-    if (!raw) { favsCache = []; return; }
+    if (!raw) { favsCache = []; favsReady = true; return; }
     if (Array.isArray(raw)) {
       favsCache = raw.flatMap((v, i) => v === true ? [String(i)] : typeof v === 'string' || typeof v === 'number' ? [String(v)] : []).filter(Boolean);
     } else if (typeof raw === 'object') {
-      favsCache = Object.keys(raw).filter(k => raw[k]).map(String);
+      favsCache = Object.entries(raw).flatMap(([k, v]) => {
+        if (v === true) return [String(k)];
+        if (typeof v === 'string' || typeof v === 'number') return [String(v)];
+        if (v && typeof v === 'object') {
+          if (v.id !== undefined && v.id !== null) return [String(v.id)];
+          if (v.placeId !== undefined && v.placeId !== null) return [String(v.placeId)];
+        }
+        return [];
+      }).filter(Boolean);
+    } else {
+      favsCache = [];
     }
+    favsReady = true;
   });
 
   window.__onValue(window.__ref(db, 'base_places'), snap => {
@@ -789,6 +829,7 @@ waitFirebase(() => {
       _key: k,
       id: v && v.id !== undefined && v.id !== null && String(v.id).trim() ? v.id : k
     }));
+    basePlacesReady = true;
     buildPlaceSuggestions();
   });
 
@@ -799,6 +840,7 @@ waitFirebase(() => {
       _key: k,
       id: v && v.id !== undefined && v.id !== null && String(v.id).trim() ? v.id : k
     }));
+    customPlacesReady = true;
   });
 
   window.__onValue(window.__ref(db, 'itinerary'), snap => {
