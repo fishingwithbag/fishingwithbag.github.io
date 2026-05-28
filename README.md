@@ -3,8 +3,8 @@
 > 一個以 **HTML / CSS / JavaScript + Firebase Realtime Database** 建構的互動式旅遊網站，支援 **景點總覽、即時收藏同步、自訂新增地點、住宿費用、租車資訊、深色 / 淺色模式**。  
 > 本版本為目前 **Stable Baseline**，已修復多數 Firebase 同步、收藏與版面問題。
 
-![GitHub last commit](https://img.shields.io/github/last-commit/YOUR_ACCOUNT/YOUR_REPO?style=for-the-badge)
-![GitHub repo size](https://img.shields.io/github/repo-size/YOUR_ACCOUNT/YOUR_REPO?style=for-the-badge)
+![GitHub last commit](https://img.shields.io/github/last-commit/https://fishingwithbag.github.io/style=for-the-badge)
+![GitHub repo size](https://img.shields.io/github/repo-size/https://fishingwithbag.github.io/style=for-the-badge)
 ![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Ready-success?style=for-the-badge)
 ![Firebase](https://img.shields.io/badge/Firebase-Realtime%20Database-orange?style=for-the-badge)
 
