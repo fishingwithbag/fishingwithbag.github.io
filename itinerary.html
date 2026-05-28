@@ -330,7 +330,8 @@ let favsReady       = false;
 let basePlacesReady = false;
 let customPlacesReady = false;
 let itineraryReady  = false;
-
+let syncErrorMessage = '';
+  
 function allPlaces() { return [...allBasePlaces, ...allCustomPlaces]; }
 function getFavs()   { return favsCache; }
 function normalizeRegionName(v) {
@@ -421,6 +422,16 @@ function isPageDataReady() {
   return favsReady && basePlacesReady && customPlacesReady && itineraryReady;
 }
 
+function setSyncError(message) {
+  syncErrorMessage = message || '';
+  updateSyncStateUI();
+}
+
+function clearSyncError() {
+  syncErrorMessage = '';
+  updateSyncStateUI();
+}
+
 // ── Theme（與 index 一致，持久化）──
 (function initTheme() {
   const t = localStorage.getItem('kyushu_theme') || 'dark';
@@ -497,6 +508,13 @@ function updateSyncStateUI() {
 
   if (!autoBtn || !autoAllBtn || !desc) return;
 
+  if (syncErrorMessage) {
+    autoBtn.disabled = true;
+    autoAllBtn.disabled = true;
+    desc.textContent = syncErrorMessage;
+    return;
+  }
+
   const autoReady = favsReady && basePlacesReady && customPlacesReady;
 
   if (!autoReady) {
@@ -505,11 +523,12 @@ function updateSyncStateUI() {
     desc.textContent = '資料同步中，正在載入最愛清單與景點資料…';
     return;
   }
+
   autoBtn.disabled = false;
   autoAllBtn.disabled = false;
   updateAiDesc();
 }
-
+  
 // ── Tabs ──
 function buildTabs() {
   const wrap = document.getElementById('date-tabs');
@@ -1193,53 +1212,98 @@ waitFirebase(() => {
 
   window.__onValue(window.__ref(db, 'day_regions'), snap => {
     dayRegionMap = snap.val() || {};
-    buildTabs(); buildDayRegionSelect(); updateAiDesc();
+    buildTabs();
+    buildDayRegionSelect();
+    updateAiDesc();
+  }, err => {
+    console.error('day_regions 讀取失敗:', err);
+    setSyncError('今日城市資料讀取失敗，請確認 Firebase 連線或 Rules 權限。');
   });
 
   window.__onValue(window.__ref(db, 'favs'), snap => {
     const raw = snap.val();
-    if (!raw) {favsCache = [];favsReady = true;updateSyncStateUI();return;}
+  
+    if (!raw) {
+      favsCache = [];
+      favsReady = true;
+      clearSyncError();
+      updateSyncStateUI();
+      return;
+    }
+  
     if (Array.isArray(raw)) {
-      favsCache = raw.flatMap((v, i) => v === true ? [String(i)] : typeof v === 'string' || typeof v === 'number' ? [String(v)] : []).filter(Boolean);
+      favsCache = raw
+        .flatMap((v, i) =>
+          v === true
+            ? [String(i)]
+            : typeof v === 'string' || typeof v === 'number'
+              ? [String(v)]
+              : []
+        )
+        .filter(Boolean);
     } else if (typeof raw === 'object') {
-      favsCache = Object.entries(raw).flatMap(([k, v]) => {
-        if (v === true) return [String(k)];
-        if (typeof v === 'string' || typeof v === 'number') return [String(v)];
-        if (v && typeof v === 'object') {
-          if (v.id !== undefined && v.id !== null) return [String(v.id)];
-          if (v.placeId !== undefined && v.placeId !== null) return [String(v.placeId)];
-        }
-        return [];
-      }).filter(Boolean);
+      favsCache = Object.entries(raw)
+        .flatMap(([k, v]) => {
+          if (v === true) return [String(k)];
+          if (typeof v === 'string' || typeof v === 'number') return [String(v)];
+  
+          if (v && typeof v === 'object') {
+            if (v.id !== undefined && v.id !== null) return [String(v.id)];
+            if (v.placeId !== undefined && v.placeId !== null) return [String(v.placeId)];
+          }
+  
+          return [];
+        })
+        .filter(Boolean);
     } else {
       favsCache = [];
     }
+  
     favsReady = true;
+    clearSyncError();
     updateSyncStateUI();
+  }, err => {
+    console.error('favs 讀取失敗:', err);
+    favsReady = false;
+    setSyncError('最愛清單讀取失敗，請確認 Firebase 連線或 Rules 權限。');
   });
 
-  window.__onValue(window.__ref(db, 'base_places'), snap => {
+   window.__onValue(window.__ref(db, 'base_places'), snap => {
     const raw = snap.val() || {};
+  
     allBasePlaces = Object.entries(raw).map(([k, v]) => ({
       ...(v || {}),
       _key: k,
       id: v && v.id !== undefined && v.id !== null && String(v.id).trim() ? v.id : k
     }));
+  
     basePlacesReady = true;
     buildPlaceSuggestions();
+    clearSyncError();
     updateSyncStateUI();
+  }, err => {
+    console.error('base_places 讀取失敗:', err);
+    basePlacesReady = false;
+    setSyncError('基礎景點資料讀取失敗，請確認 Firebase 連線或 Rules 權限。');
   });
 
   window.__onValue(window.__ref(db, 'custom_places'), snap => {
     const raw = snap.val() || {};
+  
     allCustomPlaces = Object.entries(raw).map(([k, v]) => ({
       ...(v || {}),
       _key: k,
       id: v && v.id !== undefined && v.id !== null && String(v.id).trim() ? v.id : k
     }));
+  
     customPlacesReady = true;
     buildPlaceSuggestions();
+    clearSyncError();
     updateSyncStateUI();
+  }, err => {
+    console.error('custom_places 讀取失敗:', err);
+    customPlacesReady = false;
+    setSyncError('自訂景點資料讀取失敗，請確認 Firebase 連線或 Rules 權限。');
   });
 
   window.__onValue(window.__ref(db, 'itinerary'), snap => {
@@ -1263,6 +1327,8 @@ waitFirebase(() => {
     updateSyncStateUI();
   }, err => {
     console.error('itinerary 讀取失敗:', err);
+    itineraryReady = false;
+    setSyncError('行程資料讀取失敗，請確認 Firebase 連線或 Rules 權限。');
     alert('行程資料讀取失敗，請確認 Firebase 連線或 Rules 權限。');
 });
   buildTabs();buildDayRegionSelect();updateAiDesc();updateSyncStateUI();renderDay();
