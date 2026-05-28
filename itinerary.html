@@ -92,16 +92,6 @@
     .tl-card__btn { font-size:.62rem; padding:.22rem .6rem; border:1px solid var(--border); border-radius:20px; opacity:.55; -webkit-tap-highlight-color:transparent; color:var(--text); background:transparent; }
     .tl-card__btn:active { opacity:1; border-color:var(--accent); }
 
-    /* Fav btn — 與 index 一致 */
-    .tl-fav { font-size:1rem; line-height:1; color:rgba(120,120,120,.95); background:rgba(255,255,255,.88); border-color:rgba(0,0,0,.14); border-radius:999px; width:30px; height:30px; min-width:30px; display:inline-flex; align-items:center; justify-content:center; border:1px solid rgba(0,0,0,.14); -webkit-tap-highlight-color:transparent; transition:background .16s, border-color .16s, color .16s, box-shadow .16s; }
-    .tl-fav.is-fav { color:#ff3f7f; background:rgba(255,63,127,.14); border-color:rgba(255,63,127,.55); text-shadow:0 0 4px rgba(255,63,127,.45), 0 0 8px rgba(255,63,127,.28); box-shadow:0 0 0 1px rgba(255,63,127,.12) inset, 0 0 8px rgba(255,63,127,.22); }
-    [data-theme="dark"] .tl-fav { color:rgba(255,255,255,.82); background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.22); }
-    [data-theme="dark"] .tl-fav.is-fav { color:#ff6fa3; background:rgba(255,111,163,.16); border-color:rgba(255,111,163,.6); text-shadow:0 0 5px rgba(255,111,163,.6), 0 0 12px rgba(255,111,163,.35); box-shadow:0 0 0 1px rgba(255,111,163,.18) inset, 0 0 12px rgba(255,111,163,.28); }
-    [data-theme="light"] .tl-fav { color:rgba(50,50,50,.72); background:#fff; border-color:rgba(0,0,0,.16); }
-    [data-theme="light"] .tl-fav.is-fav { color:#e72f75; background:rgba(231,47,117,.1); border-color:rgba(231,47,117,.42); text-shadow:0 0 3px rgba(231,47,117,.35), 0 0 7px rgba(231,47,117,.18); box-shadow:0 1px 4px rgba(0,0,0,.08), 0 0 8px rgba(231,47,117,.16); }
-    @keyframes favPulse { 0%{transform:scale(1.5)} 70%{transform:scale(1.28)} 100%{transform:scale(1)} }
-    .tl-fav.pulse { animation:favPulse .22s var(--ease); }
-
     /* Empty */
     .empty-day { text-align:center; padding:3rem 1rem; opacity:.3; }
     .empty-day__icon { font-size:2.5rem; margin-bottom:.75rem; }
