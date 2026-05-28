@@ -181,7 +181,7 @@
 
 <div class="ai-bar">
   <div class="ai-bar__title">✨ AI 智慧排程</div>
-  <div class="ai-bar__desc" id="ai-bar-desc">從最愛清單自動排出最佳行程，考量營業時間、地理位置與交通時間。</div>
+  <div class="ai-bar__desc" id="ai-bar-desc">依最愛清單與今日城市快速產生建議行程，可再手動調整時間、順序與備註。</div>
   <div class="ai-bar__actions">
     <button class="btn-ai btn-ai--primary" id="btn-auto-schedule">🪄 自動排這天</button>
     <button class="btn-ai btn-ai--secondary" id="btn-auto-all">排全程</button>
@@ -269,8 +269,6 @@
 </nav>
 
 <script>
-const FAVICONOFF = '❤️';
-const FAVICONON  = '💖';
 
 const TRIP_DAYS = [
   {date:'2026-09-30', label:'9/30',  sub:'別府', region:'別府'},
@@ -409,18 +407,7 @@ function waitFirebaseReady() {
   return new Promise(resolve => window.addEventListener('firebase-ready', resolve, { once: true }));
 }
 
-async function toggleFav(id) {
-  await waitFirebaseReady();
-  const key = String(id);
-  const exists = favsCache.includes(key);
-  const favRef = window.__ref(window.__db, `favs/${key}`);
-  if (exists) {
-    await window.__remove(favRef);
-    return FAVICONOFF;
-  }
-  await window.__set(favRef, true);
-  return FAVICONON;
-}
+
 
 // ── Region / Day helpers ──
 function getDayRegion(date) {
@@ -443,9 +430,10 @@ function buildDayRegionSelect() {
 
 function updateAiDesc() {
   const val = getDayRegion();
+
   document.getElementById('ai-bar-desc').textContent = val
-    ? `目前城市：${val}，AI 會優先依此城市排程。`
-    : '從最愛清單自動排出最佳行程，考量營業時間、地理位置與交通時間。';
+    ? `目前城市：${val}，系統會優先使用此城市的最愛清單產生建議行程。`
+    : '依最愛清單與今日城市快速產生建議行程，可再手動調整時間、順序與備註。';
 }
 
 // ── Tabs ──
@@ -476,18 +464,29 @@ function buildTabs() {
 // ── Stats & Summary ──
 function updateStats(items) {
   const spots = items.filter(it => it.type !== 'transit');
+
   document.getElementById('stat-items').textContent = spots.length;
+
   let mins = 0;
+
   items.forEach(it => {
-    if (it.start && it.end) {
-      const [sh, sm] = it.start.split(':').map(Number);
-      const [eh, em] = it.end.split(':').map(Number);
-      mins += (eh * 60 + em) - (sh * 60 + sm);
+    const startMin = timeToMinutes(it.start);
+    const endMin = timeToMinutes(it.end);
+
+    if (startMin !== null && endMin !== null && endMin > startMin) {
+      mins += endMin - startMin;
     }
   });
-  document.getElementById('stat-hours').textContent = mins > 0 ? `${Math.floor(mins / 60)}h${mins % 60 ? mins % 60 + 'm' : ''}` : '—';
+
+  document.getElementById('stat-hours').textContent =
+    mins > 0
+      ? `${Math.floor(mins / 60)}h${mins % 60 ? mins % 60 + 'm' : ''}`
+      : '—';
+
   const cost = items.reduce((s, it) => s + (parseInt(it.cost) || 0), 0);
-  document.getElementById('stat-cost').textContent = cost > 0 ? `¥${cost.toLocaleString()}` : '—';
+
+  document.getElementById('stat-cost').textContent =
+    cost > 0 ? `¥${cost.toLocaleString()}` : '—';
 }
 
 function updateSummary(items) {
@@ -505,7 +504,16 @@ function dotClass(t)  { return {meal:'tl-dot--meal',stay:'tl-dot--stay',transit:
 // ── Render Timeline ──
 function renderDay() {
   const date  = TRIP_DAYS[currentDay].date;
-  const items = (itineraryData[date] || []).slice().sort((a, b) => (a.start || '').localeCompare(b.start || ''));
+  const items = (itineraryData[date] || []).slice().sort((a, b) => {
+  const am = timeToMinutes(a.start);
+  const bm = timeToMinutes(b.start);
+
+  if (am === null && bm === null) return String(a.start || '').localeCompare(String(b.start || ''));
+  if (am === null) return 1;
+  if (bm === null) return -1;
+
+  return am - bm;
+  });
   const tl    = document.getElementById('timeline');
   tl.innerHTML = '';
   updateStats(items);
@@ -535,7 +543,6 @@ function renderDay() {
         </div>`;
     } else {
       const [sh, sm] = (it.start || '09:00').split(':');
-      const isFav    = getFavs().includes(String(it.placeId || ''));
       row.innerHTML = `
         <div class="tl-time">
           <div class="tl-time__h">${sh}</div>
@@ -632,16 +639,27 @@ function getPlaceDuration(place) {
 }
 
 function setEndByStartAndPlace() {
-  const name  = document.getElementById('m-name')?.value || '';
-  const start = document.getElementById('m-start')?.value || '';
-  if (!start || !/^([01]?\d|2[0-3]):[0-5]\d$/.test(start)) return;
-  const place  = allPlaces().find(p => normalizeName(p.name) === normalizeName(name));
-  const dur    = getPlaceDuration(place);
-  const [h, m] = start.split(':').map(Number);
-  const endMin = h * 60 + m + dur;
+  const name = document.getElementById('m-name')?.value || '';
+  const startInput = document.getElementById('m-start');
+
+  if (!startInput) return;
+
+  const start = normalizeTimeValue(startInput.value);
+  startInput.value = start;
+
+  const startMin = timeToMinutes(start);
+
+  if (startMin === null) return;
+
+  const place = allPlaces().find(p => normalizeName(p.name) === normalizeName(name));
+  const dur = getPlaceDuration(place);
+
+  const endMin = startMin + dur;
+
   document.getElementById('m-end').value =
     `${String(Math.floor(endMin / 60) % 24).padStart(2,'0')}:${String(endMin % 60).padStart(2,'0')}`;
 }
+
 
 function buildPlaceSuggestions() {
   const dl = document.getElementById('place-suggestions');
@@ -758,7 +776,23 @@ async function autoScheduleDay(dayIndex = currentDay, { silent = false } = {}) {
     const start = `${String(Math.floor(currentMin / 60)).padStart(2,'0')}:${String(currentMin % 60).padStart(2,'0')}`;
     currentMin += dur;
     const end   = `${String(Math.floor(currentMin / 60)).padStart(2,'0')}:${String(currentMin % 60).padStart(2,'0')}`;
-    schedule.push({ type, name: p.name, start, end, hours: extractHours(p.note || ''), cost: '', note: p.note || '', transitMode: '🚗 開車', transitMin: 15, region: p.region || '', category: p.category || '', subcategory: p.subcategory || '' });
+    schedule.push({
+      type,
+      placeId: getPlaceFavKey(p),
+      sourceKey: p._key || '',
+      name: p.name,
+      start,
+      end,
+      hours: p.hours || extractHours(p.note || ''),
+      cost: '',
+      note: p.note || '',
+      transitMode: '🚗 開車',
+      transitMin: 15,
+      region: p.region || '',
+      category: p.category || '',
+      subcategory: p.subcategory || '',
+      createdAt: new Date().toISOString()
+    });
     currentMin += 15;
     return currentMin < 22 * 60;
   }
@@ -838,23 +872,8 @@ document.getElementById('btn-modal-save').addEventListener('click', async () => 
   const region = getDayRegion(date);
   const matchedPlaces = allPlaces().filter(p => normalizeName(p.name) === normalizeName(name));
   const matchedPlace = matchedPlaces.find(p => region && regionMatches(p.region, region)) || matchedPlaces[0] || null;
-
-  const item = {
-    type: matchedPlace ? guessItemType(matchedPlace) : document.getElementById('m-type').value,
-    name,
-    start: startVal,
-    end: endVal,
-    hours: document.getElementById('m-hours').value.trim() || matchedPlace?.hours || '',
-    cost: parseInt(document.getElementById('m-cost').value) || parseInt(matchedPlace?.cost) || 0,
-    transitMode: document.getElementById('m-transit').value,
-    transitMin: parseInt(document.getElementById('m-transit-min').value) || 0,
-    note: document.getElementById('m-note').value.trim() || matchedPlace?.note || '',
-    region: matchedPlace?.region || region || '',
-    category: matchedPlace?.category || '',
-    subcategory: matchedPlace?.subcategory || '',
-    createdAt: new Date().toISOString()
-  };
-
+  const oldItem = editingKey? (itineraryData[date] || []).find(i => i._key === editingKey): null;
+  const item
   try {
     if (editingKey) {
       await window.__set(
@@ -874,7 +893,7 @@ document.getElementById('btn-modal-save').addEventListener('click', async () => 
     console.error('行程儲存失敗:', err);
     alert('行程儲存失敗，請確認 Firebase 連線或 Rules 權限。');
   }
-});
+  });
 
 // ── AI Buttons ──
 document.getElementById('btn-auto-schedule').addEventListener('click', async () => {
