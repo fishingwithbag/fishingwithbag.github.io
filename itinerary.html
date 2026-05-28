@@ -870,10 +870,58 @@ document.getElementById('btn-modal-save').addEventListener('click', async () => 
 
   const date = TRIP_DAYS[currentDay].date;
   const region = getDayRegion(date);
-  const matchedPlaces = allPlaces().filter(p => normalizeName(p.name) === normalizeName(name));
-  const matchedPlace = matchedPlaces.find(p => region && regionMatches(p.region, region)) || matchedPlaces[0] || null;
-  const oldItem = editingKey? (itineraryData[date] || []).find(i => i._key === editingKey): null;
-  const item
+
+  const matchedPlaces = allPlaces().filter(p =>
+    normalizeName(p.name) === normalizeName(name)
+  );
+
+  const matchedPlace =
+    matchedPlaces.find(p => region && regionMatches(p.region, region)) ||
+    matchedPlaces[0] ||
+    null;
+
+  const oldItem = editingKey
+    ? (itineraryData[date] || []).find(i => i._key === editingKey)
+    : null;
+
+  const item = {
+    type: matchedPlace
+      ? guessItemType(matchedPlace)
+      : document.getElementById('m-type').value,
+
+    placeId: matchedPlace ? getPlaceFavKey(matchedPlace) : '',
+    sourceKey: matchedPlace?._key || '',
+
+    name,
+    start: startVal,
+    end: endVal,
+
+    hours:
+      document.getElementById('m-hours').value.trim() ||
+      matchedPlace?.hours ||
+      '',
+
+    cost:
+      parseInt(document.getElementById('m-cost').value) ||
+      parseInt(matchedPlace?.cost) ||
+      0,
+
+    transitMode: document.getElementById('m-transit').value,
+    transitMin: parseInt(document.getElementById('m-transit-min').value) || 0,
+
+    note:
+      document.getElementById('m-note').value.trim() ||
+      matchedPlace?.note ||
+      '',
+
+    region: matchedPlace?.region || region || '',
+    category: matchedPlace?.category || '',
+    subcategory: matchedPlace?.subcategory || '',
+
+    createdAt: oldItem?.createdAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
   try {
     if (editingKey) {
       await window.__set(
@@ -893,7 +941,7 @@ document.getElementById('btn-modal-save').addEventListener('click', async () => 
     console.error('行程儲存失敗:', err);
     alert('行程儲存失敗，請確認 Firebase 連線或 Rules 權限。');
   }
-  });
+});
 
 // ── AI Buttons ──
 document.getElementById('btn-auto-schedule').addEventListener('click', async () => {
