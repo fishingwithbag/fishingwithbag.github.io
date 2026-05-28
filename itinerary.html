@@ -842,28 +842,25 @@ document.getElementById('btn-modal-save').addEventListener('click', async () => 
     createdAt: new Date().toISOString()
   };
 
-  try{
+  try {
     if (editingKey) {
-      await window.__set(window.__ref(window.__db, `itinerary/${date}/${editingKey}`), item);
+      await window.__set(
+        window.__ref(window.__db, `itinerary/${date}/${editingKey}`),
+        item
+      );
     } else {
-      await window.__push(window.__ref(window.__db, `itinerary/${date}`), item);
+      await window.__push(
+        window.__ref(window.__db, `itinerary/${date}`),
+        item
+      );
     }
 
     document.getElementById('modal-overlay').classList.remove('open');
     editingKey = null;
-  }catch(err){
+  } catch (err) {
     console.error('行程儲存失敗:', err);
     alert('行程儲存失敗，請確認 Firebase 連線或 Rules 權限。');
   }
-});
-
-  if (editingKey) {
-    window.__set(window.__ref(window.__db, `itinerary/${date}/${editingKey}`), item);
-  } else {
-    window.__push(window.__ref(window.__db, `itinerary/${date}`), item);
-  }
-  document.getElementById('modal-overlay').classList.remove('open');
-  editingKey = null;
 });
 
 // ── AI Buttons ──
