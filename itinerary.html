@@ -326,6 +326,7 @@ let editingKey      = null;
 let favsReady       = false;
 let basePlacesReady = false;
 let customPlacesReady = false;
+let itineraryReady  = false;
 
 function allPlaces() { return [...allBasePlaces, ...allCustomPlaces]; }
 function getFavs()   { return favsCache; }
@@ -410,8 +411,8 @@ function hasFavForPlace(place, favSet) {
   if (fallbackId && favSet.has(fallbackId)) return true;
   return false;
 }
-function isDataReadyForAutoSchedule() {
-  return favsReady && basePlacesReady && customPlacesReady;
+function isPageDataReady() {
+  return favsReady && basePlacesReady && customPlacesReady && itineraryReady;
 }
 
 // ── Theme（與 index 一致，持久化）──
@@ -461,6 +462,25 @@ function updateAiDesc() {
   document.getElementById('ai-bar-desc').textContent = val
     ? `目前城市：${val}，系統會優先使用此城市的最愛清單產生建議行程。`
     : '依最愛清單與今日城市快速產生建議行程，可再手動調整時間、順序與備註。';
+}
+  
+function updateSyncStateUI() {
+  const autoBtn = document.getElementById('btn-auto-schedule');
+  const autoAllBtn = document.getElementById('btn-auto-all');
+  const desc = document.getElementById('ai-bar-desc');
+
+  if (!autoBtn || !autoAllBtn || !desc) return;
+
+  if (!isDataReadyForAutoSchedule()) {
+    autoBtn.disabled = true;
+    autoAllBtn.disabled = true;
+    desc.textContent = '資料同步中，正在載入最愛清單與景點資料…';
+    return;
+  }
+
+  autoBtn.disabled = false;
+  autoAllBtn.disabled = false;
+  updateAiDesc();
 }
 
 // ── Tabs ──
@@ -779,7 +799,7 @@ async function autoScheduleDay(dayIndex = currentDay, { silent = false } = {}) {
 
   if (!isDataReadyForAutoSchedule()) {
     if (!silent) {
-      alert('資料同步中，請稍候 1-2 秒再試一次自動排程。');
+      alert('資料同步中，請確認最愛清單與景點資料載入完成後再執行自動排程。');
       btn.disabled = false;
       btn.textContent = '🪄 自動排這天';
     }
@@ -1019,6 +1039,7 @@ document.getElementById('btn-modal-save').addEventListener('click', async () => 
 // ── AI Buttons ──
 document.getElementById('btn-auto-schedule').addEventListener('click', async () => {
   const day = TRIP_DAYS[currentDay];
+  if (!isDataReadyForAutoSchedule()) {alert('資料仍在同步中，請確認最愛清單與景點資料載入完成後再執行自動排程。');return;}
 
   const ok = confirm(
     `自動排「${day.label} ${getDayRegion(day.date) || day.sub}」會以建議行程覆蓋這天目前既有行程，確定繼續嗎？`
@@ -1040,6 +1061,7 @@ document.getElementById('btn-auto-schedule').addEventListener('click', async () 
 });
 
 document.getElementById('btn-auto-all').addEventListener('click', async () => {
+  if (!isDataReadyForAutoSchedule()) {alert('資料仍在同步中，請確認最愛清單與景點資料載入完成後再執行排全程。');return;}
   if (!confirm('排全程會以建議行程覆蓋有對應收藏景點的日期，確定嗎？')) return;
 
   const btn = document.getElementById('btn-auto-all');
@@ -1123,7 +1145,7 @@ waitFirebase(() => {
 
   window.__onValue(window.__ref(db, 'favs'), snap => {
     const raw = snap.val();
-    if (!raw) { favsCache = []; favsReady = true; return; }
+    if (!raw) {favsCache = [];favsReady = true;updateSyncStateUI();return;}
     if (Array.isArray(raw)) {
       favsCache = raw.flatMap((v, i) => v === true ? [String(i)] : typeof v === 'string' || typeof v === 'number' ? [String(v)] : []).filter(Boolean);
     } else if (typeof raw === 'object') {
@@ -1140,6 +1162,7 @@ waitFirebase(() => {
       favsCache = [];
     }
     favsReady = true;
+    updateSyncStateUI();
   });
 
   window.__onValue(window.__ref(db, 'base_places'), snap => {
@@ -1151,6 +1174,7 @@ waitFirebase(() => {
     }));
     basePlacesReady = true;
     buildPlaceSuggestions();
+    updateSyncStateUI();
   });
 
   window.__onValue(window.__ref(db, 'custom_places'), snap => {
@@ -1161,31 +1185,34 @@ waitFirebase(() => {
       id: v && v.id !== undefined && v.id !== null && String(v.id).trim() ? v.id : k
     }));
     customPlacesReady = true;
+    buildPlaceSuggestions();
+    updateSyncStateUI();
   });
 
   window.__onValue(window.__ref(db, 'itinerary'), snap => {
-  const raw = snap.val() || {};
-  itineraryData = {};
-
-  if(raw && typeof raw === 'object' && !Array.isArray(raw)){
-    Object.entries(raw).forEach(([date, items]) => {
-      if(!items || typeof items !== 'object' || Array.isArray(items)){
-        itineraryData[date] = [];
-        return;
-      }
-
-      itineraryData[date] = Object.entries(items)
-        .filter(([, v]) => v && typeof v === 'object')
-        .map(([k, v]) => ({ ...v, _key: k }));
-    });
-  }
-
-  renderDay();
-}, err => {
-  console.error('itinerary 讀取失敗:', err);
-  alert('行程資料讀取失敗，請確認 Firebase 連線或 Rules 權限。');
+    const raw = snap.val() || {};
+    itineraryData = {};
+  
+    if(raw && typeof raw === 'object' && !Array.isArray(raw)){
+      Object.entries(raw).forEach(([date, items]) => {
+        if(!items || typeof items !== 'object' || Array.isArray(items)){
+          itineraryData[date] = [];
+          return;
+        }
+  
+        itineraryData[date] = Object.entries(items)
+          .filter(([, v]) => v && typeof v === 'object')
+          .map(([k, v]) => ({ ...v, _key: k }));
+      });
+    }
+    itineraryReady = true;
+    renderDay();
+    updateSyncStateUI();
+  }, err => {
+    console.error('itinerary 讀取失敗:', err);
+    alert('行程資料讀取失敗，請確認 Firebase 連線或 Rules 權限。');
 });
-  buildTabs(); buildDayRegionSelect(); updateAiDesc(); renderDay();
+  buildTabs();buildDayRegionSelect();updateAiDesc();updateSyncStateUI();renderDay();
 });
 </script>
 </body>
