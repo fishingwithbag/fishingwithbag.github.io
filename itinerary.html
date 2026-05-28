@@ -539,6 +539,24 @@ function googleMapSvgIcon() {
   `;
 }  
 
+function makeItineraryKey(prefix = 'auto') {
+  const safePrefix = String(prefix || 'auto').replace(/[^a-zA-Z0-9_-]/g, '_');
+  return `${safePrefix}_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function buildScheduleObject(schedule) {
+  return schedule.reduce((acc, item, idx) => {
+    const key = item._key || makeItineraryKey(`auto_${idx}`);
+    acc[key] = {
+      ...item,
+      _key: undefined
+    };
+    delete acc[key]._key;
+    return acc;
+  }, {});
+}
+
+
 // ── Render Timeline ──
 function renderDay() {
   const date  = TRIP_DAYS[currentDay].date;
@@ -814,6 +832,7 @@ async function autoScheduleDay(dayIndex = currentDay, { silent = false } = {}) {
     const start = `${String(Math.floor(currentMin / 60)).padStart(2,'0')}:${String(currentMin % 60).padStart(2,'0')}`;
     currentMin += dur;
     const end   = `${String(Math.floor(currentMin / 60)).padStart(2,'0')}:${String(currentMin % 60).padStart(2,'0')}`;
+    const nowIso = new Date().toISOString();
     schedule.push({
       type,
       placeId: getPlaceFavKey(p),
@@ -829,7 +848,8 @@ async function autoScheduleDay(dayIndex = currentDay, { silent = false } = {}) {
       region: p.region || '',
       category: p.category || '',
       subcategory: p.subcategory || '',
-      createdAt: new Date().toISOString()
+      createdAt: nowIso,
+      updatedAt: nowIso
     });
     currentMin += 15;
     return currentMin < 22 * 60;
@@ -843,10 +863,25 @@ async function autoScheduleDay(dayIndex = currentDay, { silent = false } = {}) {
   const stayPlace = allPlaces().find(p => p.category === '住宿' && (!region || regionMatches(p.region, region)));
   if (stayPlace) { currentMin = Math.max(currentMin, 20 * 60); addItem(stayPlace, 'stay'); }
 
+  if (!schedule.length) {
+  if (!silent) {
+    alert('目前沒有產生任何可排入的行程項目。');
+    btn.disabled = false;
+    btn.textContent = '🪄 自動排這天';
+  }
+  return 0;
+}
+
   const dbRef = window.__ref(window.__db, `itinerary/${day.date}`);
-  await window.__remove(dbRef);
-  await Promise.all(schedule.map(item => window.__push(dbRef, item)));
-  if (!silent) { btn.disabled = false; btn.textContent = '🪄 自動排這天'; }
+  const scheduleObject = buildScheduleObject(schedule);
+  
+  await window.__set(dbRef, scheduleObject);
+  
+  if (!silent) {
+    btn.disabled = false;
+    btn.textContent = '🪄 自動排這天';
+  }
+  
   return schedule.length;
 }
 
@@ -986,26 +1021,26 @@ document.getElementById('btn-auto-schedule').addEventListener('click', async () 
   const day = TRIP_DAYS[currentDay];
 
   const ok = confirm(
-    `自動排「${day.label} ${getDayRegion(day.date) || day.sub}」會清空這天目前既有行程並重新產生，確定繼續嗎？`
+    `自動排「${day.label} ${getDayRegion(day.date) || day.sub}」會以建議行程覆蓋這天目前既有行程，確定繼續嗎？`
   );
 
   if (!ok) return;
+
+  const btn = document.getElementById('btn-auto-schedule');
 
   try {
     await autoScheduleDay();
   } catch (err) {
     console.error('autoScheduleDay 失敗:', err);
-
-    const btn = document.getElementById('btn-auto-schedule');
+    alert('排程時發生錯誤，請確認收藏清單是否有對應的城市景點，或檢查 Firebase Rules。');
+  } finally {
     btn.disabled = false;
     btn.textContent = '🪄 自動排這天';
-
-    alert('排程時發生錯誤，請確認收藏清單是否有對應的城市景點，或檢查 Firebase Rules。');
   }
 });
 
 document.getElementById('btn-auto-all').addEventListener('click', async () => {
-  if (!confirm('排全程會重排有對應收藏景點的日期，確定嗎？')) return;
+  if (!confirm('排全程會以建議行程覆蓋有對應收藏景點的日期，確定嗎？')) return;
 
   const btn = document.getElementById('btn-auto-all');
   const keepDay = currentDay;
