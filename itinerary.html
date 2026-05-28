@@ -307,6 +307,58 @@ function getFavs()   { return favsCache; }
 function normalizeRegionName(v) {
   return String(v || '').trim().replace(/\s+/g, '').replace(/[縣県市]$/u, '');
 }
+function escapeHTML(v){
+  return String(v ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+  }[c]));
+}
+
+function timeToMinutes(v){
+  const m = String(v || '').trim().match(/^([01]?\d|2[0-3]):([0-5]\d)$/);
+  if(!m) return null;
+  return Number(m[1]) * 60 + Number(m[2]);
+}
+
+function normalizeTimeValue(raw){
+  let v = String(raw || '').trim();
+
+  if(!v) return '';
+
+  // 保留使用者已輸入的 HH:mm 格式
+  if(/^([01]?\d|2[0-3]):[0-5]\d$/.test(v)){
+    const parts = v.split(':');
+    return `${String(Number(parts[0])).padStart(2,'0')}:${parts[1]}`;
+  }
+
+  // 支援手機常見輸入：900 / 930 / 1300 / 1830
+  const digits = v.replace(/[^0-9]/g, '');
+
+  if(digits.length === 3){
+    const h = Number(digits.slice(0,1));
+    const m = Number(digits.slice(1,3));
+    if(h >= 0 && h <= 9 && m >= 0 && m <= 59){
+      return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    }
+  }
+
+  if(digits.length === 4){
+    const h = Number(digits.slice(0,2));
+    const m = Number(digits.slice(2,4));
+    if(h >= 0 && h <= 23 && m >= 0 && m <= 59){
+      return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    }
+  }
+
+  return v;
+}
+
+function isValidTime(v){
+  return timeToMinutes(v) !== null;
+}  
 function regionMatches(a, b) {
   const aa = normalizeRegionName(a);
   const bb = normalizeRegionName(b);
@@ -400,11 +452,23 @@ function updateAiDesc() {
 function buildTabs() {
   const wrap = document.getElementById('date-tabs');
   wrap.innerHTML = '';
+
   TRIP_DAYS.forEach((d, i) => {
     const btn = document.createElement('button');
+    const dayLabel = escapeHTML(d.label);
+    const regionLabel = escapeHTML(getDayRegion(d.date) || d.sub);
+
     btn.className = 'date-tab' + (i === currentDay ? ' active' : '');
-    btn.innerHTML = `<span class="date-tab__day">${d.label}</span><span class="date-tab__label">${getDayRegion(d.date) || d.sub}</span>`;
-    btn.addEventListener('click', () => { currentDay = i; buildTabs(); buildDayRegionSelect(); updateAiDesc(); renderDay(); });
+    btn.innerHTML = `<span class="date-tab__day">${dayLabel}</span><span class="date-tab__label">${regionLabel}</span>`;
+
+    btn.addEventListener('click', () => {
+      currentDay = i;
+      buildTabs();
+      buildDayRegionSelect();
+      updateAiDesc();
+      renderDay();
+    });
+
     wrap.appendChild(btn);
   });
 }
@@ -429,7 +493,10 @@ function updateStats(items) {
 function updateSummary(items) {
   const wrap = document.getElementById('day-summary');
   const spots = items.filter(it => it.type !== 'transit');
-  wrap.innerHTML = spots.map(it => `<span class="summary-pill">${typeEmoji(it.type)} ${it.name}</span>`).join('');
+
+  wrap.innerHTML = spots
+    .map(it => `<span class="summary-pill">${typeEmoji(it.type)} ${escapeHTML(it.name)}</span>`)
+    .join('');
 }
 
 function typeEmoji(t) { return {spot:'🏛',meal:'🍜',stay:'🏨',transit:'🚗',other:'📌'}[t] || '📌'; }
@@ -460,8 +527,8 @@ function renderDay() {
           <div class="tl-dot tl-dot--transit"></div>
           <div class="tl-card tl-card--transit">
             <div class="tl-transit-label">
-              <span>${it.transitMode || '🚗'}</span>
-              <span>${it.name}</span>
+              <span>${escapeHTML(it.transitMode || '🚗')}</span>
+              <span>${escapeHTML(it.name)}</span>
               ${it.cost ? `<span style="color:var(--accent);font-size:.68rem">¥${Number(it.cost).toLocaleString()}</span>` : ''}
             </div>
           </div>
@@ -482,9 +549,9 @@ function renderDay() {
                 <span class="tl-card__cat">${typeEmoji(it.type)} ${it.type === 'spot' ? '景點' : it.type === 'meal' ? '餐廳' : it.type === 'stay' ? '住宿' : '其他'}</span>
                 ${it.start && it.end ? `<span class="tl-card__dur">${it.start}–${it.end}</span>` : ''}
               </div>
-              <div class="tl-card__name">${it.name}</div>
-              ${it.hours ? `<div class="tl-card__hours">🕐 營業：${it.hours}</div>` : ''}
-              ${it.note  ? `<p class="tl-card__note">${it.note}</p>` : ''}
+              <div class="tl-card__name">${escapeHTML(it.name)}</div>
+              ${it.hours ? `<div class="tl-card__hours">🕐 營業：${escapeHTML(it.hours)}</div>` : ''}
+              ${it.note ? `<p class="tl-card__note">${escapeHTML(it.note)}</p>` : ''}
             </div>
             <div class="tl-card__footer">
               <span class="tl-card__cost">${it.cost ? `¥${Number(it.cost).toLocaleString()}` : ''}</span>
@@ -510,10 +577,18 @@ function renderDay() {
   });
 
   tl.querySelectorAll('.btn-del').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const key  = btn.dataset.key;
       const date = TRIP_DAYS[currentDay].date;
-      window.__remove(window.__ref(window.__db, `itinerary/${date}/${key}`));
+  
+      if(!confirm('確定刪除此行程項目？')) return;
+  
+      try{
+        await window.__remove(window.__ref(window.__db, `itinerary/${date}/${key}`));
+      }catch(err){
+        console.error('刪除行程失敗:', err);
+        alert('刪除行程失敗，請確認 Firebase 連線或 Rules 權限。');
+      }
     });
   });
 
@@ -569,12 +644,18 @@ function setEndByStartAndPlace() {
 }
 
 function buildPlaceSuggestions() {
-  const dl  = document.getElementById('place-suggestions');
+  const dl = document.getElementById('place-suggestions');
   if (!dl) return;
+
   const map = new Map();
-  allPlaces().forEach(p => { if (p.name && !map.has(p.name)) map.set(p.name, p); });
-  dl.innerHTML = [...map.keys()].sort((a, b) => a.localeCompare(b, 'zh-Hant'))
-    .map(n => `<option value="${n.replace(/"/g,'&quot;')}"></option>`).join('');
+  allPlaces().forEach(p => {
+    if (p.name && !map.has(p.name)) map.set(p.name, p);
+  });
+
+  dl.innerHTML = [...map.keys()]
+    .sort((a, b) => a.localeCompare(b, 'zh-Hant'))
+    .map(n => `<option value="${escapeHTML(n)}"></option>`)
+    .join('');
 }
 
 function autofillPlaceFields() {
@@ -596,14 +677,23 @@ function autofillPlaceFields() {
 function setupTimeInput(id) {
   const el = document.getElementById(id);
   if (!el || el.dataset.timeReady) return;
+
   el.dataset.timeReady = '1';
+
   el.addEventListener('input', e => {
-    let v = e.target.value.replace(/[^0-9]/g, '');
-    if (v.length >= 3) v = v.slice(0, 2) + ':' + v.slice(2, 4);
-    e.target.value = v;
+    // 輸入中只保留數字與冒號，避免干擾使用者打字
+    e.target.value = e.target.value.replace(/[^0-9:]/g, '').slice(0, 5);
   });
+
   el.addEventListener('blur', e => {
-    e.target.style.borderColor = /^([01]?\d|2[0-3]):[0-5]\d$/.test(e.target.value) ? '' : '#ff6b6b';
+    const normalized = normalizeTimeValue(e.target.value);
+    e.target.value = normalized;
+
+    if(normalized && !isValidTime(normalized)){
+      e.target.style.borderColor = '#ff6b6b';
+    }else{
+      e.target.style.borderColor = '';
+    }
   });
 }
 
@@ -704,32 +794,68 @@ document.getElementById('btn-add-item').addEventListener('click', () => {
 document.getElementById('btn-modal-cancel').addEventListener('click', () => document.getElementById('modal-overlay').classList.remove('open'));
 document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target === document.getElementById('modal-overlay')) document.getElementById('modal-overlay').classList.remove('open'); });
 
-document.getElementById('btn-modal-save').addEventListener('click', () => {
-  const name     = document.getElementById('m-name').value.trim();
-  if (!name) { alert('請填寫名稱'); return; }
-  const startVal = document.getElementById('m-start').value.trim();
-  const endVal   = document.getElementById('m-end').value.trim();
-  if (!/^([01]?\d|2[0-3]):[0-5]\d$/.test(startVal) || !/^([01]?\d|2[0-3]):[0-5]\d$/.test(endVal)) { alert('請輸入正確的 24 小時制時間，例如 09:00'); return; }
-  if (endVal <= startVal) { alert('結束時間需晚於開始時間'); return; }
+document.getElementById('btn-modal-save').addEventListener('click', async () => {
+  const name = document.getElementById('m-name').value.trim();
 
-  const date          = TRIP_DAYS[currentDay].date;
-  const region        = getDayRegion(date);
+  if (!name) {
+    alert('請填寫名稱');
+    return;
+  }
+
+  const startVal = normalizeTimeValue(document.getElementById('m-start').value.trim());
+  const endVal   = normalizeTimeValue(document.getElementById('m-end').value.trim());
+
+  document.getElementById('m-start').value = startVal;
+  document.getElementById('m-end').value = endVal;
+
+  const startMin = timeToMinutes(startVal);
+  const endMin   = timeToMinutes(endVal);
+
+  if (startMin === null || endMin === null) {
+    alert('請輸入正確的 24 小時制時間，例如 09:00');
+    return;
+  }
+
+  if (endMin <= startMin) {
+    alert('結束時間需晚於開始時間');
+    return;
+  }
+
+  const date = TRIP_DAYS[currentDay].date;
+  const region = getDayRegion(date);
   const matchedPlaces = allPlaces().filter(p => normalizeName(p.name) === normalizeName(name));
-  const matchedPlace  = matchedPlaces.find(p => region && regionMatches(p.region, region)) || matchedPlaces[0] || null;
+  const matchedPlace = matchedPlaces.find(p => region && regionMatches(p.region, region)) || matchedPlaces[0] || null;
 
   const item = {
-    type:        matchedPlace ? guessItemType(matchedPlace) : document.getElementById('m-type').value,
-    name, start: startVal, end: endVal,
-    hours:       document.getElementById('m-hours').value.trim() || matchedPlace?.hours || '',
-    cost:        parseInt(document.getElementById('m-cost').value) || parseInt(matchedPlace?.cost) || 0,
+    type: matchedPlace ? guessItemType(matchedPlace) : document.getElementById('m-type').value,
+    name,
+    start: startVal,
+    end: endVal,
+    hours: document.getElementById('m-hours').value.trim() || matchedPlace?.hours || '',
+    cost: parseInt(document.getElementById('m-cost').value) || parseInt(matchedPlace?.cost) || 0,
     transitMode: document.getElementById('m-transit').value,
-    transitMin:  parseInt(document.getElementById('m-transit-min').value) || 0,
-    note:        document.getElementById('m-note').value.trim() || matchedPlace?.note || '',
-    region:      matchedPlace?.region || region || '',
-    category:    matchedPlace?.category || '',
+    transitMin: parseInt(document.getElementById('m-transit-min').value) || 0,
+    note: document.getElementById('m-note').value.trim() || matchedPlace?.note || '',
+    region: matchedPlace?.region || region || '',
+    category: matchedPlace?.category || '',
     subcategory: matchedPlace?.subcategory || '',
-    createdAt:   new Date().toISOString()
+    createdAt: new Date().toISOString()
   };
+
+  try{
+    if (editingKey) {
+      await window.__set(window.__ref(window.__db, `itinerary/${date}/${editingKey}`), item);
+    } else {
+      await window.__push(window.__ref(window.__db, `itinerary/${date}`), item);
+    }
+
+    document.getElementById('modal-overlay').classList.remove('open');
+    editingKey = null;
+  }catch(err){
+    console.error('行程儲存失敗:', err);
+    alert('行程儲存失敗，請確認 Firebase 連線或 Rules 權限。');
+  }
+});
 
   if (editingKey) {
     window.__set(window.__ref(window.__db, `itinerary/${date}/${editingKey}`), item);
@@ -742,6 +868,14 @@ document.getElementById('btn-modal-save').addEventListener('click', () => {
 
 // ── AI Buttons ──
 document.getElementById('btn-auto-schedule').addEventListener('click', async () => {
+  const day = TRIP_DAYS[currentDay];
+
+  const ok = confirm(
+    `自動排「${day.label} ${getDayRegion(day.date) || day.sub}」會清空這天目前既有行程並重新產生，確定繼續嗎？`
+  );
+
+  if(!ok) return;
+
   try {
     await autoScheduleDay();
   } catch (err) {
@@ -749,38 +883,72 @@ document.getElementById('btn-auto-schedule').addEventListener('click', async () 
     const btn = document.getElementById('btn-auto-schedule');
     btn.disabled = false;
     btn.textContent = '🪄 自動排這天';
-    alert('排程時發生錯誤，請確認收藏清單是否有對應的城市景點。');
+    alert('排程時發生錯誤，請確認收藏清單是否有對應的城市景點，或檢查 Firebase Rules。');
   }
 });
 
 document.getElementById('btn-auto-all').addEventListener('click', async () => {
-  if (!confirm('排全程會清空所有現有行程，確定嗎？')) return;
+  if (!confirm('排全程會重排有對應收藏景點的日期，確定嗎？')) return;
+
   const btn = document.getElementById('btn-auto-all');
-  btn.disabled = true; btn.textContent = '⏳ 排程中…';
   const keepDay = currentDay;
   let skipped = 0;
-  for (let i = 0; i < TRIP_DAYS.length; i++) {
-    const count = await autoScheduleDay(i, { silent: true });
-    if (count === 0) skipped++;
-  }
-  currentDay = keepDay; buildTabs(); buildDayRegionSelect(); updateAiDesc(); renderDay();
-  btn.disabled = false; btn.textContent = '排全程';
-  if (skipped > 0) {
-    alert(`完成排程！\n其中 ${skipped} 天因無對應城市收藏而略過，請到總覽頁面補充收藏後再重新排程。`);
+
+  btn.disabled = true;
+  btn.textContent = '⏳ 排程中…';
+
+  try{
+    for (let i = 0; i < TRIP_DAYS.length; i++) {
+      const count = await autoScheduleDay(i, { silent: true });
+      if (count === 0) skipped++;
+    }
+
+    currentDay = keepDay;
+    buildTabs();
+    buildDayRegionSelect();
+    updateAiDesc();
+    renderDay();
+
+    if (skipped > 0) {
+      alert(`完成排程！\n其中 ${skipped} 天因無對應城市收藏而略過，請到總覽頁面補充收藏後再重新排程。`);
+    }
+  }catch(err){
+    console.error('排全程失敗:', err);
+    alert('排全程時發生錯誤，請確認 Firebase 連線或 Rules 權限。');
+  }finally{
+    btn.disabled = false;
+    btn.textContent = '排全程';
   }
 });
-
-document.getElementById('btn-clear-day').addEventListener('click', () => {
+  
+document.getElementById('btn-clear-day').addEventListener('click', async () => {
   if (!confirm('確定清空這天的行程？')) return;
-  window.__remove(window.__ref(window.__db, `itinerary/${TRIP_DAYS[currentDay].date}`));
+
+  try{
+    await window.__remove(window.__ref(window.__db, `itinerary/${TRIP_DAYS[currentDay].date}`));
+  }catch(err){
+    console.error('清空這天行程失敗:', err);
+    alert('清空行程失敗，請確認 Firebase 連線或 Rules 權限。');
+  }
 });
 
-document.getElementById('day-region-select').addEventListener('change', e => {
+document.getElementById('day-region-select').addEventListener('change', async e => {
   const date = TRIP_DAYS[currentDay].date;
   const val  = e.target.value;
+
   dayRegionMap[date] = val;
-  if (window.__db) window.__set(window.__ref(window.__db, `day_regions/${date}`), val || null);
-  buildTabs(); updateAiDesc();
+
+  try{
+    if (window.__db) {
+      await window.__set(window.__ref(window.__db, `day_regions/${date}`), val || null);
+    }
+
+    buildTabs();
+    updateAiDesc();
+  }catch(err){
+    console.error('今日城市儲存失敗:', err);
+    alert('今日城市儲存失敗，請確認 Firebase 連線或 Rules 權限。');
+  }
 });
 
 document.getElementById('m-name').addEventListener('change', autofillPlaceFields);
@@ -844,14 +1012,27 @@ waitFirebase(() => {
   });
 
   window.__onValue(window.__ref(db, 'itinerary'), snap => {
-    const raw = snap.val() || {};
-    itineraryData = {};
-    Object.entries(raw).forEach(([date, items]) => {
-      itineraryData[date] = Object.entries(items).map(([k, v]) => ({ ...v, _key: k }));
-    });
-    renderDay();
-  });
+  const raw = snap.val() || {};
+  itineraryData = {};
 
+  if(raw && typeof raw === 'object' && !Array.isArray(raw)){
+    Object.entries(raw).forEach(([date, items]) => {
+      if(!items || typeof items !== 'object' || Array.isArray(items)){
+        itineraryData[date] = [];
+        return;
+      }
+
+      itineraryData[date] = Object.entries(items)
+        .filter(([, v]) => v && typeof v === 'object')
+        .map(([k, v]) => ({ ...v, _key: k }));
+    });
+  }
+
+  renderDay();
+}, err => {
+  console.error('itinerary 讀取失敗:', err);
+  alert('行程資料讀取失敗，請確認 Firebase 連線或 Rules 權限。');
+});
   buildTabs(); buildDayRegionSelect(); updateAiDesc(); renderDay();
 });
 </script>
