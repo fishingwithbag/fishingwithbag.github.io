@@ -411,6 +411,9 @@ function hasFavForPlace(place, favSet) {
   if (fallbackId && favSet.has(fallbackId)) return true;
   return false;
 }
+function isDataReadyForAutoSchedule() {
+  return favsReady && basePlacesReady && customPlacesReady;
+}
 function isPageDataReady() {
   return favsReady && basePlacesReady && customPlacesReady && itineraryReady;
 }
@@ -471,12 +474,19 @@ function updateSyncStateUI() {
 
   if (!autoBtn || !autoAllBtn || !desc) return;
 
-  if (!isDataReadyForAutoSchedule()) {
+  const autoReady = favsReady && basePlacesReady && customPlacesReady;
+
+  if (!autoReady) {
     autoBtn.disabled = true;
     autoAllBtn.disabled = true;
     desc.textContent = '資料同步中，正在載入最愛清單與景點資料…';
     return;
   }
+
+  autoBtn.disabled = false;
+  autoAllBtn.disabled = false;
+  updateAiDesc();
+}
 
   autoBtn.disabled = false;
   autoAllBtn.disabled = false;
