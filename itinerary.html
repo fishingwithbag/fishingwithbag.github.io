@@ -323,6 +323,7 @@ let itineraryData   = {};
 let dayRegionMap    = {};
 let favsCache       = [];
 let editingKey      = null;
+let modalSaving     = false;
 let favsReady       = false;
 let basePlacesReady = false;
 let customPlacesReady = false;
@@ -438,7 +439,21 @@ function waitFirebaseReady() {
   return new Promise(resolve => window.addEventListener('firebase-ready', resolve, { once: true }));
 }
 
+function setModalSaving(isSaving) {
+  modalSaving = isSaving;
 
+  const saveBtn = document.getElementById('btn-modal-save');
+  const cancelBtn = document.getElementById('btn-modal-cancel');
+
+  if (saveBtn) {
+    saveBtn.disabled = isSaving;
+    saveBtn.textContent = isSaving ? '儲存中…' : '儲存行程';
+  }
+
+  if (cancelBtn) {
+    cancelBtn.disabled = isSaving;
+  }
+}
 
 // ── Region / Day helpers ──
 function getDayRegion(date) {
@@ -664,23 +679,30 @@ function renderDay() {
   });
 
   tl.querySelectorAll('.btn-del').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const key  = btn.dataset.key;
-      const date = TRIP_DAYS[currentDay].date;
-  
-      if(!confirm('確定刪除此行程項目？')) return;
-  
-      try{
-        await window.__remove(window.__ref(window.__db, `itinerary/${date}/${key}`));
-      }catch(err){
-        console.error('刪除行程失敗:', err);
-        alert('刪除行程失敗，請確認 Firebase 連線或 Rules 權限。');
+  btn.addEventListener('click', async () => {
+    const key  = btn.dataset.key;
+    const date = TRIP_DAYS[currentDay].date;
+
+    if (!confirm('確定刪除此行程項目？')) return;
+
+    btn.disabled = true;
+    const oldText = btn.textContent;
+    btn.textContent = '刪除中…';
+
+    try {
+      await window.__remove(window.__ref(window.__db, `itinerary/${date}/${key}`));
+    } catch (err) {
+      console.error('刪除行程失敗:', err);
+      alert('刪除行程失敗，請確認 Firebase 連線或 Rules 權限。');
+      btn.disabled = false;
+      btn.textContent = oldText;
       }
     });
   });
 
   tl.querySelectorAll('.btn-edit').forEach(btn => {
     btn.addEventListener('click', () => {
+      setModalSaving(false);
       const key  = btn.dataset.key;
       const date = TRIP_DAYS[currentDay].date;
       const item = (itineraryData[date] || []).find(i => i._key === key);
@@ -911,6 +933,7 @@ async function autoScheduleDay(dayIndex = currentDay, { silent = false } = {}) {
 
 // ── Modal ──
 document.getElementById('btn-add-item').addEventListener('click', () => {
+  setModalSaving(false);
   buildPlaceSuggestions();
   setupTimeInput('m-start');
   setupTimeInput('m-end');
@@ -929,16 +952,21 @@ document.getElementById('btn-add-item').addEventListener('click', () => {
 });
 
 document.getElementById('btn-modal-cancel').addEventListener('click', () => {
+  if (modalSaving) return;
   document.getElementById('modal-overlay').classList.remove('open');
 });
 
+
 document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (modalSaving) return;
   if (e.target === document.getElementById('modal-overlay')) {
     document.getElementById('modal-overlay').classList.remove('open');
   }
 });
 
 document.getElementById('btn-modal-save').addEventListener('click', async () => {
+  if (modalSaving) return;
+
   const name = document.getElementById('m-name').value.trim();
 
   if (!name) {
@@ -1019,6 +1047,8 @@ document.getElementById('btn-modal-save').addEventListener('click', async () => 
     updatedAt: new Date().toISOString()
   };
 
+  setModalSaving(true);
+
   try {
     if (editingKey) {
       await window.__set(
@@ -1037,6 +1067,8 @@ document.getElementById('btn-modal-save').addEventListener('click', async () => 
   } catch (err) {
     console.error('行程儲存失敗:', err);
     alert('行程儲存失敗，請確認 Firebase 連線或 Rules 權限。');
+  } finally {
+    setModalSaving(false);
   }
 });
 
@@ -1102,11 +1134,20 @@ document.getElementById('btn-auto-all').addEventListener('click', async () => {
 document.getElementById('btn-clear-day').addEventListener('click', async () => {
   if (!confirm('確定清空這天的行程？')) return;
 
-  try{
-    await window.__remove(window.__ref(window.__db, `itinerary/${TRIP_DAYS[currentDay].date}`));
-  }catch(err){
+  const btn = document.getElementById('btn-clear-day');
+  btn.disabled = true;
+  btn.textContent = '清空中…';
+
+  try {
+    await window.__remove(
+      window.__ref(window.__db, `itinerary/${TRIP_DAYS[currentDay].date}`)
+    );
+  } catch (err) {
     console.error('清空這天行程失敗:', err);
     alert('清空行程失敗，請確認 Firebase 連線或 Rules 權限。');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '清空這天';
   }
 });
 
