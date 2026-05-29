@@ -864,19 +864,40 @@ let searchQ = '';
 let filterRegion = '';
 let filterCat = '';
 let filterSub = '';
-
 let basePlacesReady = false;
 let customPlacesReady = false;
+let addPlaceSaving = false;
 
 function allPlaces(){ return [...PLACES, ...CLOUD_PLACES]; }
 function escapeHTML(v){
   return String(v ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+  
+function makeCustomPlaceId(){
+  return `custom_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 }
 function showDataError(message){
   document.getElementById('cards-count').textContent=message;
   document.getElementById('cards').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;opacity:.45;font-size:.9rem;">資料連線失敗，請稍後重新整理</div>';
 }
 
+function setAddPlaceSaving(isSaving){
+  addPlaceSaving = !!isSaving;
+
+  const form = document.getElementById('add-place-form');
+  const btn = form?.querySelector('.btn-add-place');
+  const status = document.getElementById('add-sync-status');
+
+  if(btn){
+    btn.disabled = addPlaceSaving;
+    btn.textContent = addPlaceSaving ? '儲存中…' : '新增地點';
+  }
+
+  if(status && addPlaceSaving){
+    status.textContent = '⏳ 儲存中…';
+  }
+}  
+  
 function isIndexDataReady(){
   return basePlacesReady && customPlacesReady && _favsReady;
 }
@@ -931,7 +952,12 @@ function waitFirebaseReady(){
 async function toggleFav(id){
   await waitFirebaseReady();
 
-  const key = String(id);
+  const key = normalizeFavToken(id);
+
+  if(!key){
+    throw new Error('invalid-fav-id');
+  }
+
   const exists = _favsCache.includes(key);
   const favRef = window.__ref(window.__db, `favs/${key}`);
 
@@ -944,6 +970,28 @@ async function toggleFav(id){
   return FAV_ICON_ON;
 }
 
+async function deleteCustomPlace(place){
+  await waitFirebaseReady();
+
+  if(!place || !place._key){
+    throw new Error('missing-custom-place-key');
+  }
+
+  const tasks = [
+    window.__remove(window.__ref(window.__db, `custom_places/${place._key}`))
+  ];
+
+  const favKey = normalizeFavToken(place.id);
+
+  if(favKey){
+    tasks.push(
+      window.__remove(window.__ref(window.__db, `favs/${favKey}`))
+    );
+  }
+
+  await Promise.all(tasks);
+}  
+  
 // ── 建卡片 ──
 function buildCard(p){
   const el=document.createElement('article');
@@ -1009,21 +1057,21 @@ function buildCard(p){
       </div>
     </div>`;
   // fav
-      el.querySelector('.card__fav').addEventListener('click',async function(){
-        if(!_favsReady){
-          alert('最愛資料仍在同步中，請稍後再試。');
-          return;
-        }
-      
-        if(p.id === undefined || p.id === null || !String(p.id).trim()){
-          alert('此地點缺少有效 ID，無法加入收藏。');
-          return;
-        }
-      
-        this.disabled = true;
-      
-        try{
-          const nextIcon = await toggleFav(p.id);
+    el.querySelector('.card__fav').addEventListener('click', async function(){
+      if(!_favsReady){
+        alert('最愛資料仍在同步中，請稍後再試。');
+        return;
+      }
+    
+      if(p.id === undefined || p.id === null || !String(p.id).trim()){
+        alert('此地點缺少有效 ID，無法加入收藏。');
+        return;
+      }
+    
+      this.disabled = true;
+    
+      try{
+        const nextIcon = await toggleFav(p.id);
     
         this.textContent = nextIcon;
     
@@ -1038,22 +1086,42 @@ function buildCard(p){
         }
     
         this.classList.add('pulse');
-        setTimeout(()=>this.classList.remove('pulse'),220);
+        setTimeout(() => this.classList.remove('pulse'), 220);
+      }catch(err){
+        console.error('收藏切換失敗:', err);
+        alert('收藏狀態更新失敗，請確認 Firebase 連線或 Rules 權限。');
+    
+        const stillFav = getFavs().includes(String(p.id));
+    
+        this.textContent = stillFav ? FAV_ICON_ON : FAV_ICON_OFF;
+        this.classList.toggle('is-fav', stillFav);
+        this.title = stillFav ? '取消收藏' : '加入收藏';
+        this.setAttribute('aria-label', stillFav ? '取消收藏' : '加入收藏');
       }finally{
         this.disabled = false;
       }
     });
+  
   // del
-  el.querySelector('.btn-del-place')?.addEventListener('click',function(){
-    if(!confirm('確定刪除「'+p.name+'」？'))return;
-    const key=p._key;
-    if(key){
-      window.__remove(window.__ref(window.__db,'custom_places/'+key));
+  
+  el.querySelector('.btn-del-place')?.addEventListener('click', async function(){
+    if(!confirm('確定刪除「' + p.name + '」？')) return;
+  
+    this.disabled = true;
+    const oldText = this.textContent;
+    this.textContent = '…';
+  
+    try{
+      await deleteCustomPlace(p);
+    }catch(err){
+      console.error('刪除自訂地點失敗:', err);
+      alert('刪除自訂地點失敗，請確認 Firebase 連線或 Rules 權限。');
+  
+      this.disabled = false;
+      this.textContent = oldText;
     }
   });
-  revObs.observe(el);
-  return el;
-}
+
 
 // 子類別細分 icon
 const SUB_EMOJI = {
@@ -1198,9 +1266,11 @@ document.getElementById('fav-btn').addEventListener('click',()=>{
 
 // 快速入口「新增地點」按鈕 → 展開表單並滾到表單
 document.getElementById('qa-add-btn').addEventListener('click',()=>{
-  const sec=document.getElementById('add-section');
+  setAddPlaceSaving(false);
+
+  const sec = document.getElementById('add-section');
   sec.classList.add('open');
-  sec.scrollIntoView({behavior:'smooth',block:'start'});
+  sec.scrollIntoView({behavior:'smooth', block:'start'});
 });
 
 // 新增表單展開/折疊
@@ -1212,30 +1282,66 @@ document.getElementById('add-toggle').addEventListener('click',()=>{
 document.getElementById('add-category').addEventListener('change',e=>{ updateAddSubOptions(e.target.value); });
 
 // 提交新增地點
-document.getElementById('add-place-form').addEventListener('submit',e=>{
+document.getElementById('add-place-form').addEventListener('submit', async e => {
   e.preventDefault();
-  const region=document.getElementById('add-region').value.trim();
-  const category=document.getElementById('add-category').value;
-  const sub=document.getElementById('add-sub').value;
-  const name=document.getElementById('add-name').value.trim();
-  const hours=document.getElementById('add-hours').value.trim();
-  const note=document.getElementById('add-note').value.trim();
-  if(!region||!category||!name){alert('請填寫地區、類別與名稱');return;}
-  const addRef=window.__ref(window.__db,'custom_places');
-  const status=document.getElementById('add-sync-status');
-  status.textContent='⏳ 儲存中…';
-  window.__push(addRef,{
-    id:Date.now(),region,category,subcategory:sub||category,name,hours,note,
-    twd:null,tags:[region],fav:false,photo:null,createdAt:new Date().toISOString(),_src:'custom'
-  }).then(()=>{
-    status.textContent='✅ 已儲存';
+
+  if(addPlaceSaving) return;
+
+  await waitFirebaseReady();
+
+  const region = document.getElementById('add-region').value.trim();
+  const category = document.getElementById('add-category').value;
+  const sub = document.getElementById('add-sub').value;
+  const name = document.getElementById('add-name').value.trim();
+  const hours = document.getElementById('add-hours').value.trim();
+  const note = document.getElementById('add-note').value.trim();
+
+  if(!region || !category || !name){
+    alert('請填寫地區、類別與名稱');
+    return;
+  }
+
+  const status = document.getElementById('add-sync-status');
+  const addRef = window.__ref(window.__db, 'custom_places');
+
+  setAddPlaceSaving(true);
+
+  try{
+    await window.__push(addRef, {
+      id: makeCustomPlaceId(),
+      region,
+      category,
+      subcategory: sub || category,
+      name,
+      hours,
+      note,
+      twm: null,
+      twd: null,
+      tags: [region],
+      fav: false,
+      photo: null,
+      createdAt: new Date().toISOString(),
+      _src: 'custom'
+    });
+
+    status.textContent = '✅ 已儲存';
     e.target.reset();
-    document.getElementById('add-sub').innerHTML='<option value="">請先選擇類別</option>';
-    setTimeout(()=>status.textContent='',2500);
-  }).catch(()=>{
-    status.textContent='儲存失敗，請稍後再試';
-    setTimeout(()=>status.textContent='',3500);
-  });
+    document.getElementById('add-sub').innerHTML = '<option value="">請先選擇類別</option>';
+
+    setTimeout(() => {
+      status.textContent = '';
+    }, 2500);
+  }catch(err){
+    console.error('新增地點失敗:', err);
+    status.textContent = '儲存失敗，請稍加後再試';
+    alert('新增地點失敗，請確認 Firebase 連線或 Rules 權限。');
+
+    setTimeout(() => {
+      status.textContent = '';
+    }, 3500);
+  }finally{
+    setAddPlaceSaving(false);
+  }
 });
 
 // 匯出 CSV
