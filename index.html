@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>九州福岡熊本旅遊 2026/9/30~10/7</title>
+  <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🔍</text></svg>'>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet">
   <style>
@@ -1178,7 +1179,7 @@ document.getElementById('region-select').addEventListener('change',e=>{filterReg
 document.getElementById('cat-select').addEventListener('change',e=>{filterCat=e.target.value;filterSub='';updateFilterSubOptions(filterCat);renderWhenReady();});
 
 // 子類別 select
-ddocument.getElementById('sub-select').addEventListener('change',e=>{filterSub=e.target.value;renderWhenReady();});
+document.getElementById('sub-select').addEventListener('change',e=>{filterSub=e.target.value;renderWhenReady();});
 
 // 排序
 document.getElementById('sort-select').addEventListener('change',renderWhenReady);
