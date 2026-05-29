@@ -449,9 +449,60 @@
         0 0 8px rgba(231,47,117,.16);
     }
     
-    .card__fav:disabled{
-      opacity:.45;
+    /* ── Delete Icon：自訂景點刪除按鈕 ── */
+    .btn-del-place{
+      color:#ff7a7a;
+      background:rgba(255,90,90,.10);
+      border-color:rgba(255,120,120,.38);
+      box-shadow:
+        0 0 0 1px rgba(255,120,120,.08) inset,
+        0 2px 8px rgba(0,0,0,.25);
+    }
+    
+    .btn-del-place:hover{
+      color:#fff;
+      background:rgba(255,90,90,.22);
+      border-color:rgba(255,130,130,.65);
+      box-shadow:
+        0 0 0 1px rgba(255,120,120,.12) inset,
+        0 0 12px rgba(255,90,90,.26);
+    }
+    
+    .btn-del-place:active{
+      transform:scale(.94);
+    }
+    
+    .btn-del-place:disabled{
+      opacity:.55;
       pointer-events:none;
+    }
+    
+    .trash-icon{
+      width:20px;
+      height:20px;
+      display:block;
+      fill:none;
+      stroke:currentColor;
+      stroke-width:1.9;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+    
+    .trash-icon__body{
+      fill:rgba(255,120,120,.10);
+    }
+    
+    [data-theme="light"] .btn-del-place{
+      color:#d9344a;
+      background:rgba(217,52,74,.08);
+      border-color:rgba(217,52,74,.28);
+      box-shadow:0 1px 4px rgba(0,0,0,.08);
+    }
+    
+    [data-theme="light"] .btn-del-place:hover{
+      color:#fff;
+      background:rgba(217,52,74,.82);
+      border-color:rgba(217,52,74,.9);
     }
     
     /* ── Google Maps 風格 icon ── */
@@ -867,6 +918,7 @@ let filterSub = '';
 let basePlacesReady = false;
 let customPlacesReady = false;
 let addPlaceSaving = false;
+let rentalSaving = false;
 
 function allPlaces(){ return [...PLACES, ...CLOUD_PLACES]; }
 function escapeHTML(v){
@@ -876,6 +928,20 @@ function escapeHTML(v){
 function makeCustomPlaceId(){
   return `custom_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 }
+  
+function trashSvgIcon(){
+  return `
+    <svg class="trash-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path class="trash-icon__lid" d="M8.5 6.2V5.1c0-.9.7-1.6 1.6-1.6h3.8c.9 0 1.6.7 1.6 1.6v1.1"/>
+      <path class="trash-icon__body" d="M6.8 8.2h10.4l-.7 10.1c-.1 1.1-1 2-2.1 2H9.6c-1.1 0-2-.9-2.1-2L6.8 8.2z"/>
+      <path class="trash-icon__line" d="M5.4 8.2h13.2"/>
+      <path class="trash-icon__line" d="M10 11.2v5.8"/>
+      <path class="trash-icon__line" d="M14 11.2v5.8"/>
+    </svg>
+  `;
+}
+  
+
 function showDataError(message){
   document.getElementById('cards-count').textContent=message;
   document.getElementById('cards').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;opacity:.45;font-size:.9rem;">資料連線失敗，請稍後重新整理</div>';
@@ -897,6 +963,23 @@ function setAddPlaceSaving(isSaving){
     status.textContent = '⏳ 儲存中…';
   }
 }  
+
+function setRentalSaving(isSaving){
+  rentalSaving = !!isSaving;
+
+  const btn = document.getElementById('btn-save-rental');
+  const status = document.getElementById('rental-sync-status');
+
+  if(btn){
+    btn.disabled = rentalSaving;
+    btn.textContent = rentalSaving ? '儲存中…' : '儲存租車資訊';
+  }
+
+  if(status && rentalSaving){
+    status.textContent = '⏳ 儲存中…';
+  }
+}
+  
   
 function isIndexDataReady(){
   return basePlacesReady && customPlacesReady && _favsReady;
@@ -1053,7 +1136,7 @@ function buildCard(p){
             <circle class="gmap-icon__center" cx="18" cy="15.35" r="3.15"/>
           </svg>
         </a>
-        ${canDelete?`<button class="card__btn btn-del-place" data-id="${escapeHTML(p.id)}">🗑</button>`:''}
+       ${canDelete?`<buttonclass="card__btn btn-del-place"data-id="${escapeHTML(p.id)}"title="刪除自訂地點"aria-label="刪除自訂地點">${trashSvgIcon()}</button>`:''}
       </div>
     </div>`;
   // fav
@@ -1107,7 +1190,7 @@ function buildCard(p){
     if(!confirm('確定刪除「' + p.name + '」？')) return;
 
     this.disabled = true;
-    const oldText = this.textContent;
+    const oldHtml = this.innerHTML;
     this.textContent = '…';
 
     try{
@@ -1116,8 +1199,8 @@ function buildCard(p){
       console.error('刪除自訂地點失敗:', err);
       alert('刪除自訂地點失敗，請確認 Firebase 連線或 Rules 權限。');
 
-      this.disabled = false;
-      this.textContent = oldText;
+    this.disabled = false;
+    this.innerHTML = oldHtml;
     }
   });
   revObs.observe(el);
@@ -1387,14 +1470,14 @@ function renderCostEntries(){
       <button class="cost-entry__del">✕</button>`;
     row.querySelector('.cost-entry__name').addEventListener('change',e=>{
       costItems[idx].name=e.target.value;
-      saveCostItems();
+      void saveCostItems();
     });
     row.querySelector('.cost-entry__amount').addEventListener('change',e=>{
       costItems[idx].amount=Number(e.target.value)||0;
-      saveCostItems(); renderCostSummary();
+      void saveCostItems(); renderCostSummary();
     });
     row.querySelector('.cost-entry__del').addEventListener('click',()=>{
-      costItems.splice(idx,1); saveCostItems(); renderCostEntries(); renderCostSummary();
+      costItems.splice(idx,1); void saveCostItems(); renderCostEntries(); renderCostSummary();render
     });
     wrap.appendChild(row);
   });
@@ -1407,14 +1490,41 @@ function renderCostSummary(){
     <strong>總計：NT$${total.toLocaleString()}</strong><br>
     每人分攤：NT$${Math.ceil(total/persons).toLocaleString()}（${persons}人）`;
 }
-function saveCostItems(){
-  if(!window.__firebaseReady)return;
-  window.__set(window.__ref(window.__db,'cost_items'),costItems);
+async function saveCostItems(){
+  if(!window.__firebaseReady) return;
+
+  const status = document.getElementById('cost-sync-status');
+
+  try{
+    if(status) status.textContent = '⏳ 儲存中…';
+
+    await window.__set(
+      window.__ref(window.__db, 'cost_items'),
+      costItems
+    );
+
+    if(status){
+      status.textContent = '✅ 已儲存';
+      setTimeout(()=>{
+        status.textContent = '';
+      }, 1800);
+    }
+  }catch(err){
+    console.error('住宿費用儲存失敗:', err);
+
+    if(status){
+      status.textContent = '費用資料儲存失敗';
+    }
+
+    alert('住宿費用儲存失敗，請確認 Firebase 連線或 Rules 權限。');
+  }
 }
 document.getElementById('btn-add-cost').addEventListener('click',()=>{
   costItems.push({name:'',amount:0});
   renderCostEntries();
+  void saveCostItems();
 });
+  
 document.getElementById('person-input').addEventListener('change',renderCostSummary);
 
 // ════════════════════════════════════════
@@ -1423,20 +1533,51 @@ document.getElementById('person-input').addEventListener('change',renderCostSumm
 const RENTAL_FIELDS=['pickup-date','return-date','pickup-loc','return-loc','company','car','cost','booking'];
 function loadRentalUI(data){
   RENTAL_FIELDS.forEach(f=>{
-    const el=document.getElementById('r-'+f);
-    if(el&&data&&data[f]) el.value=data[f];
+    const el = document.getElementById('r-' + f);
+    if(!el || !data) return;
+
+    if(Object.prototype.hasOwnProperty.call(data, f)){
+      el.value = data[f] ?? '';
+    }
   });
 }
-document.getElementById('btn-save-rental').addEventListener('click',()=>{
-  const data={};
+document.getElementById('btn-save-rental').addEventListener('click', async ()=>{
+  if(rentalSaving) return;
+
+  await waitFirebaseReady();
+
+  const data = {};
+
   RENTAL_FIELDS.forEach(f=>{
-    const el=document.getElementById('r-'+f);
-    if(el) data[f]=el.value;
+    const el = document.getElementById('r-' + f);
+    if(el) data[f] = el.value;
   });
-  window.__set(window.__ref(window.__db,'rental_info'),data);
-  const s=document.getElementById('rental-sync-status');
-  s.textContent='✅ 已儲存'; setTimeout(()=>s.textContent='',2500);
+
+  const status = document.getElementById('rental-sync-status');
+
+  setRentalSaving(true);
+
+  try{
+    await window.__set(window.__ref(window.__db, 'rental_info'), data);
+
+    status.textContent = '✅ 已儲存';
+
+    setTimeout(()=>{
+      status.textContent = '';
+    }, 2500);
+  }catch(err){
+    console.error('租車資訊儲存失敗:', err);
+    status.textContent = '租車資料儲存失敗';
+    alert('租車資訊儲存失敗，請確認 Firebase 連線或 Rules 權限。');
+
+    setTimeout(()=>{
+      status.textContent = '';
+    }, 3500);
+  }finally{
+    setRentalSaving(false);
+  }
 });
+
 
 // ════════════════════════════════════════
 //  Firebase 初始化
