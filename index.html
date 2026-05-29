@@ -448,91 +448,146 @@
         0 1px 4px rgba(0,0,0,.08),
         0 0 8px rgba(231,47,117,.16);
     }
-    
-    /* ── Delete Icon：自訂景點刪除按鈕，對齊收藏 / 地圖 icon 尺寸 ── */
-      .btn-del-place{
-        width:34px;
-        height:34px;
-        min-width:34px;
-        min-height:34px;
-        padding:0;
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        color:#ff7a7a;
-        background:rgba(255,90,90,.12);
-        border-color:rgba(255,120,120,.48);
+  /* ── Favorite Icon：補 hover 發亮效果，對齊地圖 / 刪除 icon ── */
+    @media (hover:hover){
+      [data-theme="dark"] .card__fav:hover{
+        color:#ff8fbd;
+        background:rgba(255,111,163,.16);
+        border-color:rgba(255,111,163,.55);
+        text-shadow:
+          0 0 5px rgba(255,111,163,.55),
+          0 0 12px rgba(255,111,163,.32);
         box-shadow:
-          0 0 0 1px rgba(255,120,120,.10) inset,
-          0 2px 8px rgba(0,0,0,.32);
-      }
-      
-      .btn-del-place:active{
-        transform:scale(.94);
-      }
-      
-      .btn-del-place:disabled{
-        opacity:.55;
-        pointer-events:none;
-      }
-      
-      .trash-icon{
-        width:22px;
-        height:22px;
-        display:block;
-        flex-shrink:0;
-        fill:none;
-        stroke:currentColor;
-        stroke-width:2;
-        stroke-linecap:round;
-        stroke-linejoin:round;
-        pointer-events:none;
-      }
-      
-      .trash-icon__body{
-        fill:rgba(255,120,120,.10);
-      }
-      
-      [data-theme="dark"] .btn-del-place{
-        color:#ff8a8a;
-        background:rgba(255,90,90,.13);
-        border-color:rgba(255,130,130,.55);
-        box-shadow:
-          0 0 0 1px rgba(255,120,120,.12) inset,
-          0 0 10px rgba(255,90,90,.18),
-          0 2px 8px rgba(0,0,0,.45);
-      }
-      
-      [data-theme="light"] .btn-del-place{
-        color:#d9344a;
-        background:#fff;
-        border-color:rgba(217,52,74,.32);
-        box-shadow:
-          0 1px 4px rgba(0,0,0,.12),
-          0 0 0 1px rgba(255,255,255,.65) inset;
-      }
-      
-      @media (hover:hover){
-        [data-theme="dark"] .btn-del-place:hover{
-          color:#fff;
-          background:rgba(255,90,90,.25);
-          border-color:rgba(255,130,130,.75);
-          box-shadow:
-            0 0 0 1px rgba(255,120,120,.15) inset,
-            0 0 14px rgba(255,90,90,.30),
-            0 3px 10px rgba(0,0,0,.5);
-        }
-      
-        [data-theme="light"] .btn-del-place:hover{
-          color:#fff;
-          background:rgba(217,52,74,.86);
-          border-color:rgba(217,52,74,.9);
-          box-shadow:
-            0 2px 8px rgba(0,0,0,.16),
-            0 0 0 1px rgba(255,255,255,.75) inset;
-        }
+          0 0 0 1px rgba(255,111,163,.16) inset,
+          0 0 12px rgba(255,111,163,.24),
+          0 3px 10px rgba(0,0,0,.48);
       }
     
+      [data-theme="dark"] .card__fav.is-fav:hover{
+        color:#ff9fc8;
+        background:rgba(255,111,163,.22);
+        border-color:rgba(255,111,163,.72);
+        text-shadow:
+          0 0 6px rgba(255,111,163,.70),
+          0 0 15px rgba(255,111,163,.42);
+        box-shadow:
+          0 0 0 1px rgba(255,111,163,.22) inset,
+          0 0 16px rgba(255,111,163,.34),
+          0 3px 10px rgba(0,0,0,.50);
+      }
+    
+      [data-theme="light"] .card__fav:hover{
+        color:#e72f75;
+        background:rgba(231,47,117,.10);
+        border-color:rgba(231,47,117,.38);
+        text-shadow:
+          0 0 3px rgba(231,47,117,.32),
+          0 0 8px rgba(231,47,117,.18);
+        box-shadow:
+          0 2px 8px rgba(0,0,0,.12),
+          0 0 10px rgba(231,47,117,.16);
+      }
+    
+      [data-theme="light"] .card__fav.is-fav:hover{
+        color:#d91f66;
+        background:rgba(231,47,117,.16);
+        border-color:rgba(231,47,117,.52);
+        text-shadow:
+          0 0 4px rgba(231,47,117,.40),
+          0 0 10px rgba(231,47,117,.22);
+        box-shadow:
+          0 2px 8px rgba(0,0,0,.14),
+          0 0 12px rgba(231,47,117,.20);
+      }
+    }
+    
+    .card__fav:disabled{
+      opacity:.45;
+      pointer-events:none;
+    }
+   /* ── Delete Icon：自訂景點刪除按鈕，非紅色系，對齊收藏 / 地圖 icon ── */
+    .btn-del-place{
+      width:34px;
+      height:34px;
+      min-width:34px;
+      min-height:34px;
+      padding:0;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--purple);
+      background:rgba(184,175,255,.12);
+      border-color:rgba(184,175,255,.42);
+      box-shadow:
+        0 0 0 1px rgba(184,175,255,.10) inset,
+        0 2px 8px rgba(0,0,0,.32);
+    }
+    
+    .btn-del-place:active{
+      transform:scale(.94);
+    }
+    
+    .btn-del-place:disabled{
+      opacity:.55;
+      pointer-events:none;
+    }
+    
+    .trash-icon{
+      width:22px;
+      height:22px;
+      display:block;
+      flex-shrink:0;
+      fill:none;
+      stroke:currentColor;
+      stroke-width:2;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+      pointer-events:none;
+    }
+    
+    .trash-icon__body{
+      fill:rgba(184,175,255,.08);
+    }
+    
+    [data-theme="dark"] .btn-del-place{
+      color:#c8c1ff;
+      background:rgba(184,175,255,.13);
+      border-color:rgba(184,175,255,.56);
+      box-shadow:
+        0 0 0 1px rgba(184,175,255,.12) inset,
+        0 0 10px rgba(184,175,255,.18),
+        0 2px 8px rgba(0,0,0,.45);
+    }
+    
+    [data-theme="light"] .btn-del-place{
+      color:#6f63d8;
+      background:#fff;
+      border-color:rgba(111,99,216,.32);
+      box-shadow:
+        0 1px 4px rgba(0,0,0,.12),
+        0 0 0 1px rgba(255,255,255,.65) inset;
+    }
+    
+    @media (hover:hover){
+      [data-theme="dark"] .btn-del-place:hover{
+        color:#ffffff;
+        background:rgba(184,175,255,.24);
+        border-color:rgba(184,175,255,.78);
+        box-shadow:
+          0 0 0 1px rgba(184,175,255,.18) inset,
+          0 0 15px rgba(184,175,255,.32),
+          0 3px 10px rgba(0,0,0,.50);
+      }
+    
+      [data-theme="light"] .btn-del-place:hover{
+        color:#ffffff;
+        background:rgba(111,99,216,.86);
+        border-color:rgba(111,99,216,.92);
+        box-shadow:
+          0 2px 8px rgba(0,0,0,.16),
+          0 0 0 1px rgba(255,255,255,.75) inset;
+      }
+    }
     /* ── Google Maps 風格 icon ── */
     .card__map{
       width:34px;
@@ -967,6 +1022,27 @@ function trashSvgIcon(){
       <path class="trash-icon__line" d="M14 11.2v5.8"/>
     </svg>
   `;
+}
+
+function csvCell(value){
+  return `"${String(value ?? '').replace(/"/g, '""')}"`;
+}
+
+function downloadCsv(filename, csvText){
+  const blob = new Blob(['\uFEFF' + csvText], {
+    type: 'text/csv;charset=utf-8;'
+  });
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
   
 
@@ -1467,13 +1543,32 @@ document.getElementById('add-place-form').addEventListener('submit', async e => 
 
 // 匯出 CSV
 document.getElementById('btn-export-csv').addEventListener('click',()=>{
-  const rows=[['id','region','category','subcategory','name','hours','note','twd','createdAt']];
-  allPlaces().forEach(p=>rows.push([p.id,p.region||'',p.category||'',p.subcategory||'',p.name||'',p.hours||'',p.note||'',p.twd||'',p.createdAt||'']));
-  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
-  const a=document.createElement('a');
-  a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
-  a.download='kyushu_places.csv'; a.click();
+  const rows = [
+    ['id','source','region','category','subcategory','name','hours','note','twd','createdAt']
+  ];
+
+  allPlaces().forEach(p=>{
+    rows.push([
+      p.id,
+      p._src || '',
+      p.region || '',
+      p.category || '',
+      p.subcategory || '',
+      p.name || '',
+      p.hours || '',
+      p.note || '',
+      p.twd || '',
+      p.createdAt || ''
+    ]);
+  });
+
+  const csv = rows
+    .map(row => row.map(csvCell).join(','))
+    .join('\n');
+
+  downloadCsv('kyushu_places.csv', csv);
 });
+
 
 // 住宿費用 toggle（預設關閉）
 document.getElementById('cost-toggle').addEventListener('click',()=>{
