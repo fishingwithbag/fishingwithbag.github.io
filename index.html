@@ -864,6 +864,9 @@ let filterRegion = '';
 let filterCat = '';
 let filterSub = '';
 
+let basePlacesReady = false;
+let customPlacesReady = false;
+
 function allPlaces(){ return [...PLACES, ...CLOUD_PLACES]; }
 function escapeHTML(v){
   return String(v ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -871,6 +874,28 @@ function escapeHTML(v){
 function showDataError(message){
   document.getElementById('cards-count').textContent=message;
   document.getElementById('cards').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;opacity:.45;font-size:.9rem;">資料連線失敗，請稍後重新整理</div>';
+}
+
+function isIndexDataReady(){
+  return basePlacesReady && customPlacesReady && _favsReady;
+}
+
+function renderLoadingState(){
+  document.getElementById('cards-count').textContent = '資料同步中…';
+  document.getElementById('cards').innerHTML =
+    '<div style="grid-column:1/-1;text-align:center;padding:2rem;opacity:.45;font-size:.9rem;">正在載入景點與最愛資料…</div>';
+}
+
+function renderWhenReady(){
+  if(!isIndexDataReady()){
+    renderLoadingState();
+    return;
+  }
+
+  buildRegionSelect();
+  buildRegionTags();
+  updateFilterSubOptions(filterCat);
+  render();
 }
 
 // ── Intersection Observer ──
@@ -948,6 +973,7 @@ function buildCard(p){
           data-id="${escapeHTML(p.id)}"
           title="${isFav ? '取消收藏' : '加入收藏'}"
           aria-label="${isFav ? '取消收藏' : '加入收藏'}"
+          ${_favsReady ? '' : 'disabled'}
         >
           ${isFav ? FAV_ICON_ON : FAV_ICON_OFF}
         </button>
@@ -983,10 +1009,20 @@ function buildCard(p){
     </div>`;
   // fav
       el.querySelector('.card__fav').addEventListener('click',async function(){
-      this.disabled = true;
-    
-      try{
-        const nextIcon = await toggleFav(p.id);
+        if(!_favsReady){
+          alert('最愛資料仍在同步中，請稍後再試。');
+          return;
+        }
+      
+        if(p.id === undefined || p.id === null || !String(p.id).trim()){
+          alert('此地點缺少有效 ID，無法加入收藏。');
+          return;
+        }
+      
+        this.disabled = true;
+      
+        try{
+          const nextIcon = await toggleFav(p.id);
     
         this.textContent = nextIcon;
     
@@ -1083,13 +1119,13 @@ function buildRegionTags(){
   const allBtn=document.createElement('button');
   allBtn.className='region-tag'+(filterRegion===''?' active':'');
   allBtn.textContent='全部';
-  allBtn.addEventListener('click',()=>{ filterRegion=''; buildRegionTags(); render(); });
+  allBtn.addEventListener('click',()=>{filterRegion='';buildRegionTags();renderWhenReady();});
   wrap.appendChild(allBtn);
   regions.forEach(r=>{
     const btn=document.createElement('button');
     btn.className='region-tag'+(filterRegion===r?' active':'');
     btn.textContent=r;
-    btn.addEventListener('click',()=>{ filterRegion=r; buildRegionTags(); render(); });
+    btn.addEventListener('click',()=>{filterRegion=r;buildRegionTags();renderWhenReady();});
     wrap.appendChild(btn);
   });
 }
@@ -1133,30 +1169,30 @@ function updateAddSubOptions(cat){
 // ════════════════════════════════════════
 
 // 搜尋
-document.getElementById('search-input').addEventListener('input',e=>{ searchQ=e.target.value.trim(); render(); });
+document.getElementById('search-input').addEventListener('input',e=>{searchQ=e.target.value.trim();renderWhenReady();});
 
 // 地區 select
-document.getElementById('region-select').addEventListener('change',e=>{ filterRegion=e.target.value; buildRegionTags(); render(); });
+document.getElementById('region-select').addEventListener('change',e=>{filterRegion=e.target.value;buildRegionTags();renderWhenReady();});
 
 // 類別 select → 聯動子類別
-document.getElementById('cat-select').addEventListener('change',e=>{
-  filterCat=e.target.value;
-  filterSub='';
-  updateFilterSubOptions(filterCat);
-  render();
-});
+document.getElementById('cat-select').addEventListener('change',e=>{filterCat=e.target.value;filterSub='';updateFilterSubOptions(filterCat);renderWhenReady();});
 
 // 子類別 select
-document.getElementById('sub-select').addEventListener('change',e=>{ filterSub=e.target.value; render(); });
+ddocument.getElementById('sub-select').addEventListener('change',e=>{filterSub=e.target.value;renderWhenReady();});
 
 // 排序
-document.getElementById('sort-select').addEventListener('change',render);
+document.getElementById('sort-select').addEventListener('change',renderWhenReady);
 
 // Fav toggle（topbar icon）
-  document.getElementById('fav-btn').addEventListener('click',()=>{
+document.getElementById('fav-btn').addEventListener('click',()=>{
+  if(!isIndexDataReady()){
+    alert('景點與最愛資料仍在同步中，請稍後再使用只看最愛。');
+    return;
+  }
+
   favOnly = !favOnly;
   document.getElementById('fav-btn').textContent = favOnly ? FAV_ICON_ON : FAV_ICON_OFF;
-  render();
+  renderWhenReady();
 });
 
 // 快速入口「新增地點」按鈕 → 展開表單並滾到表單
@@ -1311,30 +1347,48 @@ function waitFirebase(cb){
 function normalizeFirebaseList(raw, source){
   if(!raw) return [];
 
+  const normalizeItem = (item, key) => {
+    const safeKey = String(key);
+
+    const safeId =
+      item &&
+      item.id !== undefined &&
+      item.id !== null &&
+      String(item.id).trim()
+        ? String(item.id)
+        : safeKey;
+
+    return {
+      ...(item || {}),
+      id: safeId,
+      _key: safeKey,
+      _src: source
+    };
+  };
+
   if(Array.isArray(raw)){
     return raw
       .filter(Boolean)
-      .map((item, index) => ({
-        ...item,
-        _key: String(index),
-        _src: source
-      }));
+      .map((item, index) => normalizeItem(item, index));
   }
 
   if(typeof raw === 'object'){
     return Object.entries(raw)
       .filter(([, item]) => item && typeof item === 'object')
-      .map(([key, item]) => ({
-        ...item,
-        _key: key,
-        _src: source
-      }));
+      .map(([key, item]) => normalizeItem(item, key));
   }
 
   return [];
 }
 
 // Favs 正規化：支援 { id:true } / ["id"] / [true,false,true] / null
+function normalizeFavToken(v){
+  if(v === undefined || v === null) return '';
+  const s = String(v).trim();
+  if(!s) return '';
+  return /^\d+$/.test(s) ? String(Number(s)) : s;
+}
+
 function normalizeFavs(raw){
   if(!raw) return [];
 
@@ -1342,16 +1396,57 @@ function normalizeFavs(raw){
     return raw
       .flatMap((value, index) => {
         if(value === true) return [String(index)];
-        if(typeof value === 'string' || typeof value === 'number') return [String(value)];
+
+        if(typeof value === 'string' || typeof value === 'number'){
+          const token = normalizeFavToken(value);
+          return token ? [token] : [];
+        }
+
+        if(value && typeof value === 'object'){
+          if(value.id !== undefined && value.id !== null){
+            const token = normalizeFavToken(value.id);
+            return token ? [token] : [];
+          }
+
+          if(value.placeId !== undefined && value.placeId !== null){
+            const token = normalizeFavToken(value.placeId);
+            return token ? [token] : [];
+          }
+        }
+
         return [];
       })
       .filter(Boolean);
   }
 
   if(typeof raw === 'object'){
-    return Object.keys(raw)
-      .filter(key => raw[key])
-      .map(String);
+    return Object.entries(raw)
+      .flatMap(([key, value]) => {
+        if(value === true){
+          const token = normalizeFavToken(key);
+          return token ? [token] : [];
+        }
+
+        if(typeof value === 'string' || typeof value === 'number'){
+          const token = normalizeFavToken(value);
+          return token ? [token] : [];
+        }
+
+        if(value && typeof value === 'object'){
+          if(value.id !== undefined && value.id !== null){
+            const token = normalizeFavToken(value.id);
+            return token ? [token] : [];
+          }
+
+          if(value.placeId !== undefined && value.placeId !== null){
+            const token = normalizeFavToken(value.placeId);
+            return token ? [token] : [];
+          }
+        }
+
+        return [];
+      })
+      .filter(Boolean);
   }
 
   return [];
@@ -1389,7 +1484,8 @@ function normalizeRentalInfo(raw){
 
   return null;
 }
-
+renderLoadingState();
+  
 waitFirebase(() => {
   const db = window.__db;
 
@@ -1398,47 +1494,39 @@ waitFirebase(() => {
   // Base places
   window.__onValue(window.__ref(db, 'base_places'), snap => {
     const raw = snap.val();
-
     PLACES = normalizeFirebaseList(raw, 'base');
-
-    buildRegionSelect();
-    buildRegionTags();
-    render();
+    basePlacesReady = true;
+    renderWhenReady();
   }, err => {
     console.error('base_places 讀取失敗:', err);
+    basePlacesReady = false;
     showDataError('基準資料連線失敗');
   });
 
   // Custom places
   window.__onValue(window.__ref(db, 'custom_places'), snap => {
     const raw = snap.val();
-
     CLOUD_PLACES = normalizeFirebaseList(raw, 'custom');
-
-    buildRegionSelect();
-    buildRegionTags();
-    render();
+    customPlacesReady = true;
+    renderWhenReady();
   }, err => {
     console.error('custom_places 讀取失敗:', err);
+    customPlacesReady = false;
     showDataError('新增資料連線失敗');
   });
-
+  
   // Favs：Firebase Realtime Database 即時同步
   window.__onValue(window.__ref(db, 'favs'), snap => {
     const nextFavs = normalizeFavs(snap.val());
-
-    const same =
-      JSON.stringify([...nextFavs].sort()) ===
-      JSON.stringify([..._favsCache].sort());
-
+  
     _favsCache = nextFavs;
     _favsReady = true;
-
-    if(!same || favOnly){
-      render();
-    }
+  
+    renderWhenReady();
   }, err => {
     console.error('favs 讀取失敗:', err);
+    _favsReady = false;
+    showDataError('最愛資料連線失敗');
   });
 
   // Cost
