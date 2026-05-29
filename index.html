@@ -1102,27 +1102,30 @@ function buildCard(p){
       }
     });
   
-  // del
-  
+ // del
   el.querySelector('.btn-del-place')?.addEventListener('click', async function(){
     if(!confirm('確定刪除「' + p.name + '」？')) return;
-  
+
     this.disabled = true;
     const oldText = this.textContent;
     this.textContent = '…';
-  
+
     try{
       await deleteCustomPlace(p);
     }catch(err){
       console.error('刪除自訂地點失敗:', err);
       alert('刪除自訂地點失敗，請確認 Firebase 連線或 Rules 權限。');
-  
+
       this.disabled = false;
       this.textContent = oldText;
     }
   });
+  revObs.observe(el);
+  return el;
+}
 
-
+// 子類別細分 icon
+const SUB_EMOJI = {
 // 子類別細分 icon
 const SUB_EMOJI = {
   // 景點
@@ -1315,7 +1318,6 @@ document.getElementById('add-place-form').addEventListener('submit', async e => 
       name,
       hours,
       note,
-      twm: null,
       twd: null,
       tags: [region],
       fav: false,
@@ -1333,7 +1335,7 @@ document.getElementById('add-place-form').addEventListener('submit', async e => 
     }, 2500);
   }catch(err){
     console.error('新增地點失敗:', err);
-    status.textContent = '儲存失敗，請稍加後再試';
+    status.textContent = '儲存失敗，請稍後再試';
     alert('新增地點失敗，請確認 Firebase 連線或 Rules 權限。');
 
     setTimeout(() => {
