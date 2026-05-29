@@ -224,6 +224,9 @@
       outline:none;
       box-sizing:border-box;
     }
+    .rental-field input[type="datetime-local"]{
+    min-height:44px;
+    }
     
     .rental-field input:focus,
     .rental-field select:focus{
@@ -933,8 +936,8 @@
   </div>
   <div class="rental-block__body">
     <div class="rental-info-grid">
-      <div class="rental-field"><label>取車日期</label><input id="r-pickup-date" type="date"></div>
-      <div class="rental-field"><label>還車日期</label><input id="r-return-date" type="date"></div>
+      <div class="rental-field"><label>取車日期時間</label><input id="r-pickup-date" type="datetime-local"></div>
+      <div class="rental-field"> <label>還車日期時間</label><input id="r-return-date" type="datetime-local"></div>
       <div class="rental-field"><label>取車地點</label><input id="r-pickup-loc" type="text" placeholder="例：福岡機場"></div>
       <div class="rental-field"><label>還車地點</label><input id="r-return-loc" type="text" placeholder="例：福岡機場"></div>
       <div class="rental-field"><label>租車公司</label><input id="r-company" type="text" placeholder="例：Times"></div>
