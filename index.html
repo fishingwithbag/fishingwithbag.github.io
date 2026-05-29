@@ -30,7 +30,42 @@
     .topbar__title{font-family:var(--serif);font-size:.95rem;letter-spacing:.18em;}
     .topbar__actions{display:flex;gap:.4rem;}
     .icon-btn{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.05rem;border:1px solid var(--border);background:var(--surface);color:var(--text);-webkit-tap-highlight-color:transparent;}
-
+    @media (hover:hover){
+      .icon-btn:hover{
+        background:rgba(255,255,255,.12);
+        border-color:rgba(255,255,255,.32);
+        box-shadow:
+          0 0 0 1px rgba(255,255,255,.06) inset,
+          0 0 12px rgba(255,255,255,.12),
+          0 2px 8px rgba(0,0,0,.35);
+        transform:translateY(-1px);
+      }
+    
+      [data-theme="light"] .icon-btn:hover{
+        background:#fff;
+        border-color:rgba(0,0,0,.18);
+        box-shadow:
+          0 2px 8px rgba(0,0,0,.12),
+          0 0 0 1px rgba(255,255,255,.75) inset;
+      }
+    }
+    .icon-btn.is-active{
+        color:#ff9fc8;
+        background:rgba(255,111,163,.18);
+        border-color:rgba(255,111,163,.55);
+        box-shadow:
+          0 0 0 1px rgba(255,111,163,.16) inset,
+          0 0 12px rgba(255,111,163,.24);
+      }
+      
+      [data-theme="light"] .icon-btn.is-active{
+        color:#d91f66;
+        background:rgba(231,47,117,.10);
+        border-color:rgba(231,47,117,.38);
+        box-shadow:
+          0 2px 8px rgba(0,0,0,.10),
+          0 0 10px rgba(231,47,117,.14);
+      }
     /* ── 快速入口區（頁面最上方） ── */
     .quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;padding:.75rem 1rem .25rem;}
     .qa-btn{display:flex;align-items:center;gap:.6rem;padding:.75rem .9rem;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);color:var(--text);text-decoration:none;-webkit-tap-highlight-color:transparent;transition:border-color .2s,background .2s;}
@@ -390,7 +425,12 @@
       opacity:1;
       border-color:var(--accent);
     }
-    
+    .card__btn:disabled{
+      opacity:.45;
+      pointer-events:none;
+      cursor:not-allowed;
+    }
+        
     /* ── 收藏 icon：紅色愛心 / 發亮愛心 ── */
     .card__fav{
       font-size:1.15rem;
@@ -1299,27 +1339,28 @@ function buildCard(p){
       }
     });
   
- // del
-    el.querySelector('.btn-del-place')?.addEventListener('click', async function(){
-        if(!confirm('確定刪除「' + p.name + '」？')) return;
-    
-        this.disabled = true;
-        const oldHtml = this.innerHTML;
-        this.textContent = '…';
-    
-        try{
-          await deleteCustomPlace(p);
-        }catch(err){
-          console.error('刪除自訂地點失敗:', err);
-          alert('刪除自訂地點失敗，請確認 Firebase 連線或 Rules 權限。');
-    
-        this.disabled = false;
-        this.innerHTML = oldHtml;
-        }
-      });
-      revObs.observe(el);
-      return el;
+  // del
+  el.querySelector('.btn-del-place')?.addEventListener('click', async function(){
+    if(!confirm('確定刪除「' + p.name + '」？')) return;
+
+    this.disabled = true;
+    const oldHtml = this.innerHTML;
+    this.textContent = '…';
+
+    try{
+      await deleteCustomPlace(p);
+    }catch(err){
+      console.error('刪除自訂地點失敗:', err);
+      alert('刪除自訂地點失敗，請確認 Firebase 連線或 Rules 權限。');
+
+      this.disabled = false;
+      this.innerHTML = oldHtml;
     }
+  });
+
+  revObs.observe(el);
+  return el;
+}
 
 // 子類別細分 icon
 const SUB_EMOJI = {
@@ -1458,7 +1499,10 @@ document.getElementById('fav-btn').addEventListener('click',()=>{
   }
 
   favOnly = !favOnly;
-  document.getElementById('fav-btn').textContent = favOnly ? FAV_ICON_ON : FAV_ICON_OFF;
+  const favBtn = document.getElementById('fav-btn');
+  favBtn.textContent = favOnly ? FAV_ICON_ON : FAV_ICON_OFF;
+  favBtn.classList.toggle('is-active', favOnly);
+
   renderWhenReady();
 });
 
@@ -1488,8 +1532,8 @@ document.getElementById('add-place-form').addEventListener('submit', async e => 
   await waitFirebaseReady();
 
   const region = document.getElementById('add-region').value.trim();
-  const category = document.getElementById('add-category').value;
-  const sub = document.getElementById('add-sub').value;
+  const category = document.getElementById('add-category').value.trim();
+  const sub = document.getElementById('add-sub').value.trim();
   const name = document.getElementById('add-name').value.trim();
   const hours = document.getElementById('add-hours').value.trim();
   const note = document.getElementById('add-note').value.trim();
@@ -1514,7 +1558,7 @@ document.getElementById('add-place-form').addEventListener('submit', async e => 
       hours,
       note,
       twd: null,
-      tags: [region],
+      tags: [region, sub || category].filter(Boolean),
       fav: false,
       photo: null,
       createdAt: new Date().toISOString(),
@@ -1566,7 +1610,10 @@ document.getElementById('btn-export-csv').addEventListener('click',()=>{
     .map(row => row.map(csvCell).join(','))
     .join('\n');
 
-  downloadCsv('kyushu_places.csv', csv);
+  downloadCsv(`kyushu_places_${todayStamp()}.csv`, csv);
+  function todayStamp(){
+  return new Date().toISOString().slice(0, 10);
+}
 });
 
 
@@ -1607,10 +1654,14 @@ function renderCostEntries(){
     });
     row.querySelector('.cost-entry__amount').addEventListener('change',e=>{
       costItems[idx].amount=Number(e.target.value)||0;
-      void saveCostItems(); renderCostSummary();
+      void saveCostItems(); 
+      renderCostSummary();
     });
     row.querySelector('.cost-entry__del').addEventListener('click',()=>{
-      costItems.splice(idx,1);void saveCostItems();renderCostEntries();renderCostSummary();
+      costItems.splice(idx, 1);
+      void saveCostItems();
+      renderCostEntries();
+      renderCostSummary();
     });
     wrap.appendChild(row);
   });
