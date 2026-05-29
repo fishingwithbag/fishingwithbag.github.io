@@ -449,61 +449,89 @@
         0 0 8px rgba(231,47,117,.16);
     }
     
-    /* ── Delete Icon：自訂景點刪除按鈕 ── */
-    .btn-del-place{
-      color:#ff7a7a;
-      background:rgba(255,90,90,.10);
-      border-color:rgba(255,120,120,.38);
-      box-shadow:
-        0 0 0 1px rgba(255,120,120,.08) inset,
-        0 2px 8px rgba(0,0,0,.25);
-    }
-    
-    .btn-del-place:hover{
-      color:#fff;
-      background:rgba(255,90,90,.22);
-      border-color:rgba(255,130,130,.65);
-      box-shadow:
-        0 0 0 1px rgba(255,120,120,.12) inset,
-        0 0 12px rgba(255,90,90,.26);
-    }
-    
-    .btn-del-place:active{
-      transform:scale(.94);
-    }
-    
-    .btn-del-place:disabled{
-      opacity:.55;
-      pointer-events:none;
-    }
-    
-    .trash-icon{
-      width:20px;
-      height:20px;
-      display:block;
-      fill:none;
-      stroke:currentColor;
-      stroke-width:1.9;
-      stroke-linecap:round;
-      stroke-linejoin:round;
-    }
-    
-    .trash-icon__body{
-      fill:rgba(255,120,120,.10);
-    }
-    
-    [data-theme="light"] .btn-del-place{
-      color:#d9344a;
-      background:rgba(217,52,74,.08);
-      border-color:rgba(217,52,74,.28);
-      box-shadow:0 1px 4px rgba(0,0,0,.08);
-    }
-    
-    [data-theme="light"] .btn-del-place:hover{
-      color:#fff;
-      background:rgba(217,52,74,.82);
-      border-color:rgba(217,52,74,.9);
-    }
+    /* ── Delete Icon：自訂景點刪除按鈕，對齊收藏 / 地圖 icon 尺寸 ── */
+      .btn-del-place{
+        width:34px;
+        height:34px;
+        min-width:34px;
+        min-height:34px;
+        padding:0;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        color:#ff7a7a;
+        background:rgba(255,90,90,.12);
+        border-color:rgba(255,120,120,.48);
+        box-shadow:
+          0 0 0 1px rgba(255,120,120,.10) inset,
+          0 2px 8px rgba(0,0,0,.32);
+      }
+      
+      .btn-del-place:active{
+        transform:scale(.94);
+      }
+      
+      .btn-del-place:disabled{
+        opacity:.55;
+        pointer-events:none;
+      }
+      
+      .trash-icon{
+        width:22px;
+        height:22px;
+        display:block;
+        flex-shrink:0;
+        fill:none;
+        stroke:currentColor;
+        stroke-width:2;
+        stroke-linecap:round;
+        stroke-linejoin:round;
+        pointer-events:none;
+      }
+      
+      .trash-icon__body{
+        fill:rgba(255,120,120,.10);
+      }
+      
+      [data-theme="dark"] .btn-del-place{
+        color:#ff8a8a;
+        background:rgba(255,90,90,.13);
+        border-color:rgba(255,130,130,.55);
+        box-shadow:
+          0 0 0 1px rgba(255,120,120,.12) inset,
+          0 0 10px rgba(255,90,90,.18),
+          0 2px 8px rgba(0,0,0,.45);
+      }
+      
+      [data-theme="light"] .btn-del-place{
+        color:#d9344a;
+        background:#fff;
+        border-color:rgba(217,52,74,.32);
+        box-shadow:
+          0 1px 4px rgba(0,0,0,.12),
+          0 0 0 1px rgba(255,255,255,.65) inset;
+      }
+      
+      @media (hover:hover){
+        [data-theme="dark"] .btn-del-place:hover{
+          color:#fff;
+          background:rgba(255,90,90,.25);
+          border-color:rgba(255,130,130,.75);
+          box-shadow:
+            0 0 0 1px rgba(255,120,120,.15) inset,
+            0 0 14px rgba(255,90,90,.30),
+            0 3px 10px rgba(0,0,0,.5);
+        }
+      
+        [data-theme="light"] .btn-del-place:hover{
+          color:#fff;
+          background:rgba(217,52,74,.86);
+          border-color:rgba(217,52,74,.9);
+          box-shadow:
+            0 2px 8px rgba(0,0,0,.16),
+            0 0 0 1px rgba(255,255,255,.75) inset;
+        }
+      }
     
     /* ── Google Maps 風格 icon ── */
     .card__map{
@@ -1136,7 +1164,17 @@ function buildCard(p){
             <circle class="gmap-icon__center" cx="18" cy="15.35" r="3.15"/>
           </svg>
         </a>
-       ${canDelete?`<buttonclass="card__btn btn-del-place"data-id="${escapeHTML(p.id)}"title="刪除自訂地點"aria-label="刪除自訂地點">${trashSvgIcon()}</button>`:''}
+             ${canDelete ? `
+        <button
+          type="button"
+          class="card__btn btn-del-place"
+          data-id="${escapeHTML(p.id)}"
+          title="刪除自訂地點"
+          aria-label="刪除自訂地點"
+        >
+          ${trashSvgIcon()}
+        </button>
+      ` : ''}
       </div>
     </div>`;
   // fav
@@ -1186,26 +1224,26 @@ function buildCard(p){
     });
   
  // del
-  el.querySelector('.btn-del-place')?.addEventListener('click', async function(){
-    if(!confirm('確定刪除「' + p.name + '」？')) return;
-
-    this.disabled = true;
-    const oldHtml = this.innerHTML;
-    this.textContent = '…';
-
-    try{
-      await deleteCustomPlace(p);
-    }catch(err){
-      console.error('刪除自訂地點失敗:', err);
-      alert('刪除自訂地點失敗，請確認 Firebase 連線或 Rules 權限。');
-
-    this.disabled = false;
-    this.innerHTML = oldHtml;
+    el.querySelector('.btn-del-place')?.addEventListener('click', async function(){
+        if(!confirm('確定刪除「' + p.name + '」？')) return;
+    
+        this.disabled = true;
+        const oldHtml = this.innerHTML;
+        this.textContent = '…';
+    
+        try{
+          await deleteCustomPlace(p);
+        }catch(err){
+          console.error('刪除自訂地點失敗:', err);
+          alert('刪除自訂地點失敗，請確認 Firebase 連線或 Rules 權限。');
+    
+        this.disabled = false;
+        this.innerHTML = oldHtml;
+        }
+      });
+      revObs.observe(el);
+      return el;
     }
-  });
-  revObs.observe(el);
-  return el;
-}
 
 // 子類別細分 icon
 const SUB_EMOJI = {
@@ -1477,7 +1515,7 @@ function renderCostEntries(){
       void saveCostItems(); renderCostSummary();
     });
     row.querySelector('.cost-entry__del').addEventListener('click',()=>{
-      costItems.splice(idx,1); void saveCostItems(); renderCostEntries(); renderCostSummary();render
+      costItems.splice(idx,1);void saveCostItems();renderCostEntries();renderCostSummary();
     });
     wrap.appendChild(row);
   });
