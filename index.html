@@ -185,12 +185,65 @@
     .rental-block.open .rental-block__toggle{transform:rotate(180deg);}
     .rental-block__body{display:none;padding:.5rem 1rem .85rem;border-top:1px solid var(--border);}
     .rental-block.open .rental-block__body{display:block;}
-    .rental-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.5rem;}
-    .rental-field{display:flex;flex-direction:column;gap:.25rem;}
-    .rental-field label{font-size:.68rem;opacity:.45;letter-spacing:.08em;}
-    .rental-field input,.rental-field select{padding:.45rem .6rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.8rem;outline:none;}
-    .rental-field input:focus,.rental-field select:focus{border-color:var(--accent);}
-    .rental-field select option{color:#1A1A1A;background:#FFF;}
+    .rental-info-grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:.55rem;
+      margin-bottom:.65rem;
+      width:100%;
+      max-width:100%;
+      min-width:0;
+      overflow:hidden;
+    }
+    
+    .rental-field{
+      display:flex;
+      flex-direction:column;
+      gap:.25rem;
+      min-width:0;
+      width:100%;
+    }
+    
+    .rental-field label{
+      font-size:.68rem;
+      opacity:.45;
+      letter-spacing:.08em;
+    }
+    
+    .rental-field input,
+    .rental-field select{
+      width:100%;
+      max-width:100%;
+      min-width:0;
+      padding:.55rem .65rem;
+      background:var(--surface2);
+      border:1px solid var(--border);
+      border-radius:8px;
+      color:var(--text);
+      font-size:.84rem;
+      outline:none;
+      box-sizing:border-box;
+    }
+    
+    .rental-field input:focus,
+    .rental-field select:focus{
+      border-color:var(--accent);
+    }
+    
+    .rental-field select option{
+      color:#1A1A1A;
+      background:#FFF;
+    }
+    
+    #btn-save-rental{
+      width:100%;
+    }
+    
+    @media(min-width:640px){
+      .rental-info-grid{
+        grid-template-columns:1fr 1fr;
+      }
+    }
 
     /* ── Cards ── */
     .cards-header{
