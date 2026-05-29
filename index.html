@@ -224,9 +224,16 @@
       outline:none;
       box-sizing:border-box;
     }
-    .rental-field input[type="datetime-local"]{
-    min-height:44px;
+    
+   .rental-time-input{
+    font-variant-numeric:tabular-nums;
+    letter-spacing:.04em;
     }
+
+.rental-field input[type="date"],
+.rental-time-input{
+  min-height:44px;
+}
     
     .rental-field input:focus,
     .rental-field select:focus{
@@ -928,16 +935,49 @@
   </div>
 </div>
 
-<!-- ══ 租車資訊 ══ -->
-<div class="rental-block" id="rental-block">
-  <div class="rental-block__header" id="rental-toggle">
-    <span class="rental-block__title">🚗 租車資訊</span>
-    <span class="rental-block__toggle">▼</span>
-  </div>
-  <div class="rental-block__body">
-    <div class="rental-info-grid">
-      <div class="rental-field"><label>取車日期時間</label><input id="r-pickup-date" type="datetime-local"></div>
-      <div class="rental-field"> <label>還車日期時間</label><input id="r-return-date" type="datetime-local"></div>
+      <!-- ══ 租車資訊 ══ -->
+      <div class="rental-block" id="rental-block">
+        <div class="rental-block__header" id="rental-toggle">
+          <span class="rental-block__title">🚗 租車資訊</span>
+          <span class="rental-block__toggle">▼</span>
+        </div>
+        <div class="rental-block__body">
+          <div class="rental-info-grid">
+      <div class="rental-field">
+        <label>取車日期</label>
+        <input id="r-pickup-date" type="date">
+      </div>
+      
+      <div class="rental-field">
+        <label>取車時間</label>
+        <input
+          id="r-pickup-time"
+          class="rental-time-input"
+          type="text"
+          inputmode="numeric"
+          autocomplete="off"
+          maxlength="5"
+          placeholder="例：09:30"
+        >
+      </div>
+      
+      <div class="rental-field">
+        <label>還車日期</label>
+        <input id="r-return-date" type="date">
+      </div>
+      
+      <div class="rental-field">
+        <label>還車時間</label>
+        <input
+          id="r-return-time"
+          class="rental-time-input"
+          type="text"
+          inputmode="numeric"
+          autocomplete="off"
+          maxlength="5"
+          placeholder="例：18:00"
+        >
+      </div>
       <div class="rental-field"><label>取車地點</label><input id="r-pickup-loc" type="text" placeholder="例：福岡機場"></div>
       <div class="rental-field"><label>還車地點</label><input id="r-return-loc" type="text" placeholder="例：福岡機場"></div>
       <div class="rental-field"><label>租車公司</label><input id="r-company" type="text" placeholder="例：Times"></div>
@@ -1767,21 +1807,89 @@ document.getElementById('btn-add-cost').addEventListener('click',()=>{
 });
   
 document.getElementById('person-input').addEventListener('change',renderCostSummary);
-
+bindRentalTimeInputs();
 // ════════════════════════════════════════
 //  租車資訊（Firebase）
 // ════════════════════════════════════════
-const RENTAL_FIELDS=['pickup-date','return-date','pickup-loc','return-loc','company','car','cost','booking'];
+const RENTAL_FIELDS=[
+  'pickup-date',
+  'pickup-time',
+  'return-date',
+  'return-time',
+  'pickup-loc',
+  'return-loc',
+  'company',
+  'car',
+  'cost',
+  'booking'
+];
+
+function formatRentalTimeInput(value){function formatRentalTimeInput4);
+
+  if(digits.length <= 2){
+    return digits;
+  }
+
+  return digits.slice(0, 2) + ':' + digits.slice(2);
+}
+
+function isValidRentalTime(value){
+  return /^([01]\d|2[0-3]):[0-5]\d$/.test(String(value || '').trim());
+}
+
+function bindRentalTimeInputs(){
+  ['pickup-time', 'return-time'].forEach(f=>{
+    const el = document.getElementById('r-' + f);
+    if(!el) return;
+
+    el.addEventListener('input', ()=>{
+      el.value = formatRentalTimeInput(el.value);
+    });
+
+    el.addEventListener('blur', ()=>{
+      if(!el.value) return;
+
+      if(!isValidRentalTime(el.value)){
+        alert('時間請輸入 24 小時制 HH:mm，例如 09:30 或 18:00。');
+        el.value = '';
+      }
+    });
+  });
+}
+
+
 function loadRentalUI(data){
+  if(!data) return;
+
+  const normalized = { ...data };
+
+  [
+    { dateKey:'pickup-date', timeKey:'pickup-time' },
+    { dateKey:'return-date', timeKey:'return-time' }
+  ].forEach(({dateKey, timeKey})=>{
+    const raw = normalized[dateKey];
+
+    if(typeof raw === 'string' && raw.includes('T')){
+      const [datePart, timePart = ''] = raw.split('T');
+
+      normalized[dateKey] = datePart;
+
+      if(!normalized[timeKey]){
+        normalized[timeKey] = timePart.slice(0, 5);
+      }
+    }
+  });
+
   RENTAL_FIELDS.forEach(f=>{
     const el = document.getElementById('r-' + f);
-    if(!el || !data) return;
+    if(!el) return;
 
-    if(Object.prototype.hasOwnProperty.call(data, f)){
-      el.value = data[f] ?? '';
+    if(Object.prototype.hasOwnProperty.call(normalized, f)){
+      el.value = normalized[f] ?? '';
     }
   });
 }
+  
 document.getElementById('btn-save-rental').addEventListener('click', async ()=>{
   if(rentalSaving) return;
 
@@ -1791,15 +1899,35 @@ document.getElementById('btn-save-rental').addEventListener('click', async ()=>{
 
   RENTAL_FIELDS.forEach(f=>{
     const el = document.getElementById('r-' + f);
-    if(el) data[f] = el.value;
+    if(!el) return;
+
+    if(f.endsWith('-time')){
+      data[f] = formatRentalTimeInput(el.value);
+      el.value = data[f];
+    }else{
+      data[f] = el.value;
+    }
   });
+
+  if(data['pickup-time'] && !isValidRentalTime(data['pickup-time'])){
+    alert('取車時間請輸入 24 小時制 HH:mm，例如 09:30。');
+    return;
+  }
+
+  if(data['return-time'] && !isValidRentalTime(data['return-time'])){
+    alert('還車時間請輸入 24 小時制 HH:mm，例如 18:00。');
+    return;
+  }
 
   const status = document.getElementById('rental-sync-status');
 
   setRentalSaving(true);
 
   try{
-    await window.__set(window.__ref(window.__db, 'rental_info'), data);
+    await window.__set(
+      window.__ref(window.__db, 'rental_info'),
+      data
+    );
 
     status.textContent = '✅ 已儲存';
 
@@ -1808,7 +1936,9 @@ document.getElementById('btn-save-rental').addEventListener('click', async ()=>{
     }, 2500);
   }catch(err){
     console.error('租車資訊儲存失敗:', err);
+
     status.textContent = '租車資料儲存失敗';
+
     alert('租車資訊儲存失敗，請確認 Firebase 連線或 Rules 權限。');
 
     setTimeout(()=>{
@@ -1818,7 +1948,6 @@ document.getElementById('btn-save-rental').addEventListener('click', async ()=>{
     setRentalSaving(false);
   }
 });
-
 
 // ════════════════════════════════════════
 //  Firebase 初始化
