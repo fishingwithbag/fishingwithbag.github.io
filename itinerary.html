@@ -90,11 +90,17 @@
     .tl-card.note-open .tl-card__note { display:block; }
     .tl-card__footer { display:flex; align-items:center; justify-content:space-between; padding:.4rem .85rem .55rem; border-top:1px solid var(--border); margin-top:.4rem; }
     .tl-card__cost { font-size:.72rem; color:var(--accent); font-weight:700; }
-    .tl-card__actions { display:flex; gap:.4rem; }
-    .tl-drag { width:30px; min-height:30px; border:1px solid var(--border); border-radius:20px; color:var(--muted); touch-action:none; cursor:grab; }
-    .tl-item.dragging { opacity:.45; }
+    .tl-card__actions { display:flex; align-items:center; justify-content:flex-end; gap:.4rem; flex-wrap:wrap; }
     .tl-card__btn { font-size:.62rem; padding:.22rem .6rem; border:1px solid var(--border); border-radius:20px; opacity:.55; -webkit-tap-highlight-color:transparent; color:var(--text); background:transparent; }
     .tl-card__btn:active { opacity:1; border-color:var(--accent); }
+    .tl-map { width:30px; height:30px; padding:0; display:inline-flex; align-items:center; justify-content:center; border-radius:999px; opacity:1; background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.28); }
+    .gmap-icon { width:22px; height:22px; display:block; flex-shrink:0; filter:drop-shadow(0 1px 2px rgba(0,0,0,.4)); }
+    .gmap-icon__bg,.gmap-icon__center { fill:#fff; }
+    .gmap-icon__green { fill:#34A853; }
+    .gmap-icon__blue { fill:#4285F4; }
+    .gmap-icon__yellow { fill:#FBBC05; }
+    .gmap-icon__red { fill:#EA4335; }
+    [data-theme="light"] .tl-map { background:#fff; border-color:rgba(0,0,0,.14); box-shadow:0 1px 4px rgba(0,0,0,.12); }
 
     /* Fav btn — 與 index 一致 */
     .tl-fav { font-size:1rem; line-height:1; color:rgba(120,120,120,.95); background:rgba(255,255,255,.88); border-color:rgba(0,0,0,.14); border-radius:999px; width:30px; height:30px; min-width:30px; display:inline-flex; align-items:center; justify-content:center; border:1px solid rgba(0,0,0,.14); -webkit-tap-highlight-color:transparent; transition:background .16s, border-color .16s, color .16s, box-shadow .16s; }
@@ -158,11 +164,20 @@
     .picker-place strong { display:block; font-size:.82rem; }
     .picker-place small { display:block; margin-top:.2rem; color:var(--muted); font-size:.68rem; }
     .picker-place>small { margin:0; }
-    .guide-intro { margin-bottom:.75rem; color:var(--muted); font-size:.78rem; line-height:1.65; }
-    .guide-step { display:grid; grid-template-columns:30px 1fr; gap:.65rem; padding:.75rem 0; border-top:1px solid var(--border); }
-    .guide-step__n { width:28px; height:28px; display:grid; place-items:center; border-radius:50%; color:var(--accent); background:rgba(232,115,74,.12); }
-    .guide-step strong { font-size:.82rem; }
-    .guide-step p { margin-top:.2rem; color:var(--muted); font-size:.72rem; line-height:1.6; }
+    .picker-time-grid { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; padding:.7rem 0; }
+    .picker-time-grid label { display:flex; flex-direction:column; gap:.3rem; color:var(--muted); font-size:.7rem; }
+    .picker-time-grid input { min-height:44px; padding:.55rem .75rem; border:1px solid var(--border); border-radius:8px; color:var(--text); background:var(--surface2); }
+    .tour-overlay { position:fixed; inset:0; z-index:900; display:none; pointer-events:none; }
+    .tour-overlay.open { display:block; }
+    .tour-overlay::before { content:''; position:absolute; inset:0; background:rgba(0,0,0,.72); pointer-events:auto; }
+    .tour-target { position:relative !important; z-index:902 !important; border-radius:10px; outline:3px solid var(--accent); outline-offset:4px; box-shadow:0 0 0 9999px rgba(0,0,0,.72); }
+    .tour-card { position:fixed; z-index:903; left:1rem; right:1rem; bottom:calc(74px + var(--safe-b)); max-width:420px; margin:auto; padding:1rem; border:1px solid var(--border); border-radius:10px; background:var(--surface); color:var(--text); pointer-events:auto; box-shadow:0 18px 48px rgba(0,0,0,.38); }
+    .tour-progress { color:var(--accent); font-size:.68rem; letter-spacing:.08em; }
+    .tour-card h2 { margin:.35rem 0; font-family:var(--serif); font-size:1rem; }
+    .tour-card p { color:var(--muted); font-size:.78rem; line-height:1.65; }
+    .tour-actions { display:grid; grid-template-columns:auto 1fr 1fr; gap:.45rem; margin-top:.9rem; }
+    .tour-actions button { min-height:44px; padding:.55rem .75rem; border:1px solid var(--border); border-radius:8px; color:var(--text); }
+    .tour-actions .tour-next { border-color:var(--accent); background:var(--accent); color:#fff; }
 
     /* Bottom Nav */
     .bottom-nav { position:fixed; bottom:0; left:0; right:0; z-index:200; display:flex; background:rgba(13,13,13,.97); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-top:1px solid var(--border); padding-bottom:var(--safe-b); }
@@ -176,6 +191,14 @@
       .timeline, .day-stats, .day-summary, .action-bar, .btn-add-item { max-width:640px; margin-left:auto; margin-right:auto; width:calc(100% - 2rem); }
       .bottom-nav { display:none; }
       body { padding-bottom:0; }
+      .tour-card { bottom:2rem; }
+    }
+    @media (max-width:420px) {
+      .modal-grid,.picker-time-grid { grid-template-columns:1fr; }
+      .tl-item { grid-template-columns:48px minmax(0,1fr); }
+      .tl-card { margin-left:14px; }
+      .tl-card__footer { align-items:flex-start; gap:.45rem; }
+      .tour-card { left:.75rem; right:.75rem; }
     }
   </style>
   <script type="module" src="assets/js/firebase-init.js"></script>
@@ -245,12 +268,12 @@
     </div>
     <div class="modal-grid">
       <div class="modal-field">
-        <label>開始時間</label>
-        <input id="m-start" type="text" inputmode="numeric" placeholder="09:00" maxlength="5" value="09:00">
+        <label>開始時間 *</label>
+        <input id="m-start" type="time" required>
       </div>
       <div class="modal-field">
-        <label>結束時間</label>
-        <input id="m-end" type="text" inputmode="numeric" placeholder="10:30" maxlength="5" value="10:30">
+        <label>結束時間 *</label>
+        <input id="m-end" type="time" required>
       </div>
     </div>
     <div class="conditional-fields" id="flight-fields">
@@ -303,22 +326,26 @@
     <input class="picker-search" id="picker-search" type="search" placeholder="搜尋景點、餐廳或城市">
     <div class="picker-filters" id="picker-filters"></div>
     <div class="picker-list" id="picker-list"></div>
+    <div class="picker-time-grid">
+      <label>第一個景點開始時間 *<input id="picker-start" type="time" required></label>
+      <label>景點間移動緩衝（分鐘）<input id="picker-gap" type="number" min="0" step="5" value="30"></label>
+    </div>
     <button class="btn-modal-save" id="btn-add-selected" type="button">加入 0 個行程</button>
     <button class="btn-modal-cancel" data-close-modal="picker-overlay" type="button">取消</button>
   </div>
 </div>
 
-<div class="modal-overlay" id="help-overlay" role="dialog" aria-modal="true" aria-labelledby="help-title">
-  <div class="modal">
-    <div style="display:flex;align-items:center;justify-content:space-between"><div class="modal__title" id="help-title">網站使用說明</div><button class="icon-btn" data-close-modal="help-overlay" type="button" aria-label="關閉">×</button></div>
-    <p class="guide-intro">從景點總覽到完整旅程，依序完成下面四步。所有行程都能重新排序、編輯或刪除。</p>
-    <div class="guide-step"><span class="guide-step__n">1</span><div><strong>從景點總覽挑選</strong><p>按「從景點總覽加入」，搜尋並勾選景點、餐廳或住宿後一次加入當天。</p></div></div>
-    <div class="guide-step"><span class="guide-step__n">2</span><div><strong>設定當日城市</strong><p>今日城市可以複選，景點選擇器會優先顯示這些城市的內容。</p></div></div>
-    <div class="guide-step"><span class="guide-step__n">3</span><div><strong>補上通勤與航班</strong><p>第一天可從住家到機場開始；航班可記錄班號、出發與抵達機場及飛行時間。</p></div></div>
-    <div class="guide-step"><span class="guide-step__n">4</span><div><strong>調整當日順序</strong><p>按住卡片下方的「≡」拖曳排序，亦可隨時編輯或刪除。</p></div></div>
-    <button class="btn-modal-save" id="btn-help-start" type="button">開始使用</button>
-    <button class="btn-modal-cancel" data-close-modal="help-overlay" type="button">關閉</button>
-  </div>
+<div class="tour-overlay" id="help-overlay" role="dialog" aria-modal="true" aria-labelledby="tour-title">
+  <section class="tour-card">
+    <span class="tour-progress" id="tour-progress"></span>
+    <h2 id="tour-title"></h2>
+    <p id="tour-body"></p>
+    <div class="tour-actions">
+      <button id="tour-close" type="button">略過</button>
+      <button id="tour-prev" type="button">上一步</button>
+      <button class="tour-next" id="tour-next" type="button">下一步</button>
+    </div>
+  </section>
 </div>
 
 <nav class="bottom-nav">
@@ -480,14 +507,27 @@ function updateSummary(items) {
 function typeEmoji(t) { return {spot:'🏛',meal:'🍜',stay:'🏨',transit:'🚗',commute:'🚕',flight:'✈️',other:'📌'}[t] || '📌'; }
 function typeLabel(t) { return {spot:'景點',meal:'餐廳',stay:'住宿',transit:'交通',commute:'通勤',flight:'航班',other:'其他'}[t] || '其他'; }
 function dotClass(t)  { return {meal:'tl-dot--meal',stay:'tl-dot--stay',transit:'tl-dot--transit'}[t] || ''; }
+function timeToMinutes(value) {
+  const match = String(value || '').match(/^(?:[01]?\d|2[0-3]):[0-5]\d$/);
+  if (!match) return Number.MAX_SAFE_INTEGER;
+  const [hours, minutes] = match[0].split(':').map(Number);
+  return hours * 60 + minutes;
+}
+function normalizeTimeValue(value) {
+  const minutes = timeToMinutes(value);
+  if (!Number.isFinite(minutes) || minutes === Number.MAX_SAFE_INTEGER) return '';
+  return `${String(Math.floor(minutes / 60)).padStart(2,'0')}:${String(minutes % 60).padStart(2,'0')}`;
+}
+function compareItineraryTime(a, b) {
+  const difference = timeToMinutes(a.start) - timeToMinutes(b.start);
+  if (difference) return difference;
+  return String(a.createdAt || '').localeCompare(String(b.createdAt || '')) || String(a._key || '').localeCompare(String(b._key || ''));
+}
 
 // ── Render Timeline ──
 function renderDay() {
   const date  = TRIP_DAYS[currentDay].date;
-  const items = (itineraryData[date] || []).slice().sort((a, b) => {
-    if (Number.isFinite(Number(a.order)) || Number.isFinite(Number(b.order))) return (Number(a.order) || 0) - (Number(b.order) || 0);
-    return (a.start || '').localeCompare(b.start || '');
-  });
+  const items = (itineraryData[date] || []).slice().sort(compareItineraryTime);
   const tl    = document.getElementById('timeline');
   tl.innerHTML = '';
   updateStats(items);
@@ -527,8 +567,16 @@ function renderDay() {
               <span class="tl-card__cost">${it.cost ? `¥${Number(it.cost).toLocaleString()}` : ''}</span>
               <div class="tl-card__actions">
                 ${it.note ? `<button class="tl-card__btn btn-note-toggle">備註</button>` : ''}
-                <a class="tl-card__btn" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(it.name + ' Japan')}" target="_blank" rel="noopener">🗺</a>
-                <button class="tl-drag" type="button" aria-label="拖曳排序">≡</button>
+                <a class="tl-card__btn tl-map" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(it.name + ' Japan')}" target="_blank" rel="noopener" title="開啟 Google Maps" aria-label="開啟 Google Maps">
+                  <svg class="gmap-icon" viewBox="0 0 36 36" aria-hidden="true">
+                    <circle class="gmap-icon__bg" cx="18" cy="18" r="16"/>
+                    <path class="gmap-icon__green" d="M18 6.2c-5.05 0-9.15 4.05-9.15 9.05 0 6.8 9.15 14.55 9.15 14.55V19.1l-3.75-3.75L18 6.2z"/>
+                    <path class="gmap-icon__blue" d="M18 29.8s9.15-7.75 9.15-14.55c0-2.45-.98-4.67-2.57-6.3L18 15.5v14.3z"/>
+                    <path class="gmap-icon__yellow" d="M8.85 15.25c0 2.8 1.55 5.95 3.38 8.6L18 18.1v-2.6l-5.95-5.95a8.95 8.95 0 0 0-3.2 5.7z"/>
+                    <path class="gmap-icon__red" d="M24.58 8.95A9.08 9.08 0 0 0 18 6.2a9.02 9.02 0 0 0-5.95 2.25L18 14.4l6.58-5.45z"/>
+                    <circle class="gmap-icon__center" cx="18" cy="15.35" r="3.15"/>
+                  </svg>
+                </a>
                 <button class="tl-card__btn btn-edit" data-key="${it._key || idx}">編輯</button>
                 <button class="tl-card__btn btn-del" data-key="${it._key || idx}" style="color:#ff6b6b">刪除</button>
               </div>
@@ -566,8 +614,8 @@ function renderDay() {
       editingKey = key;
       document.getElementById('m-type').value         = item.type || 'spot';
       document.getElementById('m-name').value         = item.name || '';
-      document.getElementById('m-start').value        = item.start || '09:00';
-      document.getElementById('m-end').value          = item.end   || '10:00';
+      document.getElementById('m-start').value        = normalizeTimeValue(item.start) || '09:00';
+      document.getElementById('m-end').value          = normalizeTimeValue(item.end) || '10:00';
       document.getElementById('m-hours').value        = item.hours || '';
       document.getElementById('m-cost').value         = item.cost  || '';
       document.getElementById('m-transit').value      = item.transitMode || '';
@@ -586,79 +634,6 @@ function renderDay() {
     });
   });
 
-  // 拖曳排序：改用事件委派與 document pointer events。
-  // 原本事件只綁在小按鈕上，游標／手指離開按鈕後 pointermove 容易中斷。
-  let draggingRow = null;
-  let draggingPointerId = null;
-  let dragHandle = null;
-
-  const saveDraggedOrder = async () => {
-    if (!draggingRow) return;
-
-    const finishedRow = draggingRow;
-    draggingRow = null;
-    draggingPointerId = null;
-    dragHandle = null;
-    finishedRow.classList.remove('dragging');
-
-    const date = TRIP_DAYS[currentDay].date;
-    const updates = {};
-    [...tl.querySelectorAll('.tl-item')].forEach((itemRow, order) => {
-      const key = itemRow.dataset.key;
-      if (key) updates[`${key}/order`] = order;
-    });
-
-    try {
-      await waitFirebaseReady();
-      await window.__update(window.__ref(window.__db, `itinerary/${date}`), updates);
-    } catch (error) {
-      console.error('拖曳排序儲存失敗：', error);
-      alert('拖曳排序儲存失敗，請確認 Firebase 登入與寫入權限。');
-      renderDay();
-    }
-  };
-
-  const onDragMove = event => {
-    if (!draggingRow || event.pointerId !== draggingPointerId) return;
-    event.preventDefault();
-
-    const target = document.elementFromPoint(event.clientX, event.clientY)?.closest('.tl-item');
-    if (!target || target === draggingRow || !tl.contains(target)) return;
-
-    const rect = target.getBoundingClientRect();
-    const insertBefore = event.clientY < rect.top + rect.height / 2;
-    tl.insertBefore(draggingRow, insertBefore ? target : target.nextSibling);
-  };
-
-  const onDragEnd = async event => {
-    if (!draggingRow || event.pointerId !== draggingPointerId) return;
-    document.removeEventListener('pointermove', onDragMove);
-    document.removeEventListener('pointerup', onDragEnd);
-    document.removeEventListener('pointercancel', onDragEnd);
-
-    if (dragHandle?.hasPointerCapture?.(event.pointerId)) {
-      dragHandle.releasePointerCapture(event.pointerId);
-    }
-    await saveDraggedOrder();
-  };
-
-  tl.addEventListener('pointerdown', event => {
-    const handle = event.target.closest('.tl-drag');
-    if (!handle || !tl.contains(handle)) return;
-
-    event.preventDefault();
-    draggingRow = handle.closest('.tl-item');
-    if (!draggingRow) return;
-
-    draggingPointerId = event.pointerId;
-    dragHandle = handle;
-    draggingRow.classList.add('dragging');
-    handle.setPointerCapture?.(event.pointerId);
-
-    document.addEventListener('pointermove', onDragMove, { passive:false });
-    document.addEventListener('pointerup', onDragEnd);
-    document.addEventListener('pointercancel', onDragEnd);
-  });
 }
 
 // ── Helpers: normalize / autofill ──
@@ -766,13 +741,12 @@ function renderPlacePicker() {
 
 async function addSelectedPlaces() {
   if (!selectedPlaceIds.size) return;
+  const pickerStart = document.getElementById('picker-start').value;
+  if (!pickerStart) { alert('請先填寫第一個景點的開始時間'); return; }
   await waitFirebaseReady();
   const date = TRIP_DAYS[currentDay].date;
-  const currentItems = (itineraryData[date] || []).slice().sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
-  let nextOrder = currentItems.length;
-  let startMinutes = currentItems.length && currentItems.at(-1).end
-    ? currentItems.at(-1).end.split(':').map(Number).reduce((h, m) => h * 60 + m) + 30
-    : 9 * 60;
+  let startMinutes = timeToMinutes(pickerStart);
+  const gapMinutes = Math.max(0, parseInt(document.getElementById('picker-gap').value) || 0);
   const selected = allPlaces().filter(place => selectedPlaceIds.has(getPlaceFavKey(place)));
   for (const place of selected) {
     const duration = getPlaceDuration(place);
@@ -783,39 +757,12 @@ async function addSelectedPlaces() {
       type: guessItemType(place), name: place.name || '', city: place.region || '', start, end,
       hours: place.hours || '', cost: parseInt(place.cost) || 0, note: place.note || '',
       region: place.region || '', category: place.category || '', subcategory: place.subcategory || '',
-      placeId: getPlaceFavKey(place), order: nextOrder++, createdAt: new Date().toISOString()
+      placeId: getPlaceFavKey(place), createdAt: new Date().toISOString()
     });
-    startMinutes += 30;
+    startMinutes += gapMinutes;
   }
   document.getElementById('picker-overlay').classList.remove('open');
   selectedPlaceIds.clear();
-}
-
-// ── 行程時間排序（僅用於編輯後重新計算 order） ──
-function timeToMinutes(value) {
-  const match = String(value || '').match(/^(?:[01]?\d|2[0-3]):[0-5]\d$/);
-  if (!match) return Number.MAX_SAFE_INTEGER;
-  const [hours, minutes] = match[0].split(':').map(Number);
-  return hours * 60 + minutes;
-}
-
-async function reorderDayAfterTimeEdit(date, changedKey, changedItem) {
-  const nextItems = (itineraryData[date] || [])
-    .map(item => item._key === changedKey ? { ...changedItem, _key: changedKey } : item)
-    .sort((a, b) => {
-      const timeDiff = timeToMinutes(a.start) - timeToMinutes(b.start);
-      if (timeDiff !== 0) return timeDiff;
-      return (Number(a.order) || 0) - (Number(b.order) || 0);
-    });
-
-  const updates = {};
-  nextItems.forEach((item, order) => {
-    if (item._key) updates[`${item._key}/order`] = order;
-  });
-
-  if (Object.keys(updates).length) {
-    await window.__update(window.__ref(window.__db, `itinerary/${date}`), updates);
-  }
 }
 
 // ── Modal ──
@@ -827,8 +774,8 @@ document.getElementById('btn-add-item').addEventListener('click', () => {
   editingKey = null;
   ['m-name','m-hours','m-cost','m-transit-min','m-note','m-flight-no','m-flight-duration','m-origin','m-destination'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('m-type').value  = 'spot';
-  document.getElementById('m-start').value = '09:00';
-  document.getElementById('m-end').value   = '10:30';
+  document.getElementById('m-start').value = '';
+  document.getElementById('m-end').value   = '';
   toggleFlightFields();
   document.getElementById('modal-overlay').classList.add('open');
 });
@@ -850,6 +797,7 @@ document.getElementById('btn-modal-save').addEventListener('click', async () => 
   const matchedPlace  = matchedPlaces.find(p => region && regionMatches(p.region, region)) || matchedPlaces[0] || null;
   const selectedType  = document.getElementById('m-type').value;
   const durationMin   = selectedType === 'flight' ? parseDuration(document.getElementById('m-flight-duration').value) : 0;
+  const existingItem  = editingKey ? (itineraryData[date] || []).find(existing => existing._key === editingKey) : null;
 
   const item = {
     type:        selectedType === 'flight' || selectedType === 'commute' ? selectedType : matchedPlace ? guessItemType(matchedPlace) : selectedType,
@@ -868,23 +816,16 @@ document.getElementById('btn-modal-save').addEventListener('click', async () => 
     flightNo:    document.getElementById('m-flight-no').value.trim(),
     origin:      document.getElementById('m-origin').value.trim(),
     destination: document.getElementById('m-destination').value.trim(),
-    order:       editingKey ? (itineraryData[date] || []).find(existing => existing._key === editingKey)?.order ?? 0 : (itineraryData[date] || []).length,
-    createdAt:   new Date().toISOString()
+    createdAt:   existingItem?.createdAt || new Date().toISOString()
   };
 
   try {
     await waitFirebaseReady();
-
     if (editingKey) {
-      const key = editingKey;
-      await window.__set(window.__ref(window.__db, `itinerary/${date}/${key}`), item);
-
-      // 編輯時間後，依開始時間重算整天的 order；手動拖曳仍可再次覆寫 order。
-      await reorderDayAfterTimeEdit(date, key, item);
+      await window.__set(window.__ref(window.__db, `itinerary/${date}/${editingKey}`), item);
     } else {
       await window.__push(window.__ref(window.__db, `itinerary/${date}`), item);
     }
-
     document.getElementById('modal-overlay').classList.remove('open');
     editingKey = null;
   } catch (error) {
@@ -921,6 +862,7 @@ document.getElementById('btn-open-picker').addEventListener('click', () => {
   selectedPlaceIds.clear();
   pickerRegion = '全部';
   document.getElementById('picker-search').value = '';
+  document.getElementById('picker-start').value = '';
   renderPickerFilters();
   renderPlacePicker();
   document.getElementById('picker-overlay').classList.add('open');
@@ -943,12 +885,55 @@ document.getElementById('picker-list').addEventListener('click', event => {
 document.getElementById('btn-add-selected').addEventListener('click', addSelectedPlaces);
 document.getElementById('m-type').addEventListener('change', toggleFlightFields);
 document.querySelectorAll('[data-close-modal]').forEach(button => button.addEventListener('click', () => document.getElementById(button.dataset.closeModal).classList.remove('open')));
-['picker-overlay','help-overlay'].forEach(id => document.getElementById(id).addEventListener('click', event => { if (event.target.id === id) event.target.classList.remove('open'); }));
-document.getElementById('help-btn').addEventListener('click', () => document.getElementById('help-overlay').classList.add('open'));
-document.getElementById('btn-help-start').addEventListener('click', () => {
-  localStorage.setItem('kyushu_itinerary_help_seen_v1', '1');
+document.getElementById('picker-overlay').addEventListener('click', event => { if (event.target.id === 'picker-overlay') event.target.classList.remove('open'); });
+
+const TOUR_STEPS = [
+  { target:'#date-tabs', title:'選擇旅遊日期', body:'先切換要安排的日期，每一天都會保存自己的城市與行程。' },
+  { target:'#day-region-trigger', title:'設定今日城市', body:'同一天可以選擇多個城市，景點選擇器會依這些城市縮小範圍。' },
+  { target:'.action-bar', title:'加入行程項目', body:'可從景點總覽挑選，或手動加入景點、餐廳、機場通勤與航班。新增時必須設定開始與結束時間。' },
+  { target:'#timeline', title:'依時間自動排序', body:'行程會依開始時間自動排列。修改任何項目的時間後，順序會立即重新計算。' },
+  { target:'#help-btn', title:'隨時重新查看', body:'之後可按右上角問號再次啟動這份互動導覽。' }
+];
+let tourIndex = 0;
+let tourTarget = null;
+
+function closeTour() {
+  tourTarget?.classList.remove('tour-target');
+  tourTarget = null;
   document.getElementById('help-overlay').classList.remove('open');
+  localStorage.setItem('kyushu_itinerary_tour_seen_v2', '1');
+}
+
+function renderTourStep() {
+  tourTarget?.classList.remove('tour-target');
+  const step = TOUR_STEPS[tourIndex];
+  tourTarget = document.querySelector(step.target);
+  if (tourTarget) {
+    tourTarget.classList.add('tour-target');
+    tourTarget.scrollIntoView({ behavior:'smooth', block:'center' });
+  }
+  document.getElementById('tour-progress').textContent = `${tourIndex + 1} / ${TOUR_STEPS.length}`;
+  document.getElementById('tour-title').textContent = step.title;
+  document.getElementById('tour-body').textContent = step.body;
+  document.getElementById('tour-prev').disabled = tourIndex === 0;
+  document.getElementById('tour-next').textContent = tourIndex === TOUR_STEPS.length - 1 ? '完成' : '下一步';
+}
+
+function startTour() {
+  tourIndex = 0;
+  document.getElementById('help-overlay').classList.add('open');
+  renderTourStep();
+}
+
+document.getElementById('help-btn').addEventListener('click', startTour);
+document.getElementById('tour-close').addEventListener('click', closeTour);
+document.getElementById('tour-prev').addEventListener('click', () => { if (tourIndex > 0) { tourIndex--; renderTourStep(); } });
+document.getElementById('tour-next').addEventListener('click', () => {
+  if (tourIndex === TOUR_STEPS.length - 1) { closeTour(); return; }
+  tourIndex++;
+  renderTourStep();
 });
+if (!localStorage.getItem('kyushu_itinerary_tour_seen_v2')) startTour();
 
 document.getElementById('m-name').addEventListener('change', autofillPlaceFields);
 document.getElementById('m-name').addEventListener('blur',   autofillPlaceFields);
@@ -1018,7 +1003,6 @@ waitFirebase(() => {
   });
 
   buildTabs(); buildDayRegionSelect(); renderDay();
-  if (!localStorage.getItem('kyushu_itinerary_help_seen_v1')) document.getElementById('help-overlay').classList.add('open');
 });
 </script>
 </body>
