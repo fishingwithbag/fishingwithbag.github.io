@@ -586,31 +586,78 @@ function renderDay() {
     });
   });
 
-  tl.querySelectorAll('.tl-drag').forEach(handle => {
-    let row = null;
-    handle.addEventListener('pointerdown', event => {
-      row = handle.closest('.tl-item');
-      row.classList.add('dragging');
-      handle.setPointerCapture(event.pointerId);
+  // 拖曳排序：改用事件委派與 document pointer events。
+  // 原本事件只綁在小按鈕上，游標／手指離開按鈕後 pointermove 容易中斷。
+  let draggingRow = null;
+  let draggingPointerId = null;
+  let dragHandle = null;
+
+  const saveDraggedOrder = async () => {
+    if (!draggingRow) return;
+
+    const finishedRow = draggingRow;
+    draggingRow = null;
+    draggingPointerId = null;
+    dragHandle = null;
+    finishedRow.classList.remove('dragging');
+
+    const date = TRIP_DAYS[currentDay].date;
+    const updates = {};
+    [...tl.querySelectorAll('.tl-item')].forEach((itemRow, order) => {
+      const key = itemRow.dataset.key;
+      if (key) updates[`${key}/order`] = order;
     });
-    handle.addEventListener('pointermove', event => {
-      if (!row) return;
-      const target = document.elementFromPoint(event.clientX, event.clientY)?.closest('.tl-item');
-      if (!target || target === row || target.parentElement !== tl) return;
-      const before = event.clientY < target.getBoundingClientRect().top + target.offsetHeight / 2;
-      tl.insertBefore(row, before ? target : target.nextSibling);
-    });
-    handle.addEventListener('pointerup', async () => {
-      if (!row) return;
-      row.classList.remove('dragging');
-      row = null;
-      const date = TRIP_DAYS[currentDay].date;
-      const updates = {};
-      [...tl.querySelectorAll('.tl-item')].forEach((itemRow, order) => {
-        updates[`${itemRow.dataset.key}/order`] = order;
-      });
+
+    try {
+      await waitFirebaseReady();
       await window.__update(window.__ref(window.__db, `itinerary/${date}`), updates);
-    });
+    } catch (error) {
+      console.error('拖曳排序儲存失敗：', error);
+      alert('拖曳排序儲存失敗，請確認 Firebase 登入與寫入權限。');
+      renderDay();
+    }
+  };
+
+  const onDragMove = event => {
+    if (!draggingRow || event.pointerId !== draggingPointerId) return;
+    event.preventDefault();
+
+    const target = document.elementFromPoint(event.clientX, event.clientY)?.closest('.tl-item');
+    if (!target || target === draggingRow || !tl.contains(target)) return;
+
+    const rect = target.getBoundingClientRect();
+    const insertBefore = event.clientY < rect.top + rect.height / 2;
+    tl.insertBefore(draggingRow, insertBefore ? target : target.nextSibling);
+  };
+
+  const onDragEnd = async event => {
+    if (!draggingRow || event.pointerId !== draggingPointerId) return;
+    document.removeEventListener('pointermove', onDragMove);
+    document.removeEventListener('pointerup', onDragEnd);
+    document.removeEventListener('pointercancel', onDragEnd);
+
+    if (dragHandle?.hasPointerCapture?.(event.pointerId)) {
+      dragHandle.releasePointerCapture(event.pointerId);
+    }
+    await saveDraggedOrder();
+  };
+
+  tl.addEventListener('pointerdown', event => {
+    const handle = event.target.closest('.tl-drag');
+    if (!handle || !tl.contains(handle)) return;
+
+    event.preventDefault();
+    draggingRow = handle.closest('.tl-item');
+    if (!draggingRow) return;
+
+    draggingPointerId = event.pointerId;
+    dragHandle = handle;
+    draggingRow.classList.add('dragging');
+    handle.setPointerCapture?.(event.pointerId);
+
+    document.addEventListener('pointermove', onDragMove, { passive:false });
+    document.addEventListener('pointerup', onDragEnd);
+    document.addEventListener('pointercancel', onDragEnd);
   });
 }
 
@@ -744,6 +791,33 @@ async function addSelectedPlaces() {
   selectedPlaceIds.clear();
 }
 
+// ── 行程時間排序（僅用於編輯後重新計算 order） ──
+function timeToMinutes(value) {
+  const match = String(value || '').match(/^(?:[01]?\d|2[0-3]):[0-5]\d$/);
+  if (!match) return Number.MAX_SAFE_INTEGER;
+  const [hours, minutes] = match[0].split(':').map(Number);
+  return hours * 60 + minutes;
+}
+
+async function reorderDayAfterTimeEdit(date, changedKey, changedItem) {
+  const nextItems = (itineraryData[date] || [])
+    .map(item => item._key === changedKey ? { ...changedItem, _key: changedKey } : item)
+    .sort((a, b) => {
+      const timeDiff = timeToMinutes(a.start) - timeToMinutes(b.start);
+      if (timeDiff !== 0) return timeDiff;
+      return (Number(a.order) || 0) - (Number(b.order) || 0);
+    });
+
+  const updates = {};
+  nextItems.forEach((item, order) => {
+    if (item._key) updates[`${item._key}/order`] = order;
+  });
+
+  if (Object.keys(updates).length) {
+    await window.__update(window.__ref(window.__db, `itinerary/${date}`), updates);
+  }
+}
+
 // ── Modal ──
 document.getElementById('btn-add-item').addEventListener('click', () => {
   buildPlaceSuggestions();
@@ -762,7 +836,7 @@ document.getElementById('btn-add-item').addEventListener('click', () => {
 document.getElementById('btn-modal-cancel').addEventListener('click', () => document.getElementById('modal-overlay').classList.remove('open'));
 document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target === document.getElementById('modal-overlay')) document.getElementById('modal-overlay').classList.remove('open'); });
 
-document.getElementById('btn-modal-save').addEventListener('click', () => {
+document.getElementById('btn-modal-save').addEventListener('click', async () => {
   const name     = document.getElementById('m-name').value.trim();
   if (!name) { alert('請填寫名稱'); return; }
   const startVal = document.getElementById('m-start').value.trim();
@@ -798,13 +872,25 @@ document.getElementById('btn-modal-save').addEventListener('click', () => {
     createdAt:   new Date().toISOString()
   };
 
-  if (editingKey) {
-    window.__set(window.__ref(window.__db, `itinerary/${date}/${editingKey}`), item);
-  } else {
-    window.__push(window.__ref(window.__db, `itinerary/${date}`), item);
+  try {
+    await waitFirebaseReady();
+
+    if (editingKey) {
+      const key = editingKey;
+      await window.__set(window.__ref(window.__db, `itinerary/${date}/${key}`), item);
+
+      // 編輯時間後，依開始時間重算整天的 order；手動拖曳仍可再次覆寫 order。
+      await reorderDayAfterTimeEdit(date, key, item);
+    } else {
+      await window.__push(window.__ref(window.__db, `itinerary/${date}`), item);
+    }
+
+    document.getElementById('modal-overlay').classList.remove('open');
+    editingKey = null;
+  } catch (error) {
+    console.error('行程儲存失敗：', error);
+    alert('行程儲存失敗，請確認 Firebase 登入與寫入權限。');
   }
-  document.getElementById('modal-overlay').classList.remove('open');
-  editingKey = null;
 });
 
 document.getElementById('btn-clear-day').addEventListener('click', () => {
