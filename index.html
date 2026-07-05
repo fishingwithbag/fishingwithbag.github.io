@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>九州福岡熊本旅遊 2026/9/30~10/7</title>
-  <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🔍</text></svg>'>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet">
   <style>
@@ -30,42 +29,7 @@
     .topbar__title{font-family:var(--serif);font-size:.95rem;letter-spacing:.18em;}
     .topbar__actions{display:flex;gap:.4rem;}
     .icon-btn{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.05rem;border:1px solid var(--border);background:var(--surface);color:var(--text);-webkit-tap-highlight-color:transparent;}
-    @media (hover:hover){
-      .icon-btn:hover{
-        background:rgba(255,255,255,.12);
-        border-color:rgba(255,255,255,.32);
-        box-shadow:
-          0 0 0 1px rgba(255,255,255,.06) inset,
-          0 0 12px rgba(255,255,255,.12),
-          0 2px 8px rgba(0,0,0,.35);
-        transform:translateY(-1px);
-      }
-    
-      [data-theme="light"] .icon-btn:hover{
-        background:#fff;
-        border-color:rgba(0,0,0,.18);
-        box-shadow:
-          0 2px 8px rgba(0,0,0,.12),
-          0 0 0 1px rgba(255,255,255,.75) inset;
-      }
-    }
-    .icon-btn.is-active{
-        color:#ff9fc8;
-        background:rgba(255,111,163,.18);
-        border-color:rgba(255,111,163,.55);
-        box-shadow:
-          0 0 0 1px rgba(255,111,163,.16) inset,
-          0 0 12px rgba(255,111,163,.24);
-      }
-      
-      [data-theme="light"] .icon-btn.is-active{
-        color:#d91f66;
-        background:rgba(231,47,117,.10);
-        border-color:rgba(231,47,117,.38);
-        box-shadow:
-          0 2px 8px rgba(0,0,0,.10),
-          0 0 10px rgba(231,47,117,.14);
-      }
+
     /* ── 快速入口區（頁面最上方） ── */
     .quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;padding:.75rem 1rem .25rem;}
     .qa-btn{display:flex;align-items:center;gap:.6rem;padding:.75rem .9rem;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);color:var(--text);text-decoration:none;-webkit-tap-highlight-color:transparent;transition:border-color .2s,background .2s;}
@@ -185,75 +149,12 @@
     .rental-block.open .rental-block__toggle{transform:rotate(180deg);}
     .rental-block__body{display:none;padding:.5rem 1rem .85rem;border-top:1px solid var(--border);}
     .rental-block.open .rental-block__body{display:block;}
-    .rental-info-grid{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:.55rem;
-      margin-bottom:.65rem;
-      width:100%;
-      max-width:100%;
-      min-width:0;
-      overflow:hidden;
-    }
-    
-    .rental-field{
-      display:flex;
-      flex-direction:column;
-      gap:.25rem;
-      min-width:0;
-      width:100%;
-    }
-    
-    .rental-field label{
-      font-size:.68rem;
-      opacity:.45;
-      letter-spacing:.08em;
-    }
-    
-    .rental-field input,
-    .rental-field select{
-      width:100%;
-      max-width:100%;
-      min-width:0;
-      padding:.55rem .65rem;
-      background:var(--surface2);
-      border:1px solid var(--border);
-      border-radius:8px;
-      color:var(--text);
-      font-size:.84rem;
-      outline:none;
-      box-sizing:border-box;
-    }
-    
-   .rental-time-input{
-    font-variant-numeric:tabular-nums;
-    letter-spacing:.04em;
-    }
-
-    .rental-field input[type="date"],
-    .rental-time-input{
-      min-height:44px;
-    }
-    
-    .rental-field input:focus,
-    .rental-field select:focus{
-      border-color:var(--accent);
-    }
-    
-    .rental-field select option{
-      color:#1A1A1A;
-      background:#FFF;
-    }
-    
-    #btn-save-rental{
-      width:100%;
-    }
-    
-    @media(min-width:640px){
-      .rental-info-grid{
-        grid-template-columns:1fr 1fr;
-      }
-    }
+    .rental-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.5rem;}
+    .rental-field{display:flex;flex-direction:column;gap:.25rem;}
+    .rental-field label{font-size:.68rem;opacity:.45;letter-spacing:.08em;}
+    .rental-field input,.rental-field select{padding:.45rem .6rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.8rem;outline:none;}
+    .rental-field input:focus,.rental-field select:focus{border-color:var(--accent);}
+    .rental-field select option{color:#1A1A1A;background:#FFF;}
 
     /* ── Cards ── */
     .cards-header{
@@ -488,12 +389,7 @@
       opacity:1;
       border-color:var(--accent);
     }
-    .card__btn:disabled{
-      opacity:.45;
-      pointer-events:none;
-      cursor:not-allowed;
-    }
-        
+    
     /* ── 收藏 icon：紅色愛心 / 發亮愛心 ── */
     .card__fav{
       font-size:1.15rem;
@@ -551,146 +447,12 @@
         0 1px 4px rgba(0,0,0,.08),
         0 0 8px rgba(231,47,117,.16);
     }
-  /* ── Favorite Icon：補 hover 發亮效果，對齊地圖 / 刪除 icon ── */
-    @media (hover:hover){
-      [data-theme="dark"] .card__fav:hover{
-        color:#ff8fbd;
-        background:rgba(255,111,163,.16);
-        border-color:rgba(255,111,163,.55);
-        text-shadow:
-          0 0 5px rgba(255,111,163,.55),
-          0 0 12px rgba(255,111,163,.32);
-        box-shadow:
-          0 0 0 1px rgba(255,111,163,.16) inset,
-          0 0 12px rgba(255,111,163,.24),
-          0 3px 10px rgba(0,0,0,.48);
-      }
-    
-      [data-theme="dark"] .card__fav.is-fav:hover{
-        color:#ff9fc8;
-        background:rgba(255,111,163,.22);
-        border-color:rgba(255,111,163,.72);
-        text-shadow:
-          0 0 6px rgba(255,111,163,.70),
-          0 0 15px rgba(255,111,163,.42);
-        box-shadow:
-          0 0 0 1px rgba(255,111,163,.22) inset,
-          0 0 16px rgba(255,111,163,.34),
-          0 3px 10px rgba(0,0,0,.50);
-      }
-    
-      [data-theme="light"] .card__fav:hover{
-        color:#e72f75;
-        background:rgba(231,47,117,.10);
-        border-color:rgba(231,47,117,.38);
-        text-shadow:
-          0 0 3px rgba(231,47,117,.32),
-          0 0 8px rgba(231,47,117,.18);
-        box-shadow:
-          0 2px 8px rgba(0,0,0,.12),
-          0 0 10px rgba(231,47,117,.16);
-      }
-    
-      [data-theme="light"] .card__fav.is-fav:hover{
-        color:#d91f66;
-        background:rgba(231,47,117,.16);
-        border-color:rgba(231,47,117,.52);
-        text-shadow:
-          0 0 4px rgba(231,47,117,.40),
-          0 0 10px rgba(231,47,117,.22);
-        box-shadow:
-          0 2px 8px rgba(0,0,0,.14),
-          0 0 12px rgba(231,47,117,.20);
-      }
-    }
     
     .card__fav:disabled{
       opacity:.45;
       pointer-events:none;
     }
-   /* ── Delete Icon：自訂景點刪除按鈕，非紅色系，對齊收藏 / 地圖 icon ── */
-    .btn-del-place{
-      width:34px;
-      height:34px;
-      min-width:34px;
-      min-height:34px;
-      padding:0;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      color:var(--purple);
-      background:rgba(184,175,255,.12);
-      border-color:rgba(184,175,255,.42);
-      box-shadow:
-        0 0 0 1px rgba(184,175,255,.10) inset,
-        0 2px 8px rgba(0,0,0,.32);
-    }
     
-    .btn-del-place:active{
-      transform:scale(.94);
-    }
-    
-    .btn-del-place:disabled{
-      opacity:.55;
-      pointer-events:none;
-    }
-    
-    .trash-icon{
-      width:22px;
-      height:22px;
-      display:block;
-      flex-shrink:0;
-      fill:none;
-      stroke:currentColor;
-      stroke-width:2;
-      stroke-linecap:round;
-      stroke-linejoin:round;
-      pointer-events:none;
-    }
-    
-    .trash-icon__body{
-      fill:rgba(184,175,255,.08);
-    }
-    
-    [data-theme="dark"] .btn-del-place{
-      color:#c8c1ff;
-      background:rgba(184,175,255,.13);
-      border-color:rgba(184,175,255,.56);
-      box-shadow:
-        0 0 0 1px rgba(184,175,255,.12) inset,
-        0 0 10px rgba(184,175,255,.18),
-        0 2px 8px rgba(0,0,0,.45);
-    }
-    
-    [data-theme="light"] .btn-del-place{
-      color:#6f63d8;
-      background:#fff;
-      border-color:rgba(111,99,216,.32);
-      box-shadow:
-        0 1px 4px rgba(0,0,0,.12),
-        0 0 0 1px rgba(255,255,255,.65) inset;
-    }
-    
-    @media (hover:hover){
-      [data-theme="dark"] .btn-del-place:hover{
-        color:#ffffff;
-        background:rgba(184,175,255,.24);
-        border-color:rgba(184,175,255,.78);
-        box-shadow:
-          0 0 0 1px rgba(184,175,255,.18) inset,
-          0 0 15px rgba(184,175,255,.32),
-          0 3px 10px rgba(0,0,0,.50);
-      }
-    
-      [data-theme="light"] .btn-del-place:hover{
-        color:#ffffff;
-        background:rgba(111,99,216,.86);
-        border-color:rgba(111,99,216,.92);
-        box-shadow:
-          0 2px 8px rgba(0,0,0,.16),
-          0 0 0 1px rgba(255,255,255,.75) inset;
-      }
-    }
     /* ── Google Maps 風格 icon ── */
     .card__map{
       width:34px;
@@ -816,6 +578,20 @@
     .driving-tip-card h4{margin:0 0 .5rem;font-size:.85rem;color:var(--accent)}
     .driving-tip-card ul{margin:0;padding-left:1.2rem;font-size:.82rem;color:var(--text);line-height:1.7}
     .driving-tip-card ul li strong{color:var(--text)}    
+
+    .help-overlay{position:fixed;inset:0;z-index:900;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.7)}
+    .help-overlay.open{display:flex}
+    .help-dialog{width:100%;max-width:620px;max-height:88svh;overflow-y:auto;padding:1.1rem 1.1rem calc(1.1rem + var(--safe-b));border:1px solid var(--border);border-bottom:0;border-radius:14px 14px 0 0;background:var(--surface)}
+    .help-dialog__head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:.75rem}
+    .help-dialog__head h2{font-family:var(--serif);font-size:1rem;letter-spacing:.08em}
+    .help-close{width:40px;height:40px;border:1px solid var(--border);border-radius:50%;color:var(--text)}
+    .help-intro{margin-bottom:.75rem;color:var(--muted);font-size:.8rem;line-height:1.65}
+    .help-step{display:grid;grid-template-columns:30px 1fr;gap:.65rem;padding:.75rem 0;border-top:1px solid var(--border)}
+    .help-step__n{width:28px;height:28px;display:grid;place-items:center;border-radius:50%;color:var(--accent);background:rgba(232,115,74,.12)}
+    .help-step strong{font-size:.82rem}
+    .help-step p{margin-top:.2rem;color:var(--muted);font-size:.72rem;line-height:1.6}
+    .help-start{width:100%;min-height:44px;margin-top:.75rem;border-radius:8px;background:var(--accent);color:#fff;font-size:.84rem}
+    @media(min-width:768px){.help-overlay{align-items:center}.help-dialog{border-bottom:1px solid var(--border);border-radius:12px}}
   </style>
 
   <!-- Firebase SDK -->
@@ -827,6 +603,7 @@
 <header class="topbar">
   <span class="topbar__title">九州福岡熊本旅遊 2026/9/30~10/7</span>
   <div class="topbar__actions">
+    <button class="icon-btn" id="help-btn" title="使用說明" aria-label="使用說明">?</button>
     <button class="icon-btn" id="fav-btn" title="只看最愛">💖</button>
     <button class="icon-btn" id="theme-btn">🌙</button>
   </div>
@@ -838,7 +615,7 @@
     <span class="qa-btn__icon">🗓</span>
     <div class="qa-btn__info">
       <span class="qa-btn__title">每日行程表</span>
-      <span class="qa-btn__sub">AI 自動排程</span>
+      <span class="qa-btn__sub">景點挑選與手動編排</span>
     </div>
   </a>
   <button class="qa-btn qa-btn--add" id="qa-add-btn">
@@ -935,56 +712,16 @@
   </div>
 </div>
 
-      <!-- ══ 租車資訊 ══ -->
-      <div class="rental-block" id="rental-block">
-        <div class="rental-block__header" id="rental-toggle">
-          <span class="rental-block__title">🚗 租車資訊</span>
-          <span class="rental-block__toggle">▼</span>
-        </div>
-        <div class="rental-block__body">
-          <div class="rental-info-grid">
-      <div class="rental-field">
-        <label>取車日期</label>
-        <input id="r-pickup-date" type="date">
-      </div>
-      
-      <div class="rental-field">
-        <label>取車時間</label>
-        <input
-          id="r"  id="r-pickup-time"
-          inputmode="numeric"
-          pattern="[0-9:]*"
-          autocomplete="off"
-          autocorrect="off"
-          spellcheck="false"
-          enterkeyhint="done"
-          maxlength="5"
-          placeholder="例：09:30"
-        >
-          class="rental-time-input"
-      </div>
-      
-      <div class="rental-field">
-        <label>還車日期</label>
-        <input id="r-return-date" type="date">
-      </div>
-      
-      <div class="rental-field">
-        <label>還車時間</label>
-        <input
-          id="r-return-time"
-          class="rental-time-input"
-          type="text"
-          inputmode="numeric"
-          pattern="[0-9:]*"
-          autocomplete="off"
-          autocorrect="off"
-          spellcheck="false"
-          enterkeyhint="done"
-          maxlength="5"
-          placeholder="例：18:00"
-        >
-      </div>
+<!-- ══ 租車資訊 ══ -->
+<div class="rental-block" id="rental-block">
+  <div class="rental-block__header" id="rental-toggle">
+    <span class="rental-block__title">🚗 租車資訊</span>
+    <span class="rental-block__toggle">▼</span>
+  </div>
+  <div class="rental-block__body">
+    <div class="rental-info-grid">
+      <div class="rental-field"><label>取車日期</label><input id="r-pickup-date" type="date"></div>
+      <div class="rental-field"><label>還車日期</label><input id="r-return-date" type="date"></div>
       <div class="rental-field"><label>取車地點</label><input id="r-pickup-loc" type="text" placeholder="例：福岡機場"></div>
       <div class="rental-field"><label>還車地點</label><input id="r-return-loc" type="text" placeholder="例：福岡機場"></div>
       <div class="rental-field"><label>租車公司</label><input id="r-company" type="text" placeholder="例：Times"></div>
@@ -1111,6 +848,18 @@
 </div>
 <div class="cards" id="cards"></div>
 
+<div class="help-overlay" id="help-overlay" role="dialog" aria-modal="true" aria-labelledby="help-title">
+  <section class="help-dialog">
+    <div class="help-dialog__head"><h2 id="help-title">景點總覽使用說明</h2><button class="help-close" id="help-close" type="button" aria-label="關閉">×</button></div>
+    <p class="help-intro">這裡集中管理景點、收藏與旅費資料。第一次使用可依序完成下面四步。</p>
+    <div class="help-step"><span class="help-step__n">1</span><div><strong>搜尋與篩選景點</strong><p>使用搜尋框、地區與類別篩選快速找到景點、餐廳、住宿或購物地點。</p></div></div>
+    <div class="help-step"><span class="help-step__n">2</span><div><strong>收藏常用地點</strong><p>按卡片上的愛心加入收藏；收藏會即時同步，之後仍可使用右上角愛心只看最愛。</p></div></div>
+    <div class="help-step"><span class="help-step__n">3</span><div><strong>建立自己的地點</strong><p>展開「新增地點」填寫城市、類別與備註，新地點會立即出現在總覽。</p></div></div>
+    <div class="help-step"><span class="help-step__n">4</span><div><strong>編排行程</strong><p>進入每日行程表，從總覽挑選地點或手動加入通勤、航班，再拖曳調整順序。</p></div></div>
+    <button class="help-start" id="help-start" type="button">開始使用</button>
+  </section>
+</div>
+
 <!-- ══ Bottom Nav ══ -->
 <nav class="bottom-nav">
   <a href="travel.html" class="bottom-nav__item"><span>🏠</span><span>首頁</span></a>
@@ -1120,6 +869,18 @@
 </nav>
 
 <script>
+const helpOverlay = document.getElementById('help-overlay');
+function openHelp() { helpOverlay.classList.add('open'); }
+function closeHelp() { helpOverlay.classList.remove('open'); }
+document.getElementById('help-btn').addEventListener('click', openHelp);
+document.getElementById('help-close').addEventListener('click', closeHelp);
+document.getElementById('help-start').addEventListener('click', () => {
+  localStorage.setItem('kyushu_overview_help_seen_v1', '1');
+  closeHelp();
+});
+helpOverlay.addEventListener('click', event => { if (event.target === helpOverlay) closeHelp(); });
+if (!localStorage.getItem('kyushu_overview_help_seen_v1')) openHelp();
+
 // ════════════════════════════════════════
 //  子類別映射
 // ════════════════════════════════════════
@@ -1141,116 +902,14 @@ let searchQ = '';
 let filterRegion = '';
 let filterCat = '';
 let filterSub = '';
-let basePlacesReady = false;
-let customPlacesReady = false;
-let addPlaceSaving = false;
-let rentalSaving = false;
 
 function allPlaces(){ return [...PLACES, ...CLOUD_PLACES]; }
 function escapeHTML(v){
   return String(v ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
-  
-function makeCustomPlaceId(){
-  return `custom_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-}
-  
-function trashSvgIcon(){
-  return `
-    <svg class="trash-icon" viewBox="0 0 24 24" aria-hidden="true">
-      <path class="trash-icon__lid" d="M8.5 6.2V5.1c0-.9.7-1.6 1.6-1.6h3.8c.9 0 1.6.7 1.6 1.6v1.1"/>
-      <path class="trash-icon__body" d="M6.8 8.2h10.4l-.7 10.1c-.1 1.1-1 2-2.1 2H9.6c-1.1 0-2-.9-2.1-2L6.8 8.2z"/>
-      <path class="trash-icon__line" d="M5.4 8.2h13.2"/>
-      <path class="trash-icon__line" d="M10 11.2v5.8"/>
-      <path class="trash-icon__line" d="M14 11.2v5.8"/>
-    </svg>
-  `;
-}
-
-function csvCell(value){
-  return `"${String(value ?? '').replace(/"/g, '""')}"`;
-}
-
-function downloadCsv(filename, csvText){
-  const blob = new Blob(['\uFEFF' + csvText], {
-    type: 'text/csv;charset=utf-8;'
-  });
-
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
-
-function todayStamp(){
-  return new Date().toISOString().slice(0, 10);
-}
-  
 function showDataError(message){
   document.getElementById('cards-count').textContent=message;
   document.getElementById('cards').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;opacity:.45;font-size:.9rem;">資料連線失敗，請稍後重新整理</div>';
-}
-
-function setAddPlaceSaving(isSaving){
-  addPlaceSaving = !!isSaving;
-
-  const form = document.getElementById('add-place-form');
-  const btn = form?.querySelector('.btn-add-place');
-  const status = document.getElementById('add-sync-status');
-
-  if(btn){
-    btn.disabled = addPlaceSaving;
-    btn.textContent = addPlaceSaving ? '儲存中…' : '新增地點';
-  }
-
-  if(status && addPlaceSaving){
-    status.textContent = '⏳ 儲存中…';
-  }
-}  
-
-function setRentalSaving(isSaving){
-  rentalSaving = !!isSaving;
-
-  const btn = document.getElementById('btn-save-rental');
-  const status = document.getElementById('rental-sync-status');
-
-  if(btn){
-    btn.disabled = rentalSaving;
-    btn.textContent = rentalSaving ? '儲存中…' : '儲存租車資訊';
-  }
-
-  if(status && rentalSaving){
-    status.textContent = '⏳ 儲存中…';
-  }
-}
-  
-  
-function isIndexDataReady(){
-  return basePlacesReady && customPlacesReady && _favsReady;
-}
-
-function renderLoadingState(){
-  document.getElementById('cards-count').textContent = '資料同步中…';
-  document.getElementById('cards').innerHTML =
-    '<div style="grid-column:1/-1;text-align:center;padding:2rem;opacity:.45;font-size:.9rem;">正在載入景點與最愛資料…</div>';
-}
-
-function renderWhenReady(){
-  if(!isIndexDataReady()){
-    renderLoadingState();
-    return;
-  }
-
-  buildRegionSelect();
-  buildRegionTags();
-  updateFilterSubOptions(filterCat);
-  render();
 }
 
 // ── Intersection Observer ──
@@ -1285,12 +944,7 @@ function waitFirebaseReady(){
 async function toggleFav(id){
   await waitFirebaseReady();
 
-  const key = normalizeFavToken(id);
-
-  if(!key){
-    throw new Error('invalid-fav-id');
-  }
-
+  const key = String(id);
   const exists = _favsCache.includes(key);
   const favRef = window.__ref(window.__db, `favs/${key}`);
 
@@ -1303,28 +957,6 @@ async function toggleFav(id){
   return FAV_ICON_ON;
 }
 
-async function deleteCustomPlace(place){
-  await waitFirebaseReady();
-
-  if(!place || !place._key){
-    throw new Error('missing-custom-place-key');
-  }
-
-  const tasks = [
-    window.__remove(window.__ref(window.__db, `custom_places/${place._key}`))
-  ];
-
-  const favKey = normalizeFavToken(place.id);
-
-  if(favKey){
-    tasks.push(
-      window.__remove(window.__ref(window.__db, `favs/${favKey}`))
-    );
-  }
-
-  await Promise.all(tasks);
-}  
-  
 // ── 建卡片 ──
 function buildCard(p){
   const el=document.createElement('article');
@@ -1355,7 +987,6 @@ function buildCard(p){
           data-id="${escapeHTML(p.id)}"
           title="${isFav ? '取消收藏' : '加入收藏'}"
           aria-label="${isFav ? '取消收藏' : '加入收藏'}"
-          ${_favsReady ? '' : 'disabled'}
         >
           ${isFav ? FAV_ICON_ON : FAV_ICON_OFF}
         </button>
@@ -1386,31 +1017,11 @@ function buildCard(p){
             <circle class="gmap-icon__center" cx="18" cy="15.35" r="3.15"/>
           </svg>
         </a>
-             ${canDelete ? `
-        <button
-          type="button"
-          class="card__btn btn-del-place"
-          data-id="${escapeHTML(p.id)}"
-          title="刪除自訂地點"
-          aria-label="刪除自訂地點"
-        >
-          ${trashSvgIcon()}
-        </button>
-      ` : ''}
+        ${canDelete?`<button class="card__btn btn-del-place" data-id="${escapeHTML(p.id)}">🗑</button>`:''}
       </div>
     </div>`;
   // fav
-    el.querySelector('.card__fav').addEventListener('click', async function(){
-      if(!_favsReady){
-        alert('最愛資料仍在同步中，請稍後再試。');
-        return;
-      }
-    
-      if(p.id === undefined || p.id === null || !String(p.id).trim()){
-        alert('此地點缺少有效 ID，無法加入收藏。');
-        return;
-      }
-    
+      el.querySelector('.card__fav').addEventListener('click',async function(){
       this.disabled = true;
     
       try{
@@ -1429,41 +1040,19 @@ function buildCard(p){
         }
     
         this.classList.add('pulse');
-        setTimeout(() => this.classList.remove('pulse'), 220);
-      }catch(err){
-        console.error('收藏切換失敗:', err);
-        alert('收藏狀態更新失敗，請確認 Firebase 連線或 Rules 權限。');
-    
-        const stillFav = getFavs().includes(String(p.id));
-    
-        this.textContent = stillFav ? FAV_ICON_ON : FAV_ICON_OFF;
-        this.classList.toggle('is-fav', stillFav);
-        this.title = stillFav ? '取消收藏' : '加入收藏';
-        this.setAttribute('aria-label', stillFav ? '取消收藏' : '加入收藏');
+        setTimeout(()=>this.classList.remove('pulse'),220);
       }finally{
         this.disabled = false;
       }
     });
-  
   // del
-  el.querySelector('.btn-del-place')?.addEventListener('click', async function(){
-    if(!confirm('確定刪除「' + p.name + '」？')) return;
-
-    this.disabled = true;
-    const oldHtml = this.innerHTML;
-    this.textContent = '…';
-
-    try{
-      await deleteCustomPlace(p);
-    }catch(err){
-      console.error('刪除自訂地點失敗:', err);
-      alert('刪除自訂地點失敗，請確認 Firebase 連線或 Rules 權限。');
-
-      this.disabled = false;
-      this.innerHTML = oldHtml;
+  el.querySelector('.btn-del-place')?.addEventListener('click',function(){
+    if(!confirm('確定刪除「'+p.name+'」？'))return;
+    const key=p._key;
+    if(key){
+      window.__remove(window.__ref(window.__db,'custom_places/'+key));
     }
   });
-
   revObs.observe(el);
   return el;
 }
@@ -1533,13 +1122,13 @@ function buildRegionTags(){
   const allBtn=document.createElement('button');
   allBtn.className='region-tag'+(filterRegion===''?' active':'');
   allBtn.textContent='全部';
-  allBtn.addEventListener('click',()=>{filterRegion='';buildRegionTags();renderWhenReady();});
+  allBtn.addEventListener('click',()=>{ filterRegion=''; buildRegionTags(); render(); });
   wrap.appendChild(allBtn);
   regions.forEach(r=>{
     const btn=document.createElement('button');
     btn.className='region-tag'+(filterRegion===r?' active':'');
     btn.textContent=r;
-    btn.addEventListener('click',()=>{filterRegion=r;buildRegionTags();renderWhenReady();});
+    btn.addEventListener('click',()=>{ filterRegion=r; buildRegionTags(); render(); });
     wrap.appendChild(btn);
   });
 }
@@ -1583,42 +1172,37 @@ function updateAddSubOptions(cat){
 // ════════════════════════════════════════
 
 // 搜尋
-document.getElementById('search-input').addEventListener('input',e=>{searchQ=e.target.value.trim();renderWhenReady();});
+document.getElementById('search-input').addEventListener('input',e=>{ searchQ=e.target.value.trim(); render(); });
 
 // 地區 select
-document.getElementById('region-select').addEventListener('change',e=>{filterRegion=e.target.value;buildRegionTags();renderWhenReady();});
+document.getElementById('region-select').addEventListener('change',e=>{ filterRegion=e.target.value; buildRegionTags(); render(); });
 
 // 類別 select → 聯動子類別
-document.getElementById('cat-select').addEventListener('change',e=>{filterCat=e.target.value;filterSub='';updateFilterSubOptions(filterCat);renderWhenReady();});
+document.getElementById('cat-select').addEventListener('change',e=>{
+  filterCat=e.target.value;
+  filterSub='';
+  updateFilterSubOptions(filterCat);
+  render();
+});
 
 // 子類別 select
-document.getElementById('sub-select').addEventListener('change',e=>{filterSub=e.target.value;renderWhenReady();});
+document.getElementById('sub-select').addEventListener('change',e=>{ filterSub=e.target.value; render(); });
 
 // 排序
-document.getElementById('sort-select').addEventListener('change',renderWhenReady);
+document.getElementById('sort-select').addEventListener('change',render);
 
 // Fav toggle（topbar icon）
-document.getElementById('fav-btn').addEventListener('click',()=>{
-  if(!isIndexDataReady()){
-    alert('景點與最愛資料仍在同步中，請稍後再使用只看最愛。');
-    return;
-  }
-
+  document.getElementById('fav-btn').addEventListener('click',()=>{
   favOnly = !favOnly;
-  const favBtn = document.getElementById('fav-btn');
-  favBtn.textContent = favOnly ? FAV_ICON_ON : FAV_ICON_OFF;
-  favBtn.classList.toggle('is-active', favOnly);
-
-  renderWhenReady();
+  document.getElementById('fav-btn').textContent = favOnly ? FAV_ICON_ON : FAV_ICON_OFF;
+  render();
 });
 
 // 快速入口「新增地點」按鈕 → 展開表單並滾到表單
 document.getElementById('qa-add-btn').addEventListener('click',()=>{
-  setAddPlaceSaving(false);
-
-  const sec = document.getElementById('add-section');
+  const sec=document.getElementById('add-section');
   sec.classList.add('open');
-  sec.scrollIntoView({behavior:'smooth', block:'start'});
+  sec.scrollIntoView({behavior:'smooth',block:'start'});
 });
 
 // 新增表單展開/折疊
@@ -1630,96 +1214,41 @@ document.getElementById('add-toggle').addEventListener('click',()=>{
 document.getElementById('add-category').addEventListener('change',e=>{ updateAddSubOptions(e.target.value); });
 
 // 提交新增地點
-document.getElementById('add-place-form').addEventListener('submit', async e => {
+document.getElementById('add-place-form').addEventListener('submit',e=>{
   e.preventDefault();
-
-  if(addPlaceSaving) return;
-
-  await waitFirebaseReady();
-
-  const region = document.getElementById('add-region').value.trim();
-  const category = document.getElementById('add-category').value.trim();
-  const sub = document.getElementById('add-sub').value.trim();
-  const name = document.getElementById('add-name').value.trim();
-  const hours = document.getElementById('add-hours').value.trim();
-  const note = document.getElementById('add-note').value.trim();
-
-  if(!region || !category || !name){
-    alert('請填寫地區、類別與名稱');
-    return;
-  }
-
-  const status = document.getElementById('add-sync-status');
-  const addRef = window.__ref(window.__db, 'custom_places');
-
-  setAddPlaceSaving(true);
-
-  try{
-    await window.__push(addRef, {
-      id: makeCustomPlaceId(),
-      region,
-      category,
-      subcategory: sub || category,
-      name,
-      hours,
-      note,
-      twd: null,
-      tags: [region, sub || category].filter(Boolean),
-      fav: false,
-      photo: null,
-      createdAt: new Date().toISOString(),
-      _src: 'custom'
-    });
-
-    status.textContent = '✅ 已儲存';
+  const region=document.getElementById('add-region').value.trim();
+  const category=document.getElementById('add-category').value;
+  const sub=document.getElementById('add-sub').value;
+  const name=document.getElementById('add-name').value.trim();
+  const hours=document.getElementById('add-hours').value.trim();
+  const note=document.getElementById('add-note').value.trim();
+  if(!region||!category||!name){alert('請填寫地區、類別與名稱');return;}
+  const addRef=window.__ref(window.__db,'custom_places');
+  const status=document.getElementById('add-sync-status');
+  status.textContent='⏳ 儲存中…';
+  window.__push(addRef,{
+    id:Date.now(),region,category,subcategory:sub||category,name,hours,note,
+    twd:null,tags:[region],fav:false,photo:null,createdAt:new Date().toISOString(),_src:'custom'
+  }).then(()=>{
+    status.textContent='✅ 已儲存';
     e.target.reset();
-    document.getElementById('add-sub').innerHTML = '<option value="">請先選擇類別</option>';
-
-    setTimeout(() => {
-      status.textContent = '';
-    }, 2500);
-  }catch(err){
-    console.error('新增地點失敗:', err);
-    status.textContent = '儲存失敗，請稍後再試';
-    alert('新增地點失敗，請確認 Firebase 連線或 Rules 權限。');
-
-    setTimeout(() => {
-      status.textContent = '';
-    }, 3500);
-  }finally{
-    setAddPlaceSaving(false);
-  }
+    document.getElementById('add-sub').innerHTML='<option value="">請先選擇類別</option>';
+    setTimeout(()=>status.textContent='',2500);
+  }).catch(()=>{
+    status.textContent='儲存失敗，請稍後再試';
+    setTimeout(()=>status.textContent='',3500);
+  });
 });
 
 // 匯出 CSV
 document.getElementById('btn-export-csv').addEventListener('click',()=>{
-  const rows = [
-    ['id','source','region','category','subcategory','name','hours','note','twd','createdAt']
-  ];
-
-  allPlaces().forEach(p=>{
-    rows.push([
-      p.id,
-      p._src || '',
-      p.region || '',
-      p.category || '',
-      p.subcategory || '',
-      p.name || '',
-      p.hours || '',
-      p.note || '',
-      p.twd || '',
-      p.createdAt || ''
-    ]);
-  });
-
-  const csv = rows
-    .map(row => row.map(csvCell).join(','))
-    .join('\n');
-
-  downloadCsv(`kyushu_places_${todayStamp()}.csv`, csv);
-  
+  const rows=[['id','region','category','subcategory','name','hours','note','twd','createdAt']];
+  allPlaces().forEach(p=>rows.push([p.id,p.region||'',p.category||'',p.subcategory||'',p.name||'',p.hours||'',p.note||'',p.twd||'',p.createdAt||'']));
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download='kyushu_places.csv'; a.click();
 });
-
 
 // 住宿費用 toggle（預設關閉）
 document.getElementById('cost-toggle').addEventListener('click',()=>{
@@ -1754,18 +1283,14 @@ function renderCostEntries(){
       <button class="cost-entry__del">✕</button>`;
     row.querySelector('.cost-entry__name').addEventListener('change',e=>{
       costItems[idx].name=e.target.value;
-      void saveCostItems();
+      saveCostItems();
     });
     row.querySelector('.cost-entry__amount').addEventListener('change',e=>{
       costItems[idx].amount=Number(e.target.value)||0;
-      void saveCostItems(); 
-      renderCostSummary();
+      saveCostItems(); renderCostSummary();
     });
     row.querySelector('.cost-entry__del').addEventListener('click',()=>{
-      costItems.splice(idx, 1);
-      void saveCostItems();
-      renderCostEntries();
-      renderCostSummary();
+      costItems.splice(idx,1); saveCostItems(); renderCostEntries(); renderCostSummary();
     });
     wrap.appendChild(row);
   });
@@ -1778,213 +1303,35 @@ function renderCostSummary(){
     <strong>總計：NT$${total.toLocaleString()}</strong><br>
     每人分攤：NT$${Math.ceil(total/persons).toLocaleString()}（${persons}人）`;
 }
-async function saveCostItems(){
-  if(!window.__firebaseReady) return;
-
-  const status = document.getElementById('cost-sync-status');
-
-  try{
-    if(status) status.textContent = '⏳ 儲存中…';
-
-    await window.__set(
-      window.__ref(window.__db, 'cost_items'),
-      costItems
-    );
-
-    if(status){
-      status.textContent = '✅ 已儲存';
-      setTimeout(()=>{
-        status.textContent = '';
-      }, 1800);
-    }
-  }catch(err){
-    console.error('住宿費用儲存失敗:', err);
-
-    if(status){
-      status.textContent = '費用資料儲存失敗';
-    }
-
-    alert('住宿費用儲存失敗，請確認 Firebase 連線或 Rules 權限。');
-  }
+function saveCostItems(){
+  if(!window.__firebaseReady)return;
+  window.__set(window.__ref(window.__db,'cost_items'),costItems);
 }
 document.getElementById('btn-add-cost').addEventListener('click',()=>{
   costItems.push({name:'',amount:0});
   renderCostEntries();
-  void saveCostItems();
 });
-  
 document.getElementById('person-input').addEventListener('change',renderCostSummary);
+
 // ════════════════════════════════════════
 //  租車資訊（Firebase）
 // ════════════════════════════════════════
-const RENTAL_FIELDS=[
-  'pickup-date',
-  'pickup-time',
-  'return-date',
-  'return-time',
-  'pickup-loc',
-  'return-loc',
-  'company',
-  'car',
-  'cost',
-  'booking'
-];
-
-function formatRentalTimeInput(value){
-  const digits = String(value || '').replace(/\D/g, '').slice(0, 4);
-
-  if(digits.length <= 2){
-    return digits;
-  }
-
-  return digits.slice(0, 2) + ':' + digits.slice(2);
-}
-
-function isValidRentalTime(value){
-  return /^([01]\d|2[0-3]):[0-5]\d$/.test(String(value || '').trim());
-}
-
-function validateRentalDateTimePair(data){
-  if(data['pickup-date'] && !data['pickup-time']){
-    alert('請補上取車時間，避免租車資料不完整。');
-    return false;
-  }
-
-  if(!data['pickup-date'] && data['pickup-time']){
-    alert('請補上取車日期，避免租車資料不完整。');
-    return false;
-  }
-
-  if(data['return-date'] && !data['return-time']){
-    alert('請補上還車時間，避免租車資料不完整。');
-    return false;
-  }
-
-  if(!data['return-date'] && data['return-time']){
-    alert('請補上還車日期，避免租車資料不完整。');
-    return false;
-  }
-
-  return true;
-}
-
-function bindRentalTimeInputs(){
-  ['pickup-time', 'return-time'].forEach(f=>{
-    const el = document.getElementById('r-' + f);
-    if(!el) return;
-
-    if(el.dataset.bound === '1') return;
-    el.dataset.bound = '1';
-
-    el.addEventListener('input', ()=>{
-      el.value = formatRentalTimeInput(el.value);
-    });
-
-    el.addEventListener('blur', ()=>{
-      if(!el.value) return;
-
-      el.value = formatRentalTimeInput(el.value);
-
-      if(!isValidRentalTime(el.value)){
-        alert('時間請輸入 24 小時制 HH:mm，例如 09:30 或 18:00。');
-        el.value = '';
-      }
-    });
-  });
-}
-bindRentalTimeInputs();
- 
+const RENTAL_FIELDS=['pickup-date','return-date','pickup-loc','return-loc','company','car','cost','booking'];
 function loadRentalUI(data){
-  if(!data) return;
-
-  const normalized = { ...data };
-
-  [
-    { dateKey:'pickup-date', timeKey:'pickup-time' },
-    { dateKey:'return-date', timeKey:'return-time' }
-  ].forEach(({dateKey, timeKey})=>{
-    const raw = normalized[dateKey];
-
-    if(typeof raw === 'string' && raw.includes('T')){
-      const [datePart, timePart = ''] = raw.split('T');
-
-      normalized[dateKey] = datePart;
-
-      if(!normalized[timeKey]){
-        normalized[timeKey] = timePart.slice(0, 5);
-      }
-    }
-  });
-
   RENTAL_FIELDS.forEach(f=>{
-    const el = document.getElementById('r-' + f);
-    if(!el) return;
-
-    if(Object.prototype.hasOwnProperty.call(normalized, f)){
-      el.value = normalized[f] ?? '';
-    }
+    const el=document.getElementById('r-'+f);
+    if(el&&data&&data[f]) el.value=data[f];
   });
 }
-  
-document.getElementById('btn-save-rental').addEventListener('click', async ()=>{
-  if(rentalSaving) return;
-
-  await waitFirebaseReady();
-
-  const data = {};
-
+document.getElementById('btn-save-rental').addEventListener('click',()=>{
+  const data={};
   RENTAL_FIELDS.forEach(f=>{
-    const el = document.getElementById('r-' + f);
-    if(!el) return;
-
-    if(f.endsWith('-time')){
-      data[f] = formatRentalTimeInput(el.value);
-      el.value = data[f];
-    }else{
-      data[f] = el.value;
-    }
+    const el=document.getElementById('r-'+f);
+    if(el) data[f]=el.value;
   });
-
-  if(data['pickup-time'] && !isValidRentalTime(data['pickup-time'])){
-    alert('取車時間請輸入 24 小時制 HH:mm，例如 09:30。');
-    return;
-  }
-
-  if(data['return-time'] && !isValidRentalTime(data['return-time'])){
-    alert('還車時間請輸入 24 小時制 HH:mm，例如 18:00。');
-    return;
-  }
-  if(!validateRentalDateTimePair(data)){
-  return;
-  }
-  const status = document.getElementById('rental-sync-status');
-
-  setRentalSaving(true);
-
-  try{
-    await window.__set(
-      window.__ref(window.__db, 'rental_info'),
-      data
-    );
-
-    status.textContent = '✅ 已儲存';
-
-    setTimeout(()=>{
-      status.textContent = '';
-    }, 2500);
-  }catch(err){
-    console.error('租車資訊儲存失敗:', err);
-
-    status.textContent = '租車資料儲存失敗';
-
-    alert('租車資訊儲存失敗，請確認 Firebase 連線或 Rules 權限。');
-
-    setTimeout(()=>{
-      status.textContent = '';
-    }, 3500);
-  }finally{
-    setRentalSaving(false);
-  }
+  window.__set(window.__ref(window.__db,'rental_info'),data);
+  const s=document.getElementById('rental-sync-status');
+  s.textContent='✅ 已儲存'; setTimeout(()=>s.textContent='',2500);
 });
 
 // ════════════════════════════════════════
@@ -2003,48 +1350,30 @@ function waitFirebase(cb){
 function normalizeFirebaseList(raw, source){
   if(!raw) return [];
 
-  const normalizeItem = (item, key) => {
-    const safeKey = String(key);
-
-    const safeId =
-      item &&
-      item.id !== undefined &&
-      item.id !== null &&
-      String(item.id).trim()
-        ? String(item.id)
-        : safeKey;
-
-    return {
-      ...(item || {}),
-      id: safeId,
-      _key: safeKey,
-      _src: source
-    };
-  };
-
   if(Array.isArray(raw)){
     return raw
       .filter(Boolean)
-      .map((item, index) => normalizeItem(item, index));
+      .map((item, index) => ({
+        ...item,
+        _key: String(index),
+        _src: source
+      }));
   }
 
   if(typeof raw === 'object'){
     return Object.entries(raw)
       .filter(([, item]) => item && typeof item === 'object')
-      .map(([key, item]) => normalizeItem(item, key));
+      .map(([key, item]) => ({
+        ...item,
+        _key: key,
+        _src: source
+      }));
   }
 
   return [];
 }
 
 // Favs 正規化：支援 { id:true } / ["id"] / [true,false,true] / null
-function normalizeFavToken(v){
-  if(v === undefined || v === null) return '';
-  const s = String(v).trim();
-  if(!s) return '';
-  return /^\d+$/.test(s) ? String(Number(s)) : s;
-}
-
 function normalizeFavs(raw){
   if(!raw) return [];
 
@@ -2052,57 +1381,16 @@ function normalizeFavs(raw){
     return raw
       .flatMap((value, index) => {
         if(value === true) return [String(index)];
-
-        if(typeof value === 'string' || typeof value === 'number'){
-          const token = normalizeFavToken(value);
-          return token ? [token] : [];
-        }
-
-        if(value && typeof value === 'object'){
-          if(value.id !== undefined && value.id !== null){
-            const token = normalizeFavToken(value.id);
-            return token ? [token] : [];
-          }
-
-          if(value.placeId !== undefined && value.placeId !== null){
-            const token = normalizeFavToken(value.placeId);
-            return token ? [token] : [];
-          }
-        }
-
+        if(typeof value === 'string' || typeof value === 'number') return [String(value)];
         return [];
       })
       .filter(Boolean);
   }
 
   if(typeof raw === 'object'){
-    return Object.entries(raw)
-      .flatMap(([key, value]) => {
-        if(value === true){
-          const token = normalizeFavToken(key);
-          return token ? [token] : [];
-        }
-
-        if(typeof value === 'string' || typeof value === 'number'){
-          const token = normalizeFavToken(value);
-          return token ? [token] : [];
-        }
-
-        if(value && typeof value === 'object'){
-          if(value.id !== undefined && value.id !== null){
-            const token = normalizeFavToken(value.id);
-            return token ? [token] : [];
-          }
-
-          if(value.placeId !== undefined && value.placeId !== null){
-            const token = normalizeFavToken(value.placeId);
-            return token ? [token] : [];
-          }
-        }
-
-        return [];
-      })
-      .filter(Boolean);
+    return Object.keys(raw)
+      .filter(key => raw[key])
+      .map(String);
   }
 
   return [];
@@ -2140,8 +1428,7 @@ function normalizeRentalInfo(raw){
 
   return null;
 }
-renderLoadingState();
-  
+
 waitFirebase(() => {
   const db = window.__db;
 
@@ -2150,39 +1437,47 @@ waitFirebase(() => {
   // Base places
   window.__onValue(window.__ref(db, 'base_places'), snap => {
     const raw = snap.val();
+
     PLACES = normalizeFirebaseList(raw, 'base');
-    basePlacesReady = true;
-    renderWhenReady();
+
+    buildRegionSelect();
+    buildRegionTags();
+    render();
   }, err => {
     console.error('base_places 讀取失敗:', err);
-    basePlacesReady = false;
     showDataError('基準資料連線失敗');
   });
 
   // Custom places
   window.__onValue(window.__ref(db, 'custom_places'), snap => {
     const raw = snap.val();
+
     CLOUD_PLACES = normalizeFirebaseList(raw, 'custom');
-    customPlacesReady = true;
-    renderWhenReady();
+
+    buildRegionSelect();
+    buildRegionTags();
+    render();
   }, err => {
     console.error('custom_places 讀取失敗:', err);
-    customPlacesReady = false;
     showDataError('新增資料連線失敗');
   });
-  
+
   // Favs：Firebase Realtime Database 即時同步
   window.__onValue(window.__ref(db, 'favs'), snap => {
     const nextFavs = normalizeFavs(snap.val());
-  
+
+    const same =
+      JSON.stringify([...nextFavs].sort()) ===
+      JSON.stringify([..._favsCache].sort());
+
     _favsCache = nextFavs;
     _favsReady = true;
-  
-    renderWhenReady();
+
+    if(!same || favOnly){
+      render();
+    }
   }, err => {
     console.error('favs 讀取失敗:', err);
-    _favsReady = false;
-    showDataError('最愛資料連線失敗');
   });
 
   // Cost
