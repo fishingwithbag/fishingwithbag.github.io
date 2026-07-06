@@ -121,6 +121,7 @@
     .action-bar { display:grid; grid-template-columns:1fr 1fr; gap:.55rem; padding:.75rem 1rem .35rem; }
     .action-btn { min-height:44px; padding:.55rem .7rem; border:1px solid var(--border); border-radius:8px; color:var(--text); background:var(--surface); font-size:.78rem; }
     .action-btn--primary { border-color:var(--accent); background:var(--accent); color:#fff; }
+    .action-btn--flight { grid-column:1/-1; border-color:rgba(168,197,176,.55); color:var(--accent2); background:rgba(168,197,176,.08); }
     .action-btn--clear { grid-column:1/-1; min-height:36px; color:var(--muted); background:transparent; }
 
     /* Day stats */
@@ -149,6 +150,10 @@
     .modal-grid { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; }
     .conditional-fields { display:none; }
     .conditional-fields.open { display:block; }
+    .flight-presets { display:grid; grid-template-columns:1fr 1fr; gap:.45rem; margin-bottom:.7rem; }
+    .flight-preset { min-height:42px; padding:.45rem .6rem; border:1px solid rgba(168,197,176,.42); border-radius:7px; color:var(--accent2); background:rgba(168,197,176,.07); font-size:.72rem; text-align:left; }
+    .flight-preset strong { display:block; color:var(--text); font-size:.75rem; }
+    .flight-preset span { display:block; margin-top:.12rem; color:var(--muted); font-size:.62rem; }
     .btn-modal-save { width:100%; padding:.7rem; border-radius:8px; background:var(--accent); color:#fff; font-size:.88rem; letter-spacing:.1em; margin-top:.5rem; }
     .btn-modal-cancel { width:100%; padding:.6rem; border-radius:8px; border:1px solid var(--border); color:var(--text); font-size:.82rem; letter-spacing:.08em; margin-top:.4rem; opacity:.6; }
 
@@ -190,6 +195,8 @@
 
     @media (min-width:768px) {
       .timeline, .day-stats, .day-summary, .action-bar, .btn-add-item { max-width:640px; margin-left:auto; margin-right:auto; width:calc(100% - 2rem); }
+      .action-bar { grid-template-columns:repeat(3,1fr); }
+      .action-btn--flight { grid-column:auto; }
       .bottom-nav { display:none; }
       body { padding-bottom:0; }
       .tour-card { top:1rem; }
@@ -232,6 +239,7 @@
 <div class="action-bar">
   <button class="action-btn action-btn--primary" id="btn-open-picker" type="button">從景點總覽加入</button>
   <button class="action-btn" id="btn-add-item" type="button">手動新增行程</button>
+  <button class="action-btn action-btn--flight" id="btn-add-flight" type="button">加入航班</button>
   <button class="action-btn action-btn--clear" id="btn-clear-day" type="button">清空這天</button>
 </div>
 
@@ -246,7 +254,7 @@
 
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal">
-    <div class="modal__title">新增行程項目</div>
+    <div class="modal__title" id="modal-title">新增行程項目</div>
     <div class="modal-field">
       <label>類型</label>
       <select id="m-type">
@@ -279,6 +287,10 @@
       </div>
     </div>
     <div class="conditional-fields" id="flight-fields">
+      <div class="flight-presets" aria-label="航班快速帶入">
+        <button class="flight-preset" type="button" data-flight-preset="JX846"><strong>JX846 去程</strong><span>9/30 TPE 07:30 → KMJ 10:45</span></button>
+        <button class="flight-preset" type="button" data-flight-preset="JX847"><strong>JX847 回程</strong><span>10/7 KMJ 11:55 → TPE 13:20</span></button>
+      </div>
       <div class="modal-grid">
         <div class="modal-field"><label>航班編號</label><input id="m-flight-no" type="text" placeholder="例：JX840"></div>
         <div class="modal-field"><label>飛行時間</label><input id="m-flight-duration" type="text" inputmode="numeric" placeholder="例：2:20"></div>
@@ -556,6 +568,7 @@ function renderDay() {
             <div class="tl-card__main">
               <div class="tl-card__meta">
                 <span class="tl-card__cat">${typeEmoji(it.type)} ${typeLabel(it.type)}</span>
+                ${it.flightNo ? `<span class="tl-card__cat">${escapeHTML(it.flightNo)}</span>` : ''}
                 ${it.city ? `<span class="tl-card__cat">${escapeHTML(it.city)}</span>` : ''}
                 ${it.start && it.end ? `<span class="tl-card__dur">${it.start}–${it.end}</span>` : ''}
               </div>
@@ -630,6 +643,7 @@ function renderDay() {
       document.getElementById('m-flight-duration').value = item.durationMin ? `${Math.floor(item.durationMin / 60)}:${String(item.durationMin % 60).padStart(2, '0')}` : '';
       document.getElementById('m-origin').value = item.origin || '';
       document.getElementById('m-destination').value = item.destination || '';
+      document.getElementById('modal-title').textContent = '編輯行程項目';
       toggleFlightFields();
       document.getElementById('modal-overlay').classList.add('open');
     });
@@ -709,6 +723,44 @@ function toggleFlightFields() {
   if (isFlight && !document.getElementById('m-name').value.trim()) document.getElementById('m-name').value = '飛機航班';
 }
 
+const FLIGHT_PRESETS = {
+  JX846: {
+    date:'2026-09-30', name:'星宇航空 JX846', start:'07:30', end:'10:45', duration:'2:15',
+    origin:'TPE 桃園國際機場 T1', destination:'KMJ 熊本機場',
+    note:'05:00 機場櫃檯開放，06:30 報到截止；登機門請於當日查看 STARLUX App 或機場看板。'
+  },
+  JX847: {
+    date:'2026-10-07', name:'星宇航空 JX847', start:'11:55', end:'13:20', duration:'2:25',
+    origin:'KMJ 熊本機場', destination:'TPE 桃園國際機場 T1',
+    note:'09:25 機場櫃檯開放，10:55 報到截止並抵達登機門；登機門請於當日查看 STARLUX App 或機場看板。'
+  }
+};
+
+function applyFlightPreset(flightNo) {
+  const flight = FLIGHT_PRESETS[flightNo];
+  if (!flight) return;
+  const dayIndex = TRIP_DAYS.findIndex(day => day.date === flight.date);
+  if (dayIndex >= 0 && dayIndex !== currentDay) {
+    currentDay = dayIndex;
+    buildTabs();
+    buildDayRegionSelect();
+  }
+  const citySelect = document.getElementById('m-city');
+  if (![...citySelect.options].some(option => option.value === '移動日')) citySelect.add(new Option('移動日', '移動日'));
+  document.getElementById('m-type').value = 'flight';
+  document.getElementById('m-name').value = flight.name;
+  document.getElementById('m-city').value = '移動日';
+  document.getElementById('m-start').value = flight.start;
+  document.getElementById('m-end').value = flight.end;
+  document.getElementById('m-flight-no').value = flightNo;
+  document.getElementById('m-flight-duration').value = flight.duration;
+  document.getElementById('m-origin').value = flight.origin;
+  document.getElementById('m-destination').value = flight.destination;
+  document.getElementById('m-note').value = flight.note;
+  document.getElementById('modal-title').textContent = `加入航班 ${flightNo}`;
+  toggleFlightFields();
+}
+
 function parseDuration(value) {
   const [hours, minutes] = String(value || '').split(':').map(Number);
   return Number.isFinite(hours) && Number.isFinite(minutes) ? hours * 60 + minutes : 0;
@@ -767,19 +819,30 @@ async function addSelectedPlaces() {
 }
 
 // ── Modal ──
-document.getElementById('btn-add-item').addEventListener('click', () => {
+function openNewItemModal(type = 'spot') {
   buildPlaceSuggestions();
   buildDayRegionSelect();
   setupTimeInput('m-start');
   setupTimeInput('m-end');
   editingKey = null;
   ['m-name','m-hours','m-cost','m-transit-min','m-note','m-flight-no','m-flight-duration','m-origin','m-destination'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('m-type').value  = 'spot';
+  document.getElementById('m-type').value  = type;
   document.getElementById('m-start').value = '';
   document.getElementById('m-end').value   = '';
+  document.getElementById('modal-title').textContent = type === 'flight' ? '加入航班' : '新增行程項目';
   toggleFlightFields();
   document.getElementById('modal-overlay').classList.add('open');
-});
+}
+
+document.getElementById('btn-add-item').addEventListener('click', () => openNewItemModal());
+document.getElementById('btn-add-flight').addEventListener('click', () => openNewItemModal('flight'));
+document.querySelectorAll('[data-flight-preset]').forEach(button => button.addEventListener('click', () => applyFlightPreset(button.dataset.flightPreset)));
+const requestedFlight = new URLSearchParams(location.search).get('flight');
+if (FLIGHT_PRESETS[requestedFlight]) {
+  openNewItemModal('flight');
+  applyFlightPreset(requestedFlight);
+  history.replaceState(null, '', location.pathname);
+}
 
 document.getElementById('btn-modal-cancel').addEventListener('click', () => document.getElementById('modal-overlay').classList.remove('open'));
 document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target === document.getElementById('modal-overlay')) document.getElementById('modal-overlay').classList.remove('open'); });
@@ -938,7 +1001,7 @@ document.getElementById('tour-next').addEventListener('click', () => {
   tourIndex++;
   renderTourStep();
 });
-if (!localStorage.getItem('kyushu_itinerary_tour_seen_v3')) startTour();
+if (!requestedFlight && !localStorage.getItem('kyushu_itinerary_tour_seen_v3')) startTour();
 
 document.getElementById('m-name').addEventListener('change', autofillPlaceFields);
 document.getElementById('m-name').addEventListener('blur',   autofillPlaceFields);
