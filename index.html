@@ -41,6 +41,34 @@
     .qa-btn__title{font-family:var(--serif);font-size:.85rem;font-weight:700;display:block;}
     .qa-btn__sub{font-size:.62rem;opacity:.45;display:block;margin-top:.15rem;}
 
+    /* ── Flight board ── */
+    .flight-board{margin:.55rem 1rem .45rem;border:1px solid var(--border);border-radius:var(--r);background:var(--surface);overflow:hidden;}
+    .flight-board__head{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;padding:.8rem .9rem;border-bottom:1px solid var(--border);}
+    .flight-board__title{font-family:var(--serif);font-size:.9rem;font-weight:700;}
+    .flight-board__sub{display:block;margin-top:.18rem;color:var(--muted);font-size:.66rem;line-height:1.5;}
+    .flight-board__status{flex:0 0 auto;padding:.2rem .48rem;border:1px solid rgba(232,115,74,.38);border-radius:4px;color:var(--accent);background:rgba(232,115,74,.08);font-size:.62rem;}
+    .flight-legs{display:grid;grid-template-columns:1fr 1fr;}
+    .flight-leg{min-width:0;padding:.85rem .9rem;}
+    .flight-leg+ .flight-leg{border-left:1px solid var(--border);}
+    .flight-leg__top{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.65rem;}
+    .flight-leg__date{font-size:.7rem;color:var(--muted);}
+    .flight-leg__number{font-family:var(--serif);font-size:.9rem;font-weight:700;color:var(--accent);}
+    .flight-route{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:.65rem;margin-bottom:.75rem;}
+    .flight-airport:last-child{text-align:right;}
+    .flight-airport strong{display:block;font-family:var(--serif);font-size:1.35rem;line-height:1;}
+    .flight-airport span{display:block;margin-top:.25rem;color:var(--muted);font-size:.62rem;}
+    .flight-route__line{position:relative;width:54px;height:1px;background:var(--border);}
+    .flight-route__line::after{content:'✈';position:absolute;left:50%;top:50%;padding:0 .25rem;background:var(--surface);color:var(--accent);font-size:.8rem;transform:translate(-50%,-52%);}
+    .flight-facts{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;}
+    .flight-fact{min-width:0;padding:.5rem .55rem;border:1px solid var(--border);border-radius:6px;background:var(--surface2);}
+    .flight-fact span{display:block;color:var(--muted);font-size:.58rem;}
+    .flight-fact strong{display:block;margin-top:.18rem;font-size:.68rem;line-height:1.45;overflow-wrap:anywhere;}
+    .flight-leg__actions{display:flex;gap:.4rem;margin-top:.65rem;}
+    .flight-action{min-height:38px;display:inline-flex;align-items:center;justify-content:center;flex:1;padding:.35rem .5rem;border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.67rem;text-align:center;}
+    .flight-action--primary{border-color:var(--accent);background:var(--accent);color:#fff;}
+    .flight-board__note{padding:.6rem .9rem;border-top:1px solid var(--border);color:var(--muted);font-size:.62rem;line-height:1.55;}
+    @media(max-width:640px){.flight-legs{grid-template-columns:1fr}.flight-leg+ .flight-leg{border-left:0;border-top:1px solid var(--border)}.flight-board__head{align-items:center}.flight-facts{grid-template-columns:1fr 1fr}}
+
     /* ── Search & Filter ── */
     .search-bar{padding:.5rem 1rem .4rem;display:flex;flex-direction:column;gap:.45rem;}
     .search-wrap{position:relative;}
@@ -452,6 +480,16 @@
       opacity:.45;
       pointer-events:none;
     }
+
+    .card__delete{
+      font-size:1.25rem;
+      line-height:1;
+      color:rgba(255,107,107,.88);
+      background:rgba(255,107,107,.08);
+      border-color:rgba(255,107,107,.32);
+    }
+    .card__delete:hover{color:#fff;background:#d94f4f;border-color:#d94f4f;box-shadow:0 0 10px rgba(217,79,79,.25);}
+    [data-theme="light"] .card__delete{color:#c83f3f;background:rgba(200,63,63,.07);border-color:rgba(200,63,63,.25);}
     
     /* ── Google Maps 風格 icon ── */
     .card__map{
@@ -628,6 +666,38 @@
     </div>
   </button>
 </div>
+
+<section class="flight-board" aria-labelledby="flight-board-title">
+  <div class="flight-board__head">
+    <div><h2 class="flight-board__title" id="flight-board-title">星宇航空航班</h2><span class="flight-board__sub">台北桃園 TPE ⇄ 熊本 KMJ，時間皆為當地時間</span></div>
+    <span class="flight-board__status">預定時刻</span>
+  </div>
+  <div class="flight-legs">
+    <article class="flight-leg">
+      <div class="flight-leg__top"><span class="flight-leg__date">9/30（三）去程</span><span class="flight-leg__number">JX846</span></div>
+      <div class="flight-route"><div class="flight-airport"><strong>07:30</strong><span>TPE 桃園 T1</span></div><span class="flight-route__line" aria-hidden="true"></span><div class="flight-airport"><strong>10:45</strong><span>KMJ 熊本</span></div></div>
+      <div class="flight-facts">
+        <div class="flight-fact"><span>機場報到</span><strong>05:00 開放<br>06:30 截止</strong></div>
+        <div class="flight-fact"><span>線上報到</span><strong>9/28 07:30 起</strong></div>
+        <div class="flight-fact"><span>免費選位時段</span><strong>9/28 07:30<br>至 9/30 04:30</strong></div>
+        <div class="flight-fact"><span>登機門</span><strong>當日 App／看板確認</strong></div>
+      </div>
+      <div class="flight-leg__actions"><a class="flight-action" href="https://www.starlux-airlines.com/zh-TW/booking/manage-my-trip/manage-my-trip" target="_blank" rel="noopener">管理行程／選位</a><a class="flight-action flight-action--primary" href="itinerary.html?flight=JX846">加入行程</a></div>
+    </article>
+    <article class="flight-leg">
+      <div class="flight-leg__top"><span class="flight-leg__date">10/7（三）回程</span><span class="flight-leg__number">JX847</span></div>
+      <div class="flight-route"><div class="flight-airport"><strong>11:55</strong><span>KMJ 熊本</span></div><span class="flight-route__line" aria-hidden="true"></span><div class="flight-airport"><strong>13:20</strong><span>TPE 桃園 T1</span></div></div>
+      <div class="flight-facts">
+        <div class="flight-fact"><span>機場報到</span><strong>09:25 開放<br>10:55 截止</strong></div>
+        <div class="flight-fact"><span>線上報到</span><strong>10/5 11:55 起</strong></div>
+        <div class="flight-fact"><span>免費選位時段</span><strong>10/5 11:55<br>至 10/7 08:55</strong></div>
+        <div class="flight-fact"><span>抵達登機門</span><strong>最晚 10:55</strong></div>
+      </div>
+      <div class="flight-leg__actions"><a class="flight-action" href="https://www.starlux-airlines.com/zh-TW/check-in-fly/check-in-now/online-check-in" target="_blank" rel="noopener">線上報到</a><a class="flight-action flight-action--primary" href="itinerary.html?flight=JX847">加入行程</a></div>
+    </article>
+  </div>
+  <p class="flight-board__note">航班時間、機型、報到櫃檯與登機門可能調整；出發前請再次核對電子機票、STARLUX App 與機場看板。</p>
+</section>
 
 <!-- ══ 搜尋與篩選 ══ -->
 <div class="search-bar">
@@ -873,6 +943,7 @@
 <script>
 const OVERVIEW_TOUR_STEPS = [
   { target:'.quick-actions', title:'快速前往常用功能', body:'可直接進入每日行程表，或切換只看收藏景點。' },
+  { target:'.flight-board', title:'掌握航班節點', body:'查看去回程時間、報到截止、免費選位時段與登機門提醒，也可直接把航班加入行程。' },
   { target:'.search-bar', title:'搜尋與篩選景點', body:'使用關鍵字、地區、類別與子類別快速縮小景點範圍。' },
   { target:'#add-section', title:'建立自己的地點', body:'展開新增地點，填寫城市、類別、名稱與備註後即可加入總覽。' },
   { target:'#cards', title:'收藏與開啟地圖', body:'景點卡片可加入收藏，地圖按鈕會使用與行程頁相同的 Google Maps 圖示。' },
@@ -1060,7 +1131,7 @@ function buildCard(p){
             <circle class="gmap-icon__center" cx="18" cy="15.35" r="3.15"/>
           </svg>
         </a>
-        ${canDelete?`<button class="card__btn btn-del-place" data-id="${escapeHTML(p.id)}">🗑</button>`:''}
+        ${canDelete?`<button class="card__btn card__delete btn-del-place" data-id="${escapeHTML(p.id)}" title="刪除地點" aria-label="刪除地點"><span aria-hidden="true">×</span></button>`:''}
       </div>
     </div>`;
   // fav
