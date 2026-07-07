@@ -621,16 +621,19 @@
     .tour-overlay.open{display:block}
     .tour-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.76)}
     .tour-target{position:relative!important;z-index:2147483001!important;border-radius:10px;outline:3px solid var(--accent);outline-offset:4px}
-    .tour-card{position:fixed;z-index:2147483002;display:none;left:.75rem;right:.75rem;top:max(.75rem,env(safe-area-inset-top));max-width:420px;max-height:calc(100dvh - 1.5rem - env(safe-area-inset-top));margin:0 auto;padding:1rem;border:1px solid rgba(232,115,74,.5);border-radius:10px;background:#171717;color:var(--text);overflow-y:auto;overscroll-behavior:contain;box-shadow:0 18px 48px rgba(0,0,0,.55)}
+    .tour-card{position:fixed;z-index:2147483002;display:none;left:.75rem;right:.75rem;bottom:calc(var(--safe-b) + 4.75rem);max-width:420px;max-height:min(32svh,280px);margin:0 auto;padding:.9rem;border:1px solid rgba(232,115,74,.5);border-radius:10px;background:#171717;color:var(--text);overflow-y:auto;overscroll-behavior:contain;box-shadow:0 18px 48px rgba(0,0,0,.55)}
+    .tour-card[data-placement="top"]{top:max(.75rem,env(safe-area-inset-top));bottom:auto}
+    .tour-card[data-placement="bottom"]{top:auto;bottom:calc(var(--safe-b) + 4.75rem)}
     .tour-card.open{display:block}
     .tour-progress{color:var(--accent);font-size:.68rem;letter-spacing:.08em}
     .tour-card h2{margin:.35rem 0;font-family:var(--serif);font-size:1rem}
     .tour-card p{color:var(--muted);font-size:.78rem;line-height:1.65}
-    .tour-actions{display:grid;grid-template-columns:auto 1fr 1fr;gap:.45rem;margin-top:.9rem}
+    .tour-actions{position:sticky;bottom:0;display:grid;grid-template-columns:auto 1fr 1fr;gap:.45rem;margin-top:.75rem;padding-top:.5rem;background:#171717}
     .tour-actions button{min-height:44px;padding:.55rem .75rem;border:1px solid var(--border);border-radius:8px;color:var(--text)}
     .tour-actions .tour-next{border-color:var(--accent);background:var(--accent);color:#fff}
     [data-theme="light"] .tour-card{background:#fff;color:#1a1a1a}
-    @media(min-width:768px){.tour-card{top:1rem}}
+    [data-theme="light"] .tour-actions{background:#fff}
+    @media(min-width:768px){.tour-card,.tour-card[data-placement="top"],.tour-card[data-placement="bottom"]{top:1rem;bottom:auto;max-height:calc(100dvh - 2rem)}}
     @media(prefers-reduced-motion:reduce){.tour-target{scroll-behavior:auto}}
   </style>
 
@@ -966,19 +969,37 @@ function closeOverviewTour() {
   localStorage.setItem('kyushu_overview_tour_seen_v4', '1');
 }
 
+function placeOverviewTourCard() {
+  const card = document.getElementById('tour-card');
+  if (!overviewTourTarget) {
+    card.dataset.placement = 'bottom';
+    return;
+  }
+  const rect = overviewTourTarget.getBoundingClientRect();
+  const viewportHeight = window.visualViewport?.height || window.innerHeight;
+  const cardHeight = Math.min(viewportHeight * 0.32, 280);
+  const bottomNavSpace = 92;
+  const spaceAbove = rect.top;
+  const spaceBelow = viewportHeight - rect.bottom - bottomNavSpace;
+  card.dataset.placement = spaceAbove >= cardHeight && spaceAbove >= spaceBelow ? 'top' : 'bottom';
+}
+
 function renderOverviewTourStep() {
   overviewTourTarget?.classList.remove('tour-target');
   const step = OVERVIEW_TOUR_STEPS[overviewTourIndex];
   overviewTourTarget = document.querySelector(step.target);
   if (overviewTourTarget) {
     overviewTourTarget.classList.add('tour-target');
-    overviewTourTarget.scrollIntoView({ behavior:'smooth', block:'center' });
+    overviewTourTarget.scrollIntoView({ behavior:'smooth', block:'nearest' });
   }
   document.getElementById('tour-progress').textContent = `${overviewTourIndex + 1} / ${OVERVIEW_TOUR_STEPS.length}`;
   document.getElementById('tour-title').textContent = step.title;
   document.getElementById('tour-body').textContent = step.body;
   document.getElementById('tour-prev').disabled = overviewTourIndex === 0;
   document.getElementById('tour-next').textContent = overviewTourIndex === OVERVIEW_TOUR_STEPS.length - 1 ? '完成' : '下一步';
+  placeOverviewTourCard();
+  requestAnimationFrame(placeOverviewTourCard);
+  setTimeout(placeOverviewTourCard, 260);
 }
 
 function startOverviewTour() {
