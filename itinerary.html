@@ -952,10 +952,12 @@ document.querySelectorAll('[data-close-modal]').forEach(button => button.addEven
 document.getElementById('picker-overlay').addEventListener('click', event => { if (event.target.id === 'picker-overlay') event.target.classList.remove('open'); });
 
 const TOUR_STEPS = [
-  { target:'#date-tabs', title:'選擇旅遊日期', body:'先切換要安排的日期，每一天都會保存自己的城市與行程。' },
-  { target:'#day-region-trigger', title:'設定今日城市', body:'同一天可以選擇多個城市，景點選擇器會依這些城市縮小範圍。' },
-  { target:'.action-bar', title:'加入行程項目', body:'可從景點總覽挑選，或手動加入景點、餐廳、機場通勤與航班。新增時必須設定開始與結束時間。' },
-  { target:'#timeline', title:'依時間自動排序', body:'行程會依開始時間自動排列。修改任何項目的時間後，順序會立即重新計算。' },
+  { target:'#date-tabs', title:'選擇旅遊日期', body:'先切換要安排的日期，每一天都會保存自己的城市、景點、通勤、餐廳與航班。' },
+  { target:'#day-region-trigger', title:'設定今日城市', body:'同一天可以選擇多個城市，景點選擇器會依這些城市縮小範圍。跨城移動或航班可選「移動日」。' },
+  { target:'.action-bar', title:'加入行程項目', body:'可從景點總覽挑選收藏或全部景點，也可手動新增景點、餐廳、住宿、交通與航班。新增時必須填開始與結束時間。' },
+  { target:'#btn-add-flight', title:'獨立加入航班', body:'「加入航班」會開啟航班表單，可套用 JX846 或 JX847。航班號、起降機場、飛行時間與報到提醒會一起帶入行程。' },
+  { target:'#timeline', title:'行程卡片欄位與圖示', body:'左側時間軸顯示開始與結束時間；卡片標籤顯示類型、航班號與城市；飛機項目會顯示起降機場與飛行時間。備註、地圖、編輯、刪除都在卡片底部。' },
+  { target:'#timeline', title:'依時間自動排序', body:'行程會依開始時間自動排列。修改任何項目的時間後，順序會立即重新計算，不需要拖曳。' },
   { target:'#help-btn', title:'隨時重新查看', body:'之後可按右上角問號再次啟動這份互動導覽。' }
 ];
 let tourIndex = 0;
@@ -967,7 +969,7 @@ function closeTour() {
   document.getElementById('help-overlay').classList.remove('open');
   document.getElementById('help-overlay').setAttribute('aria-hidden', 'true');
   document.getElementById('tour-card').classList.remove('open');
-  localStorage.setItem('kyushu_itinerary_tour_seen_v3', '1');
+  localStorage.setItem('kyushu_itinerary_tour_seen_v4', '1');
 }
 
 function renderTourStep() {
@@ -1001,7 +1003,7 @@ document.getElementById('tour-next').addEventListener('click', () => {
   tourIndex++;
   renderTourStep();
 });
-if (!requestedFlight && !localStorage.getItem('kyushu_itinerary_tour_seen_v3')) startTour();
+if (!requestedFlight && !localStorage.getItem('kyushu_itinerary_tour_seen_v4')) startTour();
 
 document.getElementById('m-name').addEventListener('change', autofillPlaceFields);
 document.getElementById('m-name').addEventListener('blur',   autofillPlaceFields);
