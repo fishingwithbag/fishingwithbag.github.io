@@ -942,12 +942,16 @@
 
 <script>
 const OVERVIEW_TOUR_STEPS = [
-  { target:'.quick-actions', title:'快速前往常用功能', body:'可直接進入每日行程表，或切換只看收藏景點。' },
-  { target:'.flight-board', title:'掌握航班節點', body:'查看去回程時間、報到截止、免費選位時段與登機門提醒，也可直接把航班加入行程。' },
-  { target:'.search-bar', title:'搜尋與篩選景點', body:'使用關鍵字、地區、類別與子類別快速縮小景點範圍。' },
-  { target:'#add-section', title:'建立自己的地點', body:'展開新增地點，填寫城市、類別、名稱與備註後即可加入總覽。' },
-  { target:'#cards', title:'收藏與開啟地圖', body:'景點卡片可加入收藏，地圖按鈕會使用與行程頁相同的 Google Maps 圖示。' },
-  { target:'.qa-btn--itinerary', title:'開始編排行程', body:'進入每日行程表並設定時間，所有項目會依開始時間自動排序。' },
+  { target:'.quick-actions', title:'快速前往常用功能', body:'左側可進入每日行程表，右側可快速新增自訂地點。上方愛心按鈕會切換只看收藏清單。' },
+  { target:'.flight-board', title:'航班資訊看板', body:'每張航班卡會顯示航班號、去回程日期、起降機場、起飛抵達時間、機場報到開放與截止時間、線上報到時間、免費選位時段與登機門提醒。登機門通常以當日 STARLUX App 或機場看板為準。' },
+  { target:'.flight-board .flight-leg__actions', title:'航班快捷操作', body:'「管理行程／選位」會前往星宇航空官方頁面；「加入行程」會把該航班帶到行程表，航班也會和景點一樣依時間排序。' },
+  { target:'.search-bar', title:'搜尋與篩選景點', body:'可用名稱、地區或備註搜尋；下方下拉選單可用地區、類別、子類別縮小結果，例如餐廳、住宿、購物或釣點。' },
+  { target:'#add-section', title:'建立自己的地點', body:'展開後填入地區、類別、子類別、名稱、營業時間與備註。新增後會出現在景點卡片，也能收藏、開地圖或刪除。' },
+  { target:'#cost-block', title:'住宿費用', body:'可記錄每筆住宿費用與旅伴人數，系統會整理總額與平均分攤，資料會同步保存。' },
+  { target:'#rental-block', title:'租車資訊', body:'可保存取車日期、還車日期、地點、租車公司、車型、費用與訂單編號，方便出發前核對。' },
+  { target:'#driving-section', title:'日本自駕注意事項', body:'這裡整理靠左行駛、速限、停車、加油、ETC、導航、緊急電話、罰則與嬰幼兒乘車規定，出發前可集中確認。' },
+  { target:'#cards', title:'景點卡片欄位與圖示', body:'卡片上方是類別與地區標籤，中段顯示名稱、營業時間與備註，底部顯示費用。愛心代表收藏，彩色地圖針會開啟 Google Maps，自訂地點才會出現刪除按鈕。' },
+  { target:'.qa-btn--itinerary', title:'開始編排行程', body:'進入每日行程表後，從收藏景點或手動新增項目。所有景點、餐廳、通勤與航班都會依開始時間自動排序。' },
   { target:'#help-btn', title:'隨時重新查看', body:'之後可按右上角問號再次啟動這份互動導覽。' }
 ];
 let overviewTourIndex = 0;
@@ -959,7 +963,7 @@ function closeOverviewTour() {
   document.getElementById('help-overlay').classList.remove('open');
   document.getElementById('help-overlay').setAttribute('aria-hidden', 'true');
   document.getElementById('tour-card').classList.remove('open');
-  localStorage.setItem('kyushu_overview_tour_seen_v3', '1');
+  localStorage.setItem('kyushu_overview_tour_seen_v4', '1');
 }
 
 function renderOverviewTourStep() {
@@ -993,7 +997,7 @@ document.getElementById('tour-next').addEventListener('click', () => {
   overviewTourIndex++;
   renderOverviewTourStep();
 });
-if (!localStorage.getItem('kyushu_overview_tour_seen_v3')) startOverviewTour();
+if (!localStorage.getItem('kyushu_overview_tour_seen_v4')) startOverviewTour();
 
 // ════════════════════════════════════════
 //  子類別映射
