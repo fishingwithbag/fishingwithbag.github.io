@@ -733,16 +733,13 @@
       </div>
       <div class="add-field">
         <label>類別 *</label>
-        <select id="add-category" required>
-          <option value="">選擇類別</option>
-          <option>景點</option><option>餐廳</option><option>住宿</option><option>購物</option><option>其他</option>
-        </select>
+        <input id="add-category" type="text" list="add-category-options" placeholder="選擇或輸入新類別" autocomplete="off" required>
+        <datalist id="add-category-options"></datalist>
       </div>
       <div class="add-field">
         <label>子類別</label>
-        <select id="add-sub">
-          <option value="">請先選擇類別</option>
-        </select>
+        <input id="add-sub" type="text" list="add-sub-options" placeholder="選擇或輸入新子類別" autocomplete="off">
+        <datalist id="add-sub-options"></datalist>
       </div>
       <div class="add-field">
         <label>名稱 *</label>
@@ -1043,6 +1040,18 @@ let filterCat = '';
 let filterSub = '';
 
 function allPlaces(){ return [...PLACES, ...CLOUD_PLACES]; }
+function allCategories(){
+  return [...new Set([...Object.keys(SUB_MAP), ...allPlaces().map(p=>p.category).filter(Boolean)])];
+}
+function subcategoriesFor(category){
+  return [...new Set([
+    ...(SUB_MAP[category] || []),
+    ...allPlaces()
+      .filter(p => !category || p.category === category)
+      .map(p=>p.subcategory)
+      .filter(Boolean)
+  ])].sort((a,b)=>String(a).localeCompare(String(b),'zh-Hant'));
+}
 function escapeHTML(v){
   return String(v ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
@@ -1272,6 +1281,30 @@ function buildRegionTags(){
   });
 }
 
+// ── Category Select / Add Form Suggestions ──
+function buildCategorySelect(){
+  const sel=document.getElementById('cat-select');
+  const categories=allCategories();
+  if(filterCat && !categories.includes(filterCat)){
+    filterCat='';
+    filterSub='';
+  }
+  sel.innerHTML='<option value="">全部類別</option>';
+  categories.forEach(category=>{
+    const option=document.createElement('option');
+    option.value=category;
+    option.textContent=category;
+    option.selected=category===filterCat;
+    sel.appendChild(option);
+  });
+}
+
+function buildAddCategoryOptions(){
+  document.getElementById('add-category-options').innerHTML=allCategories()
+    .map(category=>`<option value="${escapeHTML(category)}"></option>`)
+    .join('');
+}
+
 // ── Region Select ──
 function buildRegionSelect(){
   const regions=[...new Set(allPlaces().map(p=>p.region).filter(Boolean))].sort();
@@ -1284,26 +1317,23 @@ function buildRegionSelect(){
 // ── Sub Select（篩選）聯動 ──
 function updateFilterSubOptions(cat){
   const subSel=document.getElementById('sub-select');
+  const subs=subcategoriesFor(cat);
+  if(filterSub && !subs.includes(filterSub)) filterSub='';
   subSel.innerHTML='<option value="">全部子類別</option>';
-  if(cat && SUB_MAP[cat]){
-    SUB_MAP[cat].forEach(s=>{
-      const o=document.createElement('option');o.value=s;o.textContent=s;
-      if(s===filterSub)o.selected=true;
-      subSel.appendChild(o);
-    });
-  } else {
-    const subs=[...new Set(allPlaces().map(p=>p.subcategory||'').filter(Boolean))].sort();
-    subs.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;if(s===filterSub)o.selected=true;subSel.appendChild(o);});
-  }
+  subs.forEach(subcategory=>{
+    const option=document.createElement('option');
+    option.value=subcategory;
+    option.textContent=subcategory;
+    option.selected=subcategory===filterSub;
+    subSel.appendChild(option);
+  });
 }
 
 // ── Add Form 子類別聯動 ──
 function updateAddSubOptions(cat){
-  const addSub=document.getElementById('add-sub');
-  addSub.innerHTML='<option value="">選擇子類別</option>';
-  (SUB_MAP[cat]||[]).forEach(s=>{
-    const o=document.createElement('option');o.value=s;o.textContent=s;addSub.appendChild(o);
-  });
+  document.getElementById('add-sub-options').innerHTML=subcategoriesFor(cat)
+    .map(subcategory=>`<option value="${escapeHTML(subcategory)}"></option>`)
+    .join('');
 }
 
 // ════════════════════════════════════════
@@ -1350,7 +1380,7 @@ document.getElementById('add-toggle').addEventListener('click',()=>{
 });
 
 // Add form 類別聯動
-document.getElementById('add-category').addEventListener('change',e=>{ updateAddSubOptions(e.target.value); });
+document.getElementById('add-category').addEventListener('input',e=>{ updateAddSubOptions(e.target.value.trim()); });
 
 // 提交新增地點
 document.getElementById('add-place-form').addEventListener('submit',e=>{
@@ -1371,7 +1401,7 @@ document.getElementById('add-place-form').addEventListener('submit',e=>{
   }).then(()=>{
     status.textContent='✅ 已儲存';
     e.target.reset();
-    document.getElementById('add-sub').innerHTML='<option value="">請先選擇類別</option>';
+    updateAddSubOptions('');
     setTimeout(()=>status.textContent='',2500);
   }).catch(()=>{
     status.textContent='儲存失敗，請稍後再試';
@@ -1580,6 +1610,9 @@ waitFirebase(() => {
     PLACES = normalizeFirebaseList(raw, 'base');
 
     buildRegionSelect();
+    buildCategorySelect();
+    buildAddCategoryOptions();
+    updateFilterSubOptions(filterCat);
     buildRegionTags();
     render();
   }, err => {
@@ -1594,6 +1627,9 @@ waitFirebase(() => {
     CLOUD_PLACES = normalizeFirebaseList(raw, 'custom');
 
     buildRegionSelect();
+    buildCategorySelect();
+    buildAddCategoryOptions();
+    updateFilterSubOptions(filterCat);
     buildRegionTags();
     render();
   }, err => {
