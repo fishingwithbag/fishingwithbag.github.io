@@ -34,6 +34,16 @@
     .topbar__title { font-family:var(--serif); font-size:.9rem; letter-spacing:.15em; }
     .icon-btn { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.1rem; border:1px solid var(--border); background:var(--surface); color:var(--text); -webkit-tap-highlight-color:transparent; }
 
+    /* Collaboration */
+    .collab-bar { display:flex; align-items:center; justify-content:space-between; gap:.65rem; padding:.45rem 1rem; border-bottom:1px solid var(--border); background:var(--surface2); }
+    .collab-identity { display:flex; align-items:center; gap:.4rem; white-space:nowrap; color:var(--muted); font-size:.68rem; }
+    .collab-select { min-height:34px; padding:.3rem 1.6rem .3rem .55rem; border:1px solid var(--border); border-radius:18px; background:var(--surface); color:var(--text); font-size:.7rem; outline:none; }
+    .collab-select option { color:#1a1a1a; background:#fff; }
+    .online-users { display:flex; align-items:center; justify-content:flex-end; gap:.3rem; min-width:0; overflow-x:auto; scrollbar-width:none; }
+    .online-users::-webkit-scrollbar { display:none; }
+    .online-label { flex:0 0 auto; color:var(--muted); font-size:.62rem; }
+    .online-chip { flex:0 0 auto; padding:.18rem .45rem; border:1px solid rgba(66,180,110,.38); border-radius:14px; color:#63d58e; background:rgba(66,180,110,.08); font-size:.62rem; }
+
     /* Date tabs */
     .date-tabs { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none; border-bottom:1px solid var(--border); background:var(--surface); }
     .date-tabs::-webkit-scrollbar { display:none; }
@@ -58,6 +68,18 @@
     .region-picker__menu.open { display:grid; }
     .region-option { min-height:40px; padding:.4rem; border:1px solid var(--border); border-radius:7px; color:var(--text); background:var(--surface); font-size:.72rem; }
     .region-option.active { border-color:var(--accent); color:var(--accent); background:rgba(232,115,74,.1); }
+
+    /* Two-car view */
+    .group-view { display:flex; gap:.4rem; padding:.5rem 1rem; overflow-x:auto; border-bottom:1px solid var(--border); scrollbar-width:none; }
+    .group-view::-webkit-scrollbar { display:none; }
+    .group-view__btn { flex:0 0 auto; min-height:36px; padding:.35rem .72rem; border:1px solid var(--border); border-radius:18px; color:var(--muted); background:var(--surface); font-size:.68rem; }
+    .group-view__btn.active { border-color:var(--accent); color:#fff; background:var(--accent); }
+    .group-badge--all { color:var(--accent2); border-color:rgba(168,197,176,.45); opacity:1; }
+    .group-badge--carA { color:#72a7ff; border-color:rgba(114,167,255,.5); opacity:1; }
+    .group-badge--carB { color:#d2a8ff; border-color:rgba(210,168,255,.5); opacity:1; }
+    .tl-card__updated { margin-top:.3rem; color:var(--muted); font-size:.6rem; line-height:1.45; }
+    .tl-card__lock { color:#ffbf69; }
+    .btn-edit:disabled,.btn-del:disabled { cursor:not-allowed; opacity:.25; pointer-events:none; }
 
     /* Day summary */
     .day-summary { display:flex; gap:.5rem; padding:.65rem 1rem; overflow-x:auto; scrollbar-width:none; border-bottom:1px solid var(--border); }
@@ -129,6 +151,10 @@
     .day-stat { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:.6rem .75rem; text-align:center; }
     .day-stat__n { font-family:var(--serif); font-size:1.2rem; font-weight:700; display:block; color:var(--accent); }
     .day-stat__l { font-size:.6rem; opacity:.4; letter-spacing:.1em; display:block; margin-top:.15rem; }
+    .route-bar { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; padding:.5rem 1rem .25rem; }
+    .route-btn { min-height:42px; display:flex; align-items:center; justify-content:center; padding:.5rem .65rem; border:1px solid rgba(66,133,244,.38); border-radius:8px; color:#72a7ff; background:rgba(66,133,244,.07); font-size:.72rem; text-align:center; }
+    .route-btn--b { color:#d2a8ff; border-color:rgba(180,120,255,.38); background:rgba(180,120,255,.07); }
+    .route-btn.disabled { color:var(--muted); border-color:var(--border); background:var(--surface); opacity:.45; pointer-events:none; }
 
     /* Add button */
     .btn-add-item { width:calc(100% - 2rem); margin:0 1rem .75rem; padding:.65rem; border-radius:var(--r); border:1px dashed rgba(255,255,255,.18); color:var(--text); font-size:.82rem; letter-spacing:.08em; opacity:.6; transition:opacity .2s, border-color .2s; -webkit-tap-highlight-color:transparent; }
@@ -203,6 +229,7 @@
       body { padding-bottom:0; }
       .tour-card, .tour-card[data-placement="top"], .tour-card[data-placement="bottom"] { top:1rem; bottom:auto; max-height:calc(100dvh - 2rem); }
     }
+    @media (max-width:520px) { .collab-bar { align-items:flex-start; flex-direction:column; } .online-users { width:100%; justify-content:flex-start; } }
     @media (max-width:420px) {
       .modal-grid,.picker-time-grid { grid-template-columns:1fr; }
       .tl-item { grid-template-columns:48px minmax(0,1fr); }
@@ -228,6 +255,19 @@
   </div>
 </header>
 
+<div class="collab-bar" aria-label="協作者狀態">
+  <label class="collab-identity">我是
+    <select class="collab-select" id="collab-user">
+      <option value="">請選擇</option>
+      <option value="主源">主源（網站作者）</option>
+      <option value="佳晏">佳晏</option>
+      <option value="宗憲">宗憲</option>
+      <option value="佳樺">佳樺</option>
+    </select>
+  </label>
+  <div class="online-users" id="online-users"><span class="online-label">選擇身分後顯示上線狀態</span></div>
+</div>
+
 <div class="date-tabs" id="date-tabs"></div>
 
 <div class="region-picker">
@@ -237,6 +277,12 @@
     <span aria-hidden="true">⌄</span>
   </button>
   <div class="region-picker__menu" id="day-region-menu"></div>
+</div>
+
+<div class="group-view" id="group-view" aria-label="行程分組檢視">
+  <button class="group-view__btn active" type="button" data-group-view="all">所有行程</button>
+  <button class="group-view__btn" type="button" data-group-view="carA">A 車｜主源・佳晏</button>
+  <button class="group-view__btn" type="button" data-group-view="carB">B 車｜宗憲・佳樺</button>
 </div>
 
 <div class="action-bar">
@@ -251,6 +297,8 @@
   <div class="day-stat"><span class="day-stat__n" id="stat-hours">—</span><span class="day-stat__l">行程時數</span></div>
   <div class="day-stat"><span class="day-stat__n" id="stat-cost">—</span><span class="day-stat__l">預估費用</span></div>
 </div>
+
+<div class="route-bar" id="route-bar"></div>
 
 <div class="day-summary" id="day-summary"></div>
 <div class="timeline" id="timeline"></div>
@@ -268,6 +316,14 @@
         <option value="commute">🚕 通勤／機場接送</option>
         <option value="flight">✈️ 飛機航班</option>
         <option value="other">📌 其他</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>同行分組</label>
+      <select id="m-group">
+        <option value="all">👨‍👩‍👧‍👦 全員同行</option>
+        <option value="carA">🚙 A 車｜主源、佳晏</option>
+        <option value="carB">🚗 B 車｜宗憲、佳樺</option>
       </select>
     </div>
     <div class="modal-field">
@@ -344,6 +400,14 @@
     <input class="picker-search" id="picker-search" type="search" placeholder="搜尋景點、餐廳或城市">
     <div class="picker-filters" id="picker-filters"></div>
     <div class="picker-list" id="picker-list"></div>
+    <div class="modal-field" style="margin-top:.65rem">
+      <label>這批景點由誰參加</label>
+      <select id="picker-group">
+        <option value="all">👨‍👩‍👧‍👦 全員同行</option>
+        <option value="carA">🚙 A 車｜主源、佳晏</option>
+        <option value="carB">🚗 B 車｜宗憲、佳樺</option>
+      </select>
+    </div>
     <div class="picker-time-grid">
       <label>第一個景點開始時間 *<input id="picker-start" type="time" required></label>
       <label>景點間移動緩衝（分鐘）<input id="picker-gap" type="number" min="0" step="5" value="30"></label>
@@ -394,6 +458,15 @@ const DURATION_DEFAULT = {
 };
 
 const ALL_REGIONS = ['別府','大分','熊本','阿蘇','福岡','北九州','長崎','佐賀','移動日'];
+const COLLABORATORS = ['主源','佳晏','宗憲','佳樺'];
+const TRAVEL_GROUPS = {
+  all:  {label:'全員同行', short:'共同', members:['主源','佳晏','宗憲','佳樺']},
+  carA: {label:'A 車｜主源、佳晏', short:'A 車', members:['主源','佳晏']},
+  carB: {label:'B 車｜宗憲、佳樺', short:'B 車', members:['宗憲','佳樺']}
+};
+const COLLAB_SESSION_ID = sessionStorage.getItem('kyushu_collab_session') || (globalThis.crypto?.randomUUID?.() || ('session-'+Date.now()+'-'+Math.random().toString(36).slice(2)));
+sessionStorage.setItem('kyushu_collab_session', COLLAB_SESSION_ID);
+const PRESENCE_TTL = 90000;
 
 let currentDay   = 0;
 let allBasePlaces   = [];
@@ -402,10 +475,98 @@ let itineraryData   = {};
 let dayRegionMap    = {};
 let favsCache       = [];
 let editingKey      = null;
+let editingDate     = null;
 let selectedPlaceIds = new Set();
 let pickerRegion = '全部';
+let groupView = 'all';
+let collaboratorsPresence = {};
+let itineraryEditLocks = {};
+let activeItineraryLock = null;
+let collaborationConnected = false;
 
 function allPlaces() { return [...allBasePlaces, ...allCustomPlaces]; }
+function collaboratorName() {
+  const name = localStorage.getItem('kyushu_collaborator') || '';
+  return COLLABORATORS.includes(name) ? name : '';
+}
+function itemGroup(item) { return TRAVEL_GROUPS[item?.travelGroup] ? item.travelGroup : 'all'; }
+function groupLabel(group) { return TRAVEL_GROUPS[group]?.short || TRAVEL_GROUPS.all.short; }
+function formatCollabTime(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleString('zh-TW', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});
+}
+function activeLock(lock) { return lock && Date.now() - Number(lock.updatedAt || 0) < PRESENCE_TTL; }
+function getItineraryLock(date, key) { return itineraryEditLocks?.[date]?.[key] || null; }
+function renderOnlineUsers() {
+  const names = [...new Set(Object.values(collaboratorsPresence)
+    .filter(entry => entry && COLLABORATORS.includes(entry.name) && Date.now() - Number(entry.lastSeen || 0) < PRESENCE_TTL)
+    .map(entry => entry.name))];
+  const wrap = document.getElementById('online-users');
+  wrap.innerHTML = names.length
+    ? `<span class="online-label">🟢 線上 ${names.length} 人</span>` + names.map(name => `<span class="online-chip">${escapeHTML(name)}</span>`).join('')
+    : '<span class="online-label">目前沒有其他人在線</span>';
+}
+function writePresence() {
+  const name = collaboratorName();
+  if (!window.__firebaseReady || !name) return;
+  window.__set(window.__ref(window.__db, `collaborators_presence/${COLLAB_SESSION_ID}`), {
+    name, page:'行程表', lastSeen:Date.now()
+  }).catch(error => console.warn('協作者上線狀態暫時無法寫入：', error));
+  if (activeItineraryLock) {
+    window.__set(window.__ref(window.__db, `edit_locks/itinerary/${activeItineraryLock.date}/${activeItineraryLock.key}`), {
+      name, sessionId:COLLAB_SESSION_ID, updatedAt:Date.now()
+    }).catch(() => {});
+  }
+}
+function releaseItineraryLock() {
+  const lock = activeItineraryLock;
+  activeItineraryLock = null;
+  if (lock && window.__firebaseReady) {
+    window.__remove(window.__ref(window.__db, `edit_locks/itinerary/${lock.date}/${lock.key}`)).catch(() => {});
+  }
+}
+async function acquireItineraryLock(date, key, name) {
+  const current = getItineraryLock(date, key);
+  if (activeLock(current) && current.sessionId !== COLLAB_SESSION_ID) {
+    alert(`${current.name || '其他人'}正在編輯「${name}」，請稍後再試。`);
+    return false;
+  }
+  activeItineraryLock = {date, key};
+  if (window.__firebaseReady) {
+    await window.__set(window.__ref(window.__db, `edit_locks/itinerary/${date}/${key}`), {
+      name:collaboratorName() || '未指定', sessionId:COLLAB_SESSION_ID, updatedAt:Date.now()
+    }).catch(error => console.warn('編輯鎖暫時無法啟用，仍保留原編輯功能：', error));
+  }
+  return true;
+}
+function connectCollaboration() {
+  if (collaborationConnected) return;
+  collaborationConnected = true;
+  window.__onValue(window.__ref(window.__db, 'collaborators_presence'), snap => {
+    collaboratorsPresence = snap.val() || {};
+    renderOnlineUsers();
+  }, () => renderOnlineUsers());
+  window.__onValue(window.__ref(window.__db, 'edit_locks/itinerary'), snap => {
+    itineraryEditLocks = snap.val() || {};
+    renderDay();
+  }, () => {});
+  writePresence();
+  setInterval(() => { writePresence(); renderOnlineUsers(); }, 25000);
+}
+function initCollaboration() {
+  const select = document.getElementById('collab-user');
+  select.value = collaboratorName();
+  select.addEventListener('change', () => {
+    if (COLLABORATORS.includes(select.value)) localStorage.setItem('kyushu_collaborator', select.value);
+    else localStorage.removeItem('kyushu_collaborator');
+    if (!select.value && window.__firebaseReady) window.__remove(window.__ref(window.__db, `collaborators_presence/${COLLAB_SESSION_ID}`)).catch(() => {});
+    writePresence();
+    renderOnlineUsers();
+  });
+  waitFirebase(connectCollaboration);
+}
 function escapeHTML(value) {
   return String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 }
@@ -558,14 +719,54 @@ function compareItineraryTime(a, b) {
   return String(a.createdAt || '').localeCompare(String(b.createdAt || '')) || String(a._key || '').localeCompare(String(b._key || ''));
 }
 
+function routeStopsFor(items, group) {
+  const excludedTypes = new Set(['transit','commute','flight']);
+  const seen = new Set();
+  return items.filter(item => {
+    const belongs = itemGroup(item) === 'all' || itemGroup(item) === group;
+    return belongs && !excludedTypes.has(item.type) && item.name;
+  }).map(item => `${item.name}${item.city || item.region ? ' ' + (item.city || item.region) : ''} Japan`)
+    .filter(stop => {
+      if (seen.has(stop)) return false;
+      seen.add(stop);
+      return true;
+    });
+}
+
+function googleRouteUrl(stops) {
+  if (!stops.length) return '';
+  if (stops.length === 1) return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(stops[0])}`;
+  const origin = stops[0];
+  const destination = stops[stops.length - 1];
+  const waypoints = stops.slice(1, -1);
+  let url = `https://www.google.com/maps/dir/?api=1&travelmode=driving&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}`;
+  if (waypoints.length) url += `&waypoints=${encodeURIComponent(waypoints.join('|'))}`;
+  return url;
+}
+
+function renderRouteLinks(allItems) {
+  const aStops = routeStopsFor(allItems, 'carA');
+  const bStops = routeStopsFor(allItems, 'carB');
+  const button = (group, stops, extraClass = '') => {
+    const url = googleRouteUrl(stops);
+    const label = `${groupLabel(group)}今日路線${stops.length ? `（${stops.length}站）` : ''}`;
+    return url
+      ? `<a class="route-btn ${extraClass}" href="${url}" target="_blank" rel="noopener">🗺 ${label}</a>`
+      : `<span class="route-btn disabled ${extraClass}">🗺 ${label}</span>`;
+  };
+  document.getElementById('route-bar').innerHTML = button('carA', aStops) + button('carB', bStops, 'route-btn--b');
+}
+
 // ── Render Timeline ──
 function renderDay() {
   const date  = TRIP_DAYS[currentDay].date;
-  const items = (itineraryData[date] || []).slice().sort(compareItineraryTime);
+  const allItems = (itineraryData[date] || []).slice().sort(compareItineraryTime);
+  const items = groupView === 'all' ? allItems : allItems.filter(item => itemGroup(item) === 'all' || itemGroup(item) === groupView);
   const tl    = document.getElementById('timeline');
   tl.innerHTML = '';
   updateStats(items);
   updateSummary(items);
+  renderRouteLinks(allItems);
 
   if (!items.length) {
     tl.innerHTML = `<div class="empty-day"><div class="empty-day__icon">🗓</div><div class="empty-day__text">這天還沒有行程<br>可從景點總覽挑選或手動新增</div></div>`;
@@ -577,6 +778,9 @@ function renderDay() {
     row.className = 'tl-item';
 
     const [sh, sm] = (it.start || '09:00').split(':');
+    const group = itemGroup(it);
+    const lock = getItineraryLock(date, it._key);
+    const lockedByOther = activeLock(lock) && lock.sessionId !== COLLAB_SESSION_ID;
     row.dataset.key = it._key || idx;
     row.innerHTML = `
         <div class="tl-time">
@@ -591,12 +795,15 @@ function renderDay() {
                 <span class="tl-card__cat">${typeEmoji(it.type)} ${typeLabel(it.type)}</span>
                 ${it.flightNo ? `<span class="tl-card__cat">${escapeHTML(it.flightNo)}</span>` : ''}
                 ${it.city ? `<span class="tl-card__cat">${escapeHTML(it.city)}</span>` : ''}
+                <span class="tl-card__cat group-badge--${group}">${escapeHTML(groupLabel(group))}</span>
                 ${it.start && it.end ? `<span class="tl-card__dur">${it.start}–${it.end}</span>` : ''}
               </div>
               <div class="tl-card__name">${escapeHTML(it.name)}</div>
               ${it.type === 'flight' && (it.origin || it.destination) ? `<div class="tl-card__hours">${escapeHTML(it.origin || '')} → ${escapeHTML(it.destination || '')}${it.durationMin ? ` · ${Math.floor(it.durationMin / 60)}h${it.durationMin % 60 ? it.durationMin % 60 + 'm' : ''}` : ''}</div>` : ''}
               ${it.hours ? `<div class="tl-card__hours">🕐 營業：${escapeHTML(it.hours)}</div>` : ''}
               ${it.note  ? `<p class="tl-card__note">${escapeHTML(it.note)}</p>` : ''}
+              ${it.updatedBy ? `<div class="tl-card__updated">最後由 ${escapeHTML(it.updatedBy)} 更新${formatCollabTime(it.updatedAt) ? ` · ${formatCollabTime(it.updatedAt)}` : ''}</div>` : ''}
+              ${lockedByOther ? `<div class="tl-card__updated tl-card__lock">✎ ${escapeHTML(lock.name || '其他人')}正在編輯</div>` : ''}
             </div>
             <div class="tl-card__footer">
               <span class="tl-card__cost">${it.cost ? `¥${Number(it.cost).toLocaleString()}` : ''}</span>
@@ -612,8 +819,8 @@ function renderDay() {
                     <circle class="gmap-icon__center" cx="18" cy="15.35" r="3.15"/>
                   </svg>
                 </a>
-                <button class="tl-card__btn btn-edit" data-key="${it._key || idx}">編輯</button>
-                <button class="tl-card__btn btn-del" data-key="${it._key || idx}" style="color:#ff6b6b">刪除</button>
+                <button class="tl-card__btn btn-edit" data-key="${it._key || idx}" ${lockedByOther ? 'disabled' : ''}>編輯</button>
+                <button class="tl-card__btn btn-del" data-key="${it._key || idx}" style="color:#ff6b6b" ${lockedByOther ? 'disabled' : ''}>刪除</button>
               </div>
             </div>
           </div>
@@ -633,21 +840,26 @@ function renderDay() {
     btn.addEventListener('click', () => {
       const key  = btn.dataset.key;
       const date = TRIP_DAYS[currentDay].date;
+      const lock = getItineraryLock(date, key);
+      if (activeLock(lock) && lock.sessionId !== COLLAB_SESSION_ID) { alert(`${lock.name || '其他人'}正在編輯，暫時不能刪除。`); return; }
       window.__remove(window.__ref(window.__db, `itinerary/${date}/${key}`));
     });
   });
 
   tl.querySelectorAll('.btn-edit').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const key  = btn.dataset.key;
       const date = TRIP_DAYS[currentDay].date;
       const item = (itineraryData[date] || []).find(i => i._key === key);
       if (!item) return;
+      if (!await acquireItineraryLock(date, key, item.name)) return;
       buildPlaceSuggestions();
       setupTimeInput('m-start');
       setupTimeInput('m-end');
       editingKey = key;
+      editingDate = date;
       document.getElementById('m-type').value         = item.type || 'spot';
+      document.getElementById('m-group').value        = itemGroup(item);
       document.getElementById('m-name').value         = item.name || '';
       document.getElementById('m-start').value        = normalizeTimeValue(item.start) || '09:00';
       document.getElementById('m-end').value          = normalizeTimeValue(item.end) || '10:00';
@@ -816,6 +1028,8 @@ async function addSelectedPlaces() {
   const date = TRIP_DAYS[currentDay].date;
   let startMinutes = timeToMinutes(pickerStart);
   const gapMinutes = Math.max(0, parseInt(document.getElementById('picker-gap').value) || 0);
+  const travelGroup = document.getElementById('picker-group').value || 'all';
+  const actor = collaboratorName() || '未指定';
   const selected = allPlaces().filter(place => selectedPlaceIds.has(getPlaceFavKey(place)));
   for (const place of selected) {
     const duration = getPlaceDuration(place);
@@ -826,7 +1040,8 @@ async function addSelectedPlaces() {
       type: guessItemType(place), name: place.name || '', city: place.region || '', start, end,
       hours: place.hours || '', cost: parseInt(place.cost) || 0, note: place.note || '',
       region: place.region || '', category: place.category || '', subcategory: place.subcategory || '',
-      placeId: getPlaceFavKey(place), createdAt: new Date().toISOString()
+      placeId: getPlaceFavKey(place), travelGroup,
+      createdAt: new Date().toISOString(), updatedAt:new Date().toISOString(), updatedBy:actor
     });
     startMinutes += gapMinutes;
   }
@@ -836,13 +1051,16 @@ async function addSelectedPlaces() {
 
 // ── Modal ──
 function openNewItemModal(type = 'spot') {
+  releaseItineraryLock();
   buildPlaceSuggestions();
   buildDayRegionSelect();
   setupTimeInput('m-start');
   setupTimeInput('m-end');
   editingKey = null;
+  editingDate = null;
   ['m-name','m-hours','m-cost','m-transit-min','m-note','m-flight-no','m-flight-duration','m-origin','m-destination'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('m-type').value  = type;
+  document.getElementById('m-group').value = groupView === 'all' ? 'all' : groupView;
   document.getElementById('m-city').value  = getDayRegion();
   document.getElementById('m-start').value = '';
   document.getElementById('m-end').value   = '';
@@ -861,8 +1079,14 @@ if (FLIGHT_PRESETS[requestedFlight]) {
   history.replaceState(null, '', location.pathname);
 }
 
-document.getElementById('btn-modal-cancel').addEventListener('click', () => document.getElementById('modal-overlay').classList.remove('open'));
-document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target === document.getElementById('modal-overlay')) document.getElementById('modal-overlay').classList.remove('open'); });
+function closeItemModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  editingKey = null;
+  editingDate = null;
+  releaseItineraryLock();
+}
+document.getElementById('btn-modal-cancel').addEventListener('click', closeItemModal);
+document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target === document.getElementById('modal-overlay')) closeItemModal(); });
 
 document.getElementById('btn-modal-save').addEventListener('click', async () => {
   const name     = document.getElementById('m-name').value.trim();
@@ -872,7 +1096,7 @@ document.getElementById('btn-modal-save').addEventListener('click', async () => 
   if (!/^([01]?\d|2[0-3]):[0-5]\d$/.test(startVal) || !/^([01]?\d|2[0-3]):[0-5]\d$/.test(endVal)) { alert('請輸入正確的 24 小時制時間，例如 09:00'); return; }
   if (endVal <= startVal && document.getElementById('m-type').value !== 'flight') { alert('結束時間需晚於開始時間'); return; }
 
-  const date          = TRIP_DAYS[currentDay].date;
+  const date          = editingDate || TRIP_DAYS[currentDay].date;
   const region        = document.getElementById('m-city').value || getDayRegion(date);
   const matchedPlaces = allPlaces().filter(p => normalizeName(p.name) === normalizeName(name));
   const matchedPlace  = matchedPlaces.find(p => region && regionMatches(p.region, region)) || matchedPlaces[0] || null;
@@ -897,7 +1121,10 @@ document.getElementById('btn-modal-save').addEventListener('click', async () => 
     flightNo:    document.getElementById('m-flight-no').value.trim(),
     origin:      document.getElementById('m-origin').value.trim(),
     destination: document.getElementById('m-destination').value.trim(),
-    createdAt:   existingItem?.createdAt || new Date().toISOString()
+    travelGroup: document.getElementById('m-group').value || 'all',
+    createdAt:   existingItem?.createdAt || new Date().toISOString(),
+    updatedAt:   new Date().toISOString(),
+    updatedBy:   collaboratorName() || '未指定'
   };
 
   try {
@@ -907,8 +1134,7 @@ document.getElementById('btn-modal-save').addEventListener('click', async () => 
     } else {
       await window.__push(window.__ref(window.__db, `itinerary/${date}`), item);
     }
-    document.getElementById('modal-overlay').classList.remove('open');
-    editingKey = null;
+    closeItemModal();
   } catch (error) {
     console.error('行程儲存失敗：', error);
     alert('行程儲存失敗，請確認 Firebase 登入與寫入權限。');
@@ -916,8 +1142,11 @@ document.getElementById('btn-modal-save').addEventListener('click', async () => 
 });
 
 document.getElementById('btn-clear-day').addEventListener('click', () => {
+  const date = TRIP_DAYS[currentDay].date;
+  const blockingLock = Object.values(itineraryEditLocks?.[date] || {}).find(lock => activeLock(lock) && lock.sessionId !== COLLAB_SESSION_ID);
+  if (blockingLock) { alert(`${blockingLock.name || '其他人'}正在編輯這天的行程，暫時不能清空。`); return; }
   if (!confirm('確定清空這天的行程？')) return;
-  window.__remove(window.__ref(window.__db, `itinerary/${TRIP_DAYS[currentDay].date}`));
+  window.__remove(window.__ref(window.__db, `itinerary/${date}`));
 });
 
 document.getElementById('day-region-trigger').addEventListener('click', () => {
@@ -944,6 +1173,7 @@ document.getElementById('btn-open-picker').addEventListener('click', () => {
   pickerRegion = '全部';
   document.getElementById('picker-search').value = '';
   document.getElementById('picker-start').value = '';
+  document.getElementById('picker-group').value = groupView === 'all' ? 'all' : groupView;
   renderPickerFilters();
   renderPlacePicker();
   document.getElementById('picker-overlay').classList.add('open');
@@ -964,6 +1194,13 @@ document.getElementById('picker-list').addEventListener('click', event => {
   renderPlacePicker();
 });
 document.getElementById('btn-add-selected').addEventListener('click', addSelectedPlaces);
+document.getElementById('group-view').addEventListener('click', event => {
+  const button = event.target.closest('[data-group-view]');
+  if (!button) return;
+  groupView = button.dataset.groupView;
+  document.querySelectorAll('[data-group-view]').forEach(item => item.classList.toggle('active', item === button));
+  renderDay();
+});
 document.getElementById('m-type').addEventListener('change', toggleFlightFields);
 document.querySelectorAll('[data-close-modal]').forEach(button => button.addEventListener('click', () => document.getElementById(button.dataset.closeModal).classList.remove('open')));
 document.getElementById('picker-overlay').addEventListener('click', event => { if (event.target.id === 'picker-overlay') event.target.classList.remove('open'); });
@@ -971,9 +1208,11 @@ document.getElementById('picker-overlay').addEventListener('click', event => { i
 const TOUR_STEPS = [
   { target:'#date-tabs', title:'選擇旅遊日期', body:'先切換要安排的日期，每一天都會保存自己的城市、景點、通勤、餐廳與航班。' },
   { target:'#day-region-trigger', title:'設定今日城市', body:'同一天可以選擇多個城市，景點選擇器會依這些城市縮小範圍。跨城移動或航班可選「移動日」。' },
+  { target:'#group-view', title:'共同與分車行程', body:'所有行程可查看完整安排；切換 A 車或 B 車時，會同時顯示該車專屬行程與全員共同景點。' },
   { target:'.action-bar', title:'加入行程項目', body:'可從景點總覽挑選景點，也可手動新增景點、餐廳、住宿、交通與航班。行程地區可選擇既有地區或直接輸入新地區，並需填寫開始與結束時間。' },
   { target:'#btn-add-flight', title:'獨立加入航班', body:'「加入航班」會開啟航班表單，可套用 JX846 或 JX847。航班號、起降機場、飛行時間與報到提醒會一起帶入行程。' },
-  { target:'#timeline', title:'行程卡片欄位與圖示', body:'左側時間軸顯示開始與結束時間；卡片標籤顯示類型、航班號與城市；飛機項目會顯示起降機場與飛行時間。備註、地圖、編輯、刪除都在卡片底部。' },
+  { target:'#timeline', title:'行程卡片欄位與圖示', body:'卡片會標示共同、A 車或 B 車及最後更新者。原本的單點地圖、備註、編輯與刪除功能全部保留。' },
+  { target:'#route-bar', title:'兩台車的今日路線', body:'A 車與 B 車分別產生整日 Google Maps 路線，共同景點會自動加入兩條路線。' },
   { target:'#timeline', title:'依時間自動排序', body:'行程會依開始時間自動排列。修改任何項目的時間後，順序會立即重新計算，不需要拖曳。' },
   { target:'#help-btn', title:'隨時重新查看', body:'之後可按右上角問號再次啟動這份互動導覽。' }
 ];
@@ -1108,6 +1347,12 @@ waitFirebase(() => {
   });
 
   buildTabs(); buildDayRegionSelect(); renderDay();
+});
+initCollaboration();
+window.addEventListener('pagehide', () => {
+  if (!window.__firebaseReady) return;
+  window.__remove(window.__ref(window.__db, `collaborators_presence/${COLLAB_SESSION_ID}`)).catch(() => {});
+  releaseItineraryLock();
 });
 </script>
 </body>
