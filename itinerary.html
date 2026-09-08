@@ -198,9 +198,23 @@
     .picker-place strong { display:block; font-size:.82rem; }
     .picker-place small { display:block; margin-top:.2rem; color:var(--muted); font-size:.68rem; }
     .picker-place>small { margin:0; }
-    .picker-time-grid { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; padding:.7rem 0; }
+    .picker-time-grid { display:grid; grid-template-columns:1fr; gap:.5rem; padding:.7rem 0; }
     .picker-time-grid label { display:flex; flex-direction:column; gap:.3rem; color:var(--muted); font-size:.7rem; }
     .picker-time-grid input { min-height:44px; padding:.55rem .75rem; border:1px solid var(--border); border-radius:8px; color:var(--text); background:var(--surface2); }
+    .picker-route-times { margin:.2rem 0 .7rem; border:1px solid var(--border); border-radius:8px; background:var(--surface2); overflow:hidden; }
+    .picker-route-times__title { padding:.55rem .7rem; border-bottom:1px solid var(--border); color:var(--muted); font-size:.68rem; line-height:1.55; }
+    .picker-route-row { display:grid; grid-template-columns:28px minmax(0,1fr) 112px; align-items:center; gap:.5rem; padding:.55rem .65rem; border-bottom:1px solid var(--border); }
+    .picker-route-row:last-child { border-bottom:0; }
+    .picker-route-row__order { width:24px; height:24px; display:grid; place-items:center; border-radius:50%; background:var(--surface); color:var(--accent); font-size:.66rem; font-weight:700; }
+    .picker-route-row__name { min-width:0; }
+    .picker-route-row__name strong { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.76rem; }
+    .picker-route-row__name small { display:block; margin-top:.12rem; color:var(--muted); font-size:.62rem; }
+    .picker-route-row__input { display:flex; align-items:center; gap:.3rem; }
+    .picker-route-row__input input { width:72px; min-height:36px; padding:.35rem .45rem; border:1px solid var(--border); border-radius:7px; background:var(--surface); color:var(--text); text-align:right; outline:none; }
+    .picker-route-row__input input:focus { border-color:var(--accent); }
+    .picker-route-row__input span { color:var(--muted); font-size:.62rem; white-space:nowrap; }
+    .picker-route-row__last { color:var(--muted); font-size:.66rem; text-align:right; }
+    @media(max-width:420px){.picker-route-row{grid-template-columns:26px minmax(0,1fr) 96px}.picker-route-row__input input{width:58px}}
     .tour-overlay { position:fixed; inset:0; z-index:2147483000; display:none; }
     .tour-overlay.open { display:block; }
     .tour-backdrop { position:absolute; inset:0; background:rgba(0,0,0,.76); }
@@ -412,8 +426,11 @@
       </select>
     </div>
     <div class="picker-time-grid">
-      <label>景點開始時間 *<input id="picker-start" type="time" required></label>
-      <label>景點間移動緩衝（分鐘）<input id="picker-gap" type="number" min="0" step="5" value="30"></label>
+      <label>第一個景點開始時間 *<input id="picker-start" type="time" required></label>
+    </div>
+    <div class="picker-route-times" id="picker-route-times" hidden>
+      <div class="picker-route-times__title">依你選擇的順序，分別設定每一站「到下一站交通時間」。系統會用上一站結束時間＋這段交通時間，自動計算下一站開始時間。</div>
+      <div id="picker-route-time-rows"></div>
     </div>
     <button class="btn-modal-save" id="btn-add-selected" type="button">加入 0 個行程</button>
     <button class="btn-modal-cancel" data-close-modal="picker-overlay" type="button">取消</button>
@@ -480,6 +497,7 @@ let favsCache       = [];
 let editingKey      = null;
 let editingDate     = null;
 let selectedPlaceIds = new Set();
+let selectedTransitMinutes = new Map();
 let pickerRegion = '全部';
 let groupView = 'all';
 let collaboratorsPresence = {};
@@ -1062,6 +1080,27 @@ function renderPickerFilters() {
   ).join('');
 }
 
+function renderSelectedRouteTimes() {
+  const wrap = document.getElementById('picker-route-times');
+  const rows = document.getElementById('picker-route-time-rows');
+  const placeById = new Map(allPlaces().map(place => [String(getPlaceFavKey(place)), place]));
+  const selectedIds = [...selectedPlaceIds];
+  wrap.hidden = selectedIds.length === 0;
+  rows.innerHTML = selectedIds.map((id, index) => {
+    const place = placeById.get(String(id));
+    if (!place) return '';
+    const isLast = index === selectedIds.length - 1;
+    const transitMin = Math.max(0, parseInt(selectedTransitMinutes.get(String(id))) || 0);
+    return `<div class="picker-route-row" data-route-place-id="${escapeHTML(id)}">
+      <span class="picker-route-row__order">${index + 1}</span>
+      <span class="picker-route-row__name"><strong>${escapeHTML(place.name || '')}</strong><small>${escapeHTML(place.region || '')}${!isLast ? ' → 下一站' : ''}</small></span>
+      ${isLast
+        ? '<span class="picker-route-row__last">最後一站</span>'
+        : `<label class="picker-route-row__input"><input type="number" min="0" step="5" inputmode="numeric" data-transit-place-id="${escapeHTML(id)}" value="${transitMin}" aria-label="${escapeHTML(place.name || '')}到下一站交通時間"><span>分鐘</span></label>`}
+    </div>`;
+  }).join('');
+}
+
 function renderPlacePicker() {
   const query = document.getElementById('picker-search').value.trim().toLowerCase();
   const dayRegions = getDayRegions();
@@ -1078,6 +1117,7 @@ function renderPlacePicker() {
     return `<button class="picker-place${selected ? ' selected' : ''}" type="button" data-place-id="${escapeHTML(id)}"><span class="picker-place__check">${selected ? '✓' : ''}</span><span><strong>${escapeHTML(place.name)}</strong><small>${escapeHTML(place.category || '景點')}${place.note ? ` · ${escapeHTML(place.note)}` : ''}</small></span><small>${escapeHTML(place.region || '')}</small></button>`;
   }).join('') : '<div class="empty-day"><div class="empty-day__text">目前條件沒有可加入的地點</div></div>';
   document.getElementById('btn-add-selected').textContent = `加入 ${selectedPlaceIds.size} 個行程`;
+  renderSelectedRouteTimes();
 }
 
 async function addSelectedPlaces() {
@@ -1087,7 +1127,6 @@ async function addSelectedPlaces() {
   await waitFirebaseReady();
   const date = TRIP_DAYS[currentDay].date;
   let startMinutes = timeToMinutes(pickerStart);
-  const gapMinutes = Math.max(0, parseInt(document.getElementById('picker-gap').value) || 0);
   const travelGroup = document.getElementById('picker-group').value || 'all';
   const actor = collaboratorName() || '未指定';
   const placeById = new Map(allPlaces().map(place => [String(getPlaceFavKey(place)), place]));
@@ -1098,7 +1137,8 @@ async function addSelectedPlaces() {
     const start = `${String(Math.floor(startMinutes / 60) % 24).padStart(2, '0')}:${String(startMinutes % 60).padStart(2, '0')}`;
     startMinutes += duration;
     const end = `${String(Math.floor(startMinutes / 60) % 24).padStart(2, '0')}:${String(startMinutes % 60).padStart(2, '0')}`;
-    const transitMin = index < selected.length - 1 ? gapMinutes : 0;
+    const placeId = String(getPlaceFavKey(place));
+    const transitMin = index < selected.length - 1 ? Math.max(0, parseInt(selectedTransitMinutes.get(placeId)) || 0) : 0;
     await window.__push(window.__ref(window.__db, `itinerary/${date}`), {
       type: guessItemType(place), name: place.name || '', city: place.region || '', start, end,
       hours: place.hours || '', cost: parseInt(place.cost) || 0, note: place.note || '',
@@ -1110,6 +1150,7 @@ async function addSelectedPlaces() {
   }
   document.getElementById('picker-overlay').classList.remove('open');
   selectedPlaceIds.clear();
+  selectedTransitMinutes.clear();
 }
 
 // ── Modal ──
@@ -1236,6 +1277,7 @@ document.getElementById('day-region-menu').addEventListener('click', event => {
 
 document.getElementById('btn-open-picker').addEventListener('click', () => {
   selectedPlaceIds.clear();
+  selectedTransitMinutes.clear();
   pickerRegion = '全部';
   document.getElementById('picker-search').value = '';
   document.getElementById('picker-start').value = '';
@@ -1256,8 +1298,20 @@ document.getElementById('picker-list').addEventListener('click', event => {
   const button = event.target.closest('[data-place-id]');
   if (!button) return;
   const id = button.dataset.placeId;
-  selectedPlaceIds.has(id) ? selectedPlaceIds.delete(id) : selectedPlaceIds.add(id);
+  if (selectedPlaceIds.has(id)) {
+    selectedPlaceIds.delete(id);
+    selectedTransitMinutes.delete(id);
+  } else {
+    selectedPlaceIds.add(id);
+    selectedTransitMinutes.set(id, 0);
+  }
   renderPlacePicker();
+});
+document.getElementById('picker-route-time-rows').addEventListener('input', event => {
+  const input = event.target.closest('[data-transit-place-id]');
+  if (!input) return;
+  const id = input.dataset.transitPlaceId;
+  selectedTransitMinutes.set(id, Math.max(0, parseInt(input.value) || 0));
 });
 document.getElementById('btn-add-selected').addEventListener('click', addSelectedPlaces);
 document.getElementById('group-view').addEventListener('click', event => {
@@ -1277,7 +1331,7 @@ const TOUR_STEPS = [
   { target:'#online-users', title:'查看目前在線成員', body:'這裡會即時顯示正在使用行程頁面的協作者，避免同時編輯同一筆資料。' },
   { target:'#day-region-trigger', title:'設定今日城市', body:'同一天可以選擇多個城市，景點選擇器會依這些城市縮小範圍。跨城移動或航班可選「移動日」。' },
   { target:'#group-view', title:'共同與分車行程', body:'所有行程可查看完整安排；切換 13號或 15號時，會同時顯示該車專屬行程與全員共同景點。' },
-  { target:'.action-bar', title:'加入行程項目', body:'可從景點總覽挑選景點，也可手動新增景點、餐廳、住宿、交通與航班。每筆可指定全員同行、13號或15號；地區也可直接建立新選項。' },
+  { target:'.action-bar', title:'加入行程項目', body:'可從景點總覽依點選順序批次加入景點，並逐站設定「到下一站交通時間」；系統會用上一站結束時間加交通時間，自動排出下一站開始時間。也可手動新增景點、餐廳、住宿、交通與航班，每筆可指定全員同行、13號或15號。' },
   { target:'#btn-add-flight', title:'獨立加入航班', body:'「加入航班」會開啟航班表單，可套用 JX846 或 JX847。航班號、起降機場、飛行時間與報到提醒會一起帶入行程。' },
   { target:'#timeline', title:'行程卡片欄位與圖示', body:'卡片會標示共同、13號或15號及最後更新者。原本的單點 Google Maps、備註、編輯與刪除功能全部保留。' },
   { target:'#route-bar', title:'兩台車的今日路線', body:'13號與15號會各自產生整日 Google Maps 路線，共同景點會自動加入兩條路線；卡片上的單點 Google Maps 仍可照常使用。' },
