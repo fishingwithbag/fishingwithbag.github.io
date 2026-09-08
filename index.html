@@ -57,8 +57,20 @@
     .flight-airport:last-child{text-align:right;}
     .flight-airport strong{display:block;font-family:var(--serif);font-size:1.35rem;line-height:1;}
     .flight-airport span{display:block;margin-top:.25rem;color:var(--muted);font-size:.62rem;}
-    .flight-route__line{position:relative;width:54px;height:1px;background:var(--border);}
-    .flight-route__line::after{content:'✈';position:absolute;left:50%;top:50%;padding:0 .25rem;background:var(--surface);color:var(--accent);font-size:.8rem;transform:translate(-50%,-52%);}
+    .flight-route__line{position:relative;width:88px;height:30px;display:block;overflow:visible;}
+    .flight-route__line::before{content:'';position:absolute;left:2px;right:2px;top:50%;height:2px;border-radius:999px;background:linear-gradient(90deg,transparent,rgba(143,198,255,.55) 14%,rgba(143,198,255,.55) 86%,transparent);transform:translateY(-50%);}
+    .flight-route__line::after{content:'';position:absolute;inset:50% 6px auto 6px;height:0;border-top:1px dashed rgba(255,255,255,.14);transform:translateY(-50%);}
+    .flight-route__plane{position:absolute;left:0;top:50%;width:34px;height:34px;color:#8FC6FF;filter:drop-shadow(0 3px 8px rgba(143,198,255,.28));animation:flightCruise 3.8s cubic-bezier(.45,.05,.35,1) infinite;will-change:transform,opacity;z-index:1;}
+    .flight-route__plane svg{width:100%;height:100%;display:block;fill:currentColor;transform:scaleX(-1);transform-origin:center;}
+    .flight-leg:nth-child(2) .flight-route__plane{animation-delay:.45s;}
+    @keyframes flightCruise{
+      0%{transform:translate(-6px,-50%) translateY(3px) rotate(-8deg);opacity:.58;}
+      10%{opacity:1;}
+      52%{transform:translate(28px,-50%) translateY(-4px) rotate(-1deg);opacity:1;}
+      88%{opacity:1;}
+      100%{transform:translate(58px,-50%) translateY(2px) rotate(6deg);opacity:.58;}
+    }
+    @media(prefers-reduced-motion:reduce){.flight-route__plane{animation:none;transform:translate(28px,-50%);}}
     .flight-facts{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;}
     .flight-fact{min-width:0;padding:.5rem .55rem;border:1px solid var(--border);border-radius:6px;background:var(--surface2);}
     .flight-fact span{display:block;color:var(--muted);font-size:.58rem;}
@@ -693,7 +705,7 @@
   <div class="flight-legs">
     <article class="flight-leg">
       <div class="flight-leg__top"><span class="flight-leg__date">9/30（三）去程</span><span class="flight-leg__number">JX846</span></div>
-      <div class="flight-route"><div class="flight-airport"><strong>07:30</strong><span>TPE 桃園 T1</span></div><span class="flight-route__line" aria-hidden="true"></span><div class="flight-airport"><strong>10:45</strong><span>KMJ 熊本</span></div></div>
+      <div class="flight-route"><div class="flight-airport"><strong>07:30</strong><span>TPE 桃園 T1</span></div><span class="flight-route__line" aria-hidden="true"><span class="flight-route__plane"><svg viewBox="0 0 96 48" focusable="false" aria-hidden="true"><path d="M3 25.5 9 22h19.5l17-18h8.5L46 22h22.5l13-7h6l-6 10.5 6 10.5h-6l-13-7H46l8 18h-8.5l-17-18H9L3 25.5z"/><path d="M10 22h13l-5-8h5.5l10.5 8H45L52 8h5l-3.5 14H68l7-4h4.5l-4 6 4 6H75l-7-4H53.5L57 40h-5l-7-14H34l-10.5 8H18l5-8H10z" opacity=".22"/></svg></span></span><div class="flight-airport"><strong>10:45</strong><span>KMJ 熊本</span></div></div>
       <div class="flight-facts">
         <div class="flight-fact"><span>機場報到</span><strong>05:00 開放<br>06:30 截止</strong></div>
         <div class="flight-fact"><span>線上報到</span><strong>9/28 07:30 起</strong></div>
@@ -704,7 +716,7 @@
     </article>
     <article class="flight-leg">
       <div class="flight-leg__top"><span class="flight-leg__date">10/7（三）回程</span><span class="flight-leg__number">JX847</span></div>
-      <div class="flight-route"><div class="flight-airport"><strong>11:55</strong><span>KMJ 熊本</span></div><span class="flight-route__line" aria-hidden="true"></span><div class="flight-airport"><strong>13:20</strong><span>TPE 桃園 T1</span></div></div>
+      <div class="flight-route"><div class="flight-airport"><strong>11:55</strong><span>KMJ 熊本</span></div><span class="flight-route__line" aria-hidden="true"><span class="flight-route__plane"><svg viewBox="0 0 96 48" focusable="false" aria-hidden="true"><path d="M3 25.5 9 22h19.5l17-18h8.5L46 22h22.5l13-7h6l-6 10.5 6 10.5h-6l-13-7H46l8 18h-8.5l-17-18H9L3 25.5z"/><path d="M10 22h13l-5-8h5.5l10.5 8H45L52 8h5l-3.5 14H68l7-4h4.5l-4 6 4 6H75l-7-4H53.5L57 40h-5l-7-14H34l-10.5 8H18l5-8H10z" opacity=".22"/></svg></span></span><div class="flight-airport"><strong>13:20</strong><span>TPE 桃園 T1</span></div></div>
       <div class="flight-facts">
         <div class="flight-fact"><span>機場報到</span><strong>09:25 開放<br>10:55 截止</strong></div>
         <div class="flight-fact"><span>線上報到</span><strong>10/5 11:55 起</strong></div>
