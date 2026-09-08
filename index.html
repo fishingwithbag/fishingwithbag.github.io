@@ -962,7 +962,7 @@ const OVERVIEW_TOUR_STEPS = [
   { target:'#rental-block', title:'租車資訊', body:'可保存取車日期、還車日期、地點、租車公司、車型、費用與訂單編號，方便出發前核對。' },
   { target:'#driving-section', title:'日本自駕注意事項', body:'這裡整理靠左行駛、速限、停車、加油、ETC、導航、緊急電話、罰則與嬰幼兒乘車規定，出發前可集中確認。' },
   { target:'#cards', title:'景點卡片欄位與圖示', body:'卡片上方是類別與地區標籤，中段顯示名稱、營業時間與備註，底部顯示費用。自訂地點可按鉛筆圖示帶回表單修改，也能直接刪除。' },
-  { target:'.qa-btn--itinerary', title:'開始編排行程', body:'進入每日行程表後，從收藏景點或手動新增項目。所有景點、餐廳、通勤與航班都會依開始時間自動排序。' },
+  { target:'.qa-btn--itinerary', title:'開始編排行程', body:'進入每日行程表後，可將項目設為全員同行、13號或15號。兩台車有各自的整日 Google Maps 路線，卡片上的單點 Google Maps 也完整保留。' },
   { target:'#help-btn', title:'隨時重新查看', body:'之後可按右上角問號再次啟動這份互動導覽。' }
 ];
 let overviewTourIndex = 0;
@@ -974,7 +974,7 @@ function closeOverviewTour() {
   document.getElementById('help-overlay').classList.remove('open');
   document.getElementById('help-overlay').setAttribute('aria-hidden', 'true');
   document.getElementById('tour-card').classList.remove('open');
-  localStorage.setItem('kyushu_overview_tour_seen_v4', '1');
+  localStorage.setItem('kyushu_overview_tour_seen_v5', '1');
 }
 
 function placeOverviewTourCard() {
@@ -1026,7 +1026,7 @@ document.getElementById('tour-next').addEventListener('click', () => {
   overviewTourIndex++;
   renderOverviewTourStep();
 });
-if (!localStorage.getItem('kyushu_overview_tour_seen_v4')) startOverviewTour();
+if (!localStorage.getItem('kyushu_overview_tour_seen_v5')) startOverviewTour();
 
 // ════════════════════════════════════════
 //  子類別映射

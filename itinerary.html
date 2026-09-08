@@ -152,7 +152,9 @@
     .day-stat__n { font-family:var(--serif); font-size:1.2rem; font-weight:700; display:block; color:var(--accent); }
     .day-stat__l { font-size:.6rem; opacity:.4; letter-spacing:.1em; display:block; margin-top:.15rem; }
     .route-bar { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; padding:.5rem 1rem .25rem; }
-    .route-btn { min-height:42px; display:flex; align-items:center; justify-content:center; padding:.5rem .65rem; border:1px solid rgba(66,133,244,.38); border-radius:8px; color:#72a7ff; background:rgba(66,133,244,.07); font-size:.72rem; text-align:center; }
+    .route-btn { min-height:42px; display:flex; align-items:center; justify-content:center; gap:.42rem; padding:.5rem .65rem; border:1px solid rgba(66,133,244,.38); border-radius:8px; color:#72a7ff; background:rgba(66,133,244,.07); font-size:.72rem; text-align:center; transition:transform .2s, border-color .2s, background .2s; }
+    .route-btn:not(.disabled):active { transform:scale(.985); }
+    .route-icon { width:18px; height:18px; flex:0 0 auto; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
     .route-btn--b { color:#d2a8ff; border-color:rgba(180,120,255,.38); background:rgba(180,120,255,.07); }
     .route-btn.disabled { color:var(--muted); border-color:var(--border); background:var(--surface); opacity:.45; pointer-events:none; }
 
@@ -281,8 +283,8 @@
 
 <div class="group-view" id="group-view" aria-label="行程分組檢視">
   <button class="group-view__btn active" type="button" data-group-view="all">所有行程</button>
-  <button class="group-view__btn" type="button" data-group-view="carA">A 車｜主源・佳晏</button>
-  <button class="group-view__btn" type="button" data-group-view="carB">B 車｜宗憲・佳樺</button>
+  <button class="group-view__btn" type="button" data-group-view="carA">13號</button>
+  <button class="group-view__btn" type="button" data-group-view="carB">15號</button>
 </div>
 
 <div class="action-bar">
@@ -321,9 +323,9 @@
     <div class="modal-field">
       <label>同行分組</label>
       <select id="m-group">
-        <option value="all">👨‍👩‍👧‍👦 全員同行</option>
-        <option value="carA">🚙 A 車｜主源、佳晏</option>
-        <option value="carB">🚗 B 車｜宗憲、佳樺</option>
+        <option value="all">全員同行</option>
+        <option value="carA">13號</option>
+        <option value="carB">15號</option>
       </select>
     </div>
     <div class="modal-field">
@@ -403,9 +405,9 @@
     <div class="modal-field" style="margin-top:.65rem">
       <label>這批景點由誰參加</label>
       <select id="picker-group">
-        <option value="all">👨‍👩‍👧‍👦 全員同行</option>
-        <option value="carA">🚙 A 車｜主源、佳晏</option>
-        <option value="carB">🚗 B 車｜宗憲、佳樺</option>
+        <option value="all">全員同行</option>
+        <option value="carA">13號</option>
+        <option value="carB">15號</option>
       </select>
     </div>
     <div class="picker-time-grid">
@@ -461,8 +463,8 @@ const ALL_REGIONS = ['別府','大分','熊本','阿蘇','福岡','北九州','�
 const COLLABORATORS = ['主源','佳晏','宗憲','佳樺'];
 const TRAVEL_GROUPS = {
   all:  {label:'全員同行', short:'共同', members:['主源','佳晏','宗憲','佳樺']},
-  carA: {label:'A 車｜主源、佳晏', short:'A 車', members:['主源','佳晏']},
-  carB: {label:'B 車｜宗憲、佳樺', short:'B 車', members:['宗憲','佳樺']}
+  carA: {label:'13號', short:'13號', members:['主源','佳晏']},
+  carB: {label:'15號', short:'15號', members:['宗憲','佳樺']}
 };
 const COLLAB_SESSION_ID = sessionStorage.getItem('kyushu_collab_session') || (globalThis.crypto?.randomUUID?.() || ('session-'+Date.now()+'-'+Math.random().toString(36).slice(2)));
 sessionStorage.setItem('kyushu_collab_session', COLLAB_SESSION_ID);
@@ -747,12 +749,13 @@ function googleRouteUrl(stops) {
 function renderRouteLinks(allItems) {
   const aStops = routeStopsFor(allItems, 'carA');
   const bStops = routeStopsFor(allItems, 'carB');
+  const routeIcon = `<svg class="route-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="18" r="2.5"></circle><circle cx="18" cy="6" r="2.5"></circle><path d="M8.5 18h3.25a3.25 3.25 0 0 0 0-6.5h.5a3.25 3.25 0 0 1 0-6.5h3.25"></path></svg>`;
   const button = (group, stops, extraClass = '') => {
     const url = googleRouteUrl(stops);
     const label = `${groupLabel(group)}今日路線${stops.length ? `（${stops.length}站）` : ''}`;
     return url
-      ? `<a class="route-btn ${extraClass}" href="${url}" target="_blank" rel="noopener">🗺 ${label}</a>`
-      : `<span class="route-btn disabled ${extraClass}">🗺 ${label}</span>`;
+      ? `<a class="route-btn ${extraClass}" href="${url}" target="_blank" rel="noopener" aria-label="在 Google Maps 開啟${label}">${routeIcon}<span>${label}</span></a>`
+      : `<span class="route-btn disabled ${extraClass}" aria-label="${label}尚無可用地點">${routeIcon}<span>${label}</span></span>`;
   };
   document.getElementById('route-bar').innerHTML = button('carA', aStops) + button('carB', bStops, 'route-btn--b');
 }
@@ -1207,12 +1210,14 @@ document.getElementById('picker-overlay').addEventListener('click', event => { i
 
 const TOUR_STEPS = [
   { target:'#date-tabs', title:'選擇旅遊日期', body:'先切換要安排的日期，每一天都會保存自己的城市、景點、通勤、餐廳與航班。' },
+  { target:'#collab-user', title:'選擇協作身分', body:'第一次使用先選擇自己，之後新增或修改行程時會留下最後更新者，方便四位協作者辨識變更。' },
+  { target:'#online-users', title:'查看目前在線成員', body:'這裡會即時顯示正在使用行程頁面的協作者，避免同時編輯同一筆資料。' },
   { target:'#day-region-trigger', title:'設定今日城市', body:'同一天可以選擇多個城市，景點選擇器會依這些城市縮小範圍。跨城移動或航班可選「移動日」。' },
-  { target:'#group-view', title:'共同與分車行程', body:'所有行程可查看完整安排；切換 A 車或 B 車時，會同時顯示該車專屬行程與全員共同景點。' },
-  { target:'.action-bar', title:'加入行程項目', body:'可從景點總覽挑選景點，也可手動新增景點、餐廳、住宿、交通與航班。行程地區可選擇既有地區或直接輸入新地區，並需填寫開始與結束時間。' },
+  { target:'#group-view', title:'共同與分車行程', body:'所有行程可查看完整安排；切換 13號或 15號時，會同時顯示該車專屬行程與全員共同景點。' },
+  { target:'.action-bar', title:'加入行程項目', body:'可從景點總覽挑選景點，也可手動新增景點、餐廳、住宿、交通與航班。每筆可指定全員同行、13號或15號；地區也可直接建立新選項。' },
   { target:'#btn-add-flight', title:'獨立加入航班', body:'「加入航班」會開啟航班表單，可套用 JX846 或 JX847。航班號、起降機場、飛行時間與報到提醒會一起帶入行程。' },
-  { target:'#timeline', title:'行程卡片欄位與圖示', body:'卡片會標示共同、A 車或 B 車及最後更新者。原本的單點地圖、備註、編輯與刪除功能全部保留。' },
-  { target:'#route-bar', title:'兩台車的今日路線', body:'A 車與 B 車分別產生整日 Google Maps 路線，共同景點會自動加入兩條路線。' },
+  { target:'#timeline', title:'行程卡片欄位與圖示', body:'卡片會標示共同、13號或15號及最後更新者。原本的單點 Google Maps、備註、編輯與刪除功能全部保留。' },
+  { target:'#route-bar', title:'兩台車的今日路線', body:'13號與15號會各自產生整日 Google Maps 路線，共同景點會自動加入兩條路線；卡片上的單點 Google Maps 仍可照常使用。' },
   { target:'#timeline', title:'依時間自動排序', body:'行程會依開始時間自動排列。修改任何項目的時間後，順序會立即重新計算，不需要拖曳。' },
   { target:'#help-btn', title:'隨時重新查看', body:'之後可按右上角問號再次啟動這份互動導覽。' }
 ];
@@ -1225,7 +1230,7 @@ function closeTour() {
   document.getElementById('help-overlay').classList.remove('open');
   document.getElementById('help-overlay').setAttribute('aria-hidden', 'true');
   document.getElementById('tour-card').classList.remove('open');
-  localStorage.setItem('kyushu_itinerary_tour_seen_v4', '1');
+  localStorage.setItem('kyushu_itinerary_tour_seen_v5', '1');
 }
 
 function placeTourCard() {
@@ -1277,7 +1282,8 @@ document.getElementById('tour-next').addEventListener('click', () => {
   tourIndex++;
   renderTourStep();
 });
-if (!requestedFlight && !localStorage.getItem('kyushu_itinerary_tour_seen_v4')) startTour();
+renderRouteLinks([]);
+if (!requestedFlight && !localStorage.getItem('kyushu_itinerary_tour_seen_v5')) startTour();
 
 document.getElementById('m-name').addEventListener('change', autofillPlaceFields);
 document.getElementById('m-name').addEventListener('blur',   autofillPlaceFields);
