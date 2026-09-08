@@ -145,6 +145,7 @@
     .action-btn { min-height:44px; padding:.55rem .7rem; border:1px solid var(--border); border-radius:8px; color:var(--text); background:var(--surface); font-size:.78rem; }
     .action-btn--primary { border-color:var(--accent); background:var(--accent); color:#fff; }
     .action-btn--flight { grid-column:1/-1; border-color:rgba(168,197,176,.55); color:var(--accent2); background:rgba(168,197,176,.08); }
+    .action-btn--rental { grid-column:1/-1; border-color:rgba(114,167,255,.45); color:#72a7ff; background:rgba(114,167,255,.07); }
     .action-btn--clear { grid-column:1/-1; min-height:36px; color:var(--muted); background:transparent; }
 
     /* Day stats */
@@ -306,6 +307,7 @@
   <button class="action-btn action-btn--primary" id="btn-open-picker" type="button">從景點總覽加入</button>
   <button class="action-btn" id="btn-add-item" type="button">手動新增行程</button>
   <button class="action-btn action-btn--flight" id="btn-add-flight" type="button">加入航班</button>
+  <button class="action-btn action-btn--rental" id="btn-add-rental" type="button">加入租車</button>
   <button class="action-btn action-btn--clear" id="btn-clear-day" type="button">清空這天</button>
 </div>
 
@@ -332,6 +334,7 @@
         <option value="transit">🚗 交通</option>
         <option value="commute">🚕 通勤／機場接送</option>
         <option value="flight">✈️ 飛機航班</option>
+        <option value="rental">🚙 租車取還</option>
         <option value="other">📌 其他</option>
       </select>
     </div>
@@ -375,6 +378,14 @@
       <div class="modal-grid">
         <div class="modal-field"><label>出發機場</label><input id="m-origin" type="text" placeholder="TPE 桃園"></div>
         <div class="modal-field"><label>抵達機場</label><input id="m-destination" type="text" placeholder="FUK 福岡"></div>
+      </div>
+    </div>
+    <div class="conditional-fields" id="rental-fields">
+      <div class="flight-presets" aria-label="租車快速帶入">
+        <button class="flight-preset" type="button" data-rental-preset="carA:pickup"><strong>13號 取車</strong><span>依租車資訊帶入</span></button>
+        <button class="flight-preset" type="button" data-rental-preset="carA:return"><strong>13號 還車</strong><span>依租車資訊帶入</span></button>
+        <button class="flight-preset" type="button" data-rental-preset="carB:pickup"><strong>15號 取車</strong><span>依租車資訊帶入</span></button>
+        <button class="flight-preset" type="button" data-rental-preset="carB:return"><strong>15號 還車</strong><span>依租車資訊帶入</span></button>
       </div>
     </div>
     <div class="modal-grid">
@@ -504,6 +515,11 @@ let collaboratorsPresence = {};
 let itineraryEditLocks = {};
 let activeItineraryLock = null;
 let collaborationConnected = false;
+let rentalInfoCache = {carA:null,carB:null};
+const RENTAL_GROUP_LABELS = {carA:'13號',carB:'15號'};
+const rentalQueryParams = new URLSearchParams(location.search);
+const pendingRentalRequest = {group:rentalQueryParams.get('rental'), eventType:rentalQueryParams.get('event')};
+let rentalRequestHandled = false;
 
 function allPlaces() { return [...allBasePlaces, ...allCustomPlaces]; }
 function collaboratorName() {
@@ -734,8 +750,8 @@ function updateSummary(items) {
   wrap.innerHTML = activities.map(it => `<span class="summary-pill">${typeEmoji(it.type)} ${escapeHTML(it.name)}</span>`).join('');
 }
 
-function typeEmoji(t) { return {spot:'🏛',meal:'🍜',stay:'🏨',transit:'🚗',commute:'🚕',flight:'✈️',other:'📌'}[t] || '📌'; }
-function typeLabel(t) { return {spot:'景點',meal:'餐廳',stay:'住宿',transit:'交通',commute:'通勤',flight:'航班',other:'其他'}[t] || '其他'; }
+function typeEmoji(t) { return {spot:'🏛',meal:'🍜',stay:'🏨',transit:'🚗',commute:'🚕',flight:'✈️',rental:'🚙',other:'📌'}[t] || '📌'; }
+function typeLabel(t) { return {spot:'景點',meal:'餐廳',stay:'住宿',transit:'交通',commute:'通勤',flight:'航班',rental:'租車',other:'其他'}[t] || '其他'; }
 function dotClass(t)  { return {meal:'tl-dot--meal',stay:'tl-dot--stay',transit:'tl-dot--transit'}[t] || ''; }
 function timeToMinutes(value) {
   const match = String(value || '').match(/^(?:[01]?\d|2[0-3]):[0-5]\d$/);
@@ -1026,9 +1042,13 @@ function setupTimeInput(id) {
 }
 
 function toggleFlightFields() {
-  const isFlight = document.getElementById('m-type').value === 'flight';
+  const type = document.getElementById('m-type').value;
+  const isFlight = type === 'flight';
+  const isRental = type === 'rental';
   document.getElementById('flight-fields').classList.toggle('open', isFlight);
+  document.getElementById('rental-fields').classList.toggle('open', isRental);
   if (isFlight && !document.getElementById('m-name').value.trim()) document.getElementById('m-name').value = '飛機航班';
+  if (isRental && !document.getElementById('m-name').value.trim()) document.getElementById('m-name').value = '租車';
 }
 
 const FLIGHT_PRESETS = {
@@ -1070,6 +1090,66 @@ function applyFlightPreset(flightNo) {
 function parseDuration(value) {
   const [hours, minutes] = String(value || '').split(':').map(Number);
   return Number.isFinite(hours) && Number.isFinite(minutes) ? hours * 60 + minutes : 0;
+}
+
+const RENTAL_FIELDS = ['pickup-date','pickup-time','return-date','return-time','rental-location','pickup-loc','return-loc','company','car','cost','booking'];
+function normalizeRentalInfo(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {carA:null,carB:null};
+  const legacy = RENTAL_FIELDS.some(field => Object.prototype.hasOwnProperty.call(raw, field)) ? raw : null;
+  return {
+    carA: raw.carA && typeof raw.carA === 'object' ? {...legacy, ...raw.carA} : legacy,
+    carB: raw.carB && typeof raw.carB === 'object' ? raw.carB : null
+  };
+}
+function addMinutesToClock(value, minutesToAdd) {
+  const base = timeToMinutes(value);
+  if (base === Number.MAX_SAFE_INTEGER) return '';
+  const total = (base + minutesToAdd) % 1440;
+  return `${String(Math.floor(total / 60)).padStart(2,'0')}:${String(total % 60).padStart(2,'0')}`;
+}
+function applyRentalPreset(group, eventType) {
+  const data = rentalInfoCache[group];
+  if (!RENTAL_GROUP_LABELS[group] || !data) { alert('尚未讀到這台車的租車資訊，請先在總覽頁儲存租車資料。'); return false; }
+  const isReturn = eventType === 'return';
+  const date = data[isReturn ? 'return-date' : 'pickup-date'];
+  const start = data[isReturn ? 'return-time' : 'pickup-time'];
+  if (!date || !start) { alert(`請先在總覽頁填寫${RENTAL_GROUP_LABELS[group]}的${isReturn ? '還車' : '取車'}日期與時間。`); return false; }
+  const dayIndex = TRIP_DAYS.findIndex(day => day.date === date);
+  if (dayIndex < 0) { alert('租車日期不在目前旅遊日期範圍內。'); return false; }
+  if (dayIndex !== currentDay) { currentDay = dayIndex; buildTabs(); buildDayRegionSelect(); }
+  const label = RENTAL_GROUP_LABELS[group];
+  const company = String(data.company || '').trim();
+  const branch = String(data['rental-location'] || '').trim();
+  const point = String(data[isReturn ? 'return-loc' : 'pickup-loc'] || '').trim();
+  const action = isReturn ? '還車' : '取車';
+  const where = point || branch || company || '租車地點';
+  const detail = [company, branch && branch !== company ? branch : '', data.car ? `車型：${data.car}` : '', data.booking ? `預訂編號：${data.booking}` : '', data.cost ? `租車費用：NT$${Number(data.cost).toLocaleString()}` : ''].filter(Boolean).join('；');
+  document.getElementById('m-type').value = 'rental';
+  document.getElementById('m-group').value = group;
+  document.getElementById('m-name').value = `${label} ${action}｜${where}`;
+  document.getElementById('m-city').value = where;
+  document.getElementById('m-start').value = normalizeTimeValue(start);
+  document.getElementById('m-end').value = addMinutesToClock(start, 30);
+  document.getElementById('m-cost').value = '';
+  document.getElementById('m-transit').value = '';
+  document.getElementById('m-transit-min').value = '';
+  document.getElementById('m-note').value = detail;
+  document.getElementById('m-flight-no').value = '';
+  document.getElementById('m-flight-duration').value = '';
+  document.getElementById('m-origin').value = '';
+  document.getElementById('m-destination').value = '';
+  document.getElementById('modal-title').textContent = `${label} ${action}加入行程`;
+  toggleFlightFields();
+  return true;
+}
+function tryApplyPendingRentalRequest() {
+  if (rentalRequestHandled) return;
+  const {group, eventType} = pendingRentalRequest;
+  if (!RENTAL_GROUP_LABELS[group] || !['pickup','return'].includes(eventType)) return;
+  if (!rentalInfoCache[group]) return;
+  rentalRequestHandled = true;
+  openNewItemModal('rental');
+  if (applyRentalPreset(group, eventType)) history.replaceState(null, '', location.pathname);
 }
 
 function renderPickerFilters() {
@@ -1168,14 +1248,16 @@ function openNewItemModal(type = 'spot') {
   document.getElementById('m-city').value  = getDayRegion();
   document.getElementById('m-start').value = '';
   document.getElementById('m-end').value   = '';
-  document.getElementById('modal-title').textContent = type === 'flight' ? '加入航班' : '新增行程項目';
+  document.getElementById('modal-title').textContent = type === 'flight' ? '加入航班' : type === 'rental' ? '加入租車' : '新增行程項目';
   toggleFlightFields();
   document.getElementById('modal-overlay').classList.add('open');
 }
 
 document.getElementById('btn-add-item').addEventListener('click', () => openNewItemModal());
 document.getElementById('btn-add-flight').addEventListener('click', () => openNewItemModal('flight'));
+document.getElementById('btn-add-rental').addEventListener('click', () => openNewItemModal('rental'));
 document.querySelectorAll('[data-flight-preset]').forEach(button => button.addEventListener('click', () => applyFlightPreset(button.dataset.flightPreset)));
+document.querySelectorAll('[data-rental-preset]').forEach(button => button.addEventListener('click', () => { const [group,eventType] = button.dataset.rentalPreset.split(':'); applyRentalPreset(group,eventType); }));
 const requestedFlight = new URLSearchParams(location.search).get('flight');
 if (FLIGHT_PRESETS[requestedFlight]) {
   openNewItemModal('flight');
@@ -1333,6 +1415,7 @@ const TOUR_STEPS = [
   { target:'#group-view', title:'共同與分車行程', body:'所有行程可查看完整安排；切換 13號或 15號時，會同時顯示該車專屬行程與全員共同景點。' },
   { target:'.action-bar', title:'加入行程項目', body:'可從景點總覽依點選順序批次加入景點，並逐站設定「到下一站交通時間」；系統會用上一站結束時間加交通時間，自動排出下一站開始時間。也可手動新增景點、餐廳、住宿、交通與航班，每筆可指定全員同行、13號或15號。' },
   { target:'#btn-add-flight', title:'獨立加入航班', body:'「加入航班」會開啟航班表單，可套用 JX846 或 JX847。航班號、起降機場、飛行時間與報到提醒會一起帶入行程。' },
+  { target:'#btn-add-rental', title:'租車取還車帶入', body:'「加入租車」可直接套用 13號或15號各自的取車／還車資料；從總覽頁按「取車加入行程」或「還車加入行程」時，也會自動切到對應日期與車輛分組。' },
   { target:'#timeline', title:'行程卡片欄位與圖示', body:'卡片會標示共同、13號或15號及最後更新者。原本的單點 Google Maps、備註、編輯與刪除功能全部保留。' },
   { target:'#route-bar', title:'兩台車的今日路線', body:'13號與15號會各自產生整日 Google Maps 路線，共同景點會自動加入兩條路線；卡片上的單點 Google Maps 仍可照常使用。' },
   { target:'#timeline', title:'依時間自動排序', body:'行程會依開始時間自動排列。修改任何項目的時間後，順序會立即重新計算，不需要拖曳。' },
@@ -1347,7 +1430,7 @@ function closeTour() {
   document.getElementById('help-overlay').classList.remove('open');
   document.getElementById('help-overlay').setAttribute('aria-hidden', 'true');
   document.getElementById('tour-card').classList.remove('open');
-  localStorage.setItem('kyushu_itinerary_tour_seen_v5', '1');
+  localStorage.setItem('kyushu_itinerary_tour_seen_v6', '1');
 }
 
 function placeTourCard() {
@@ -1400,7 +1483,7 @@ document.getElementById('tour-next').addEventListener('click', () => {
   renderTourStep();
 });
 renderRouteLinks([]);
-if (!requestedFlight && !localStorage.getItem('kyushu_itinerary_tour_seen_v5')) startTour();
+if (!requestedFlight && !localStorage.getItem('kyushu_itinerary_tour_seen_v6')) startTour();
 
 document.getElementById('m-name').addEventListener('change', autofillPlaceFields);
 document.getElementById('m-name').addEventListener('blur',   autofillPlaceFields);
@@ -1459,6 +1542,11 @@ waitFirebase(() => {
     }));
     buildPlaceSuggestions();
   });
+
+  window.__onValue(window.__ref(db, 'rental_info'), snap => {
+    rentalInfoCache = normalizeRentalInfo(snap.val());
+    tryApplyPendingRentalRequest();
+  }, error => console.warn('租車資訊讀取失敗：', error));
 
   window.__onValue(window.__ref(db, 'itinerary'), snap => {
     const raw = snap.val() || {};
