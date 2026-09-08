@@ -79,6 +79,7 @@
     .group-badge--carB { color:#d2a8ff; border-color:rgba(210,168,255,.5); opacity:1; }
     .tl-card__updated { margin-top:.3rem; color:var(--muted); font-size:.6rem; line-height:1.45; }
     .tl-card__lock { color:#ffbf69; }
+    .tl-card__warning { margin-top:.35rem; padding:.38rem .5rem; border:1px solid rgba(255,107,107,.35); border-radius:6px; color:#ff9b9b; background:rgba(255,107,107,.08); font-size:.66rem; line-height:1.55; }
     .btn-edit:disabled,.btn-del:disabled { cursor:not-allowed; opacity:.25; pointer-events:none; }
 
     /* Day summary */
@@ -456,7 +457,7 @@ const TRIP_DAYS = [
 const DURATION_DEFAULT = {
   '景點':90,'神社':45,'公園':45,'市場':60,'博物館':120,'動物園':180,
   '餐廳':60,'拉麵店':40,'燒肉店':90,'壽司':90,'甜點':30,
-  '住宿':0,'釣點':240,'釣具店':30,'購物':60,'其他':30
+  '住宿':30,'釣點':240,'釣具店':30,'購物':60,'其他':30
 };
 
 const ALL_REGIONS = ['別府','大分','熊本','阿蘇','福岡','北九州','長崎','佐賀','移動日'];
@@ -678,27 +679,41 @@ function buildTabs() {
 }
 
 // ── Stats & Summary ──
+function itemClockDuration(item) {
+  const start = timeToMinutes(item?.start);
+  const end = timeToMinutes(item?.end);
+  if (start === Number.MAX_SAFE_INTEGER || end === Number.MAX_SAFE_INTEGER) return 0;
+  return end > start ? end - start : (end + 1440) - start;
+}
+
+function scheduleSpanMinutes(items) {
+  const valid = items.filter(it => timeToMinutes(it.start) !== Number.MAX_SAFE_INTEGER && itemClockDuration(it) > 0);
+  if (!valid.length) return 0;
+  const first = Math.min(...valid.map(it => timeToMinutes(it.start)));
+  const last = Math.max(...valid.map(it => timeToMinutes(it.start) + itemClockDuration(it)));
+  return Math.max(0, last - first);
+}
+
 function updateStats(items) {
-  const spots = items.filter(it => it.type !== 'transit');
-  document.getElementById('stat-items').textContent = spots.length;
+  const activities = items.filter(it => !['transit','commute'].includes(it.type));
+  document.getElementById('stat-items').textContent = activities.length;
   let mins = 0;
-  items.forEach(it => {
-    if (it.durationMin) { mins += Number(it.durationMin) || 0; return; }
-    if (it.start && it.end) {
-      const [sh, sm] = it.start.split(':').map(Number);
-      const [eh, em] = it.end.split(':').map(Number);
-      mins += (eh * 60 + em) - (sh * 60 + sm);
-    }
-  });
+  if (groupView === 'all') {
+    const carAItems = items.filter(it => itemGroup(it) === 'all' || itemGroup(it) === 'carA');
+    const carBItems = items.filter(it => itemGroup(it) === 'all' || itemGroup(it) === 'carB');
+    mins = Math.max(scheduleSpanMinutes(carAItems), scheduleSpanMinutes(carBItems));
+  } else {
+    mins = scheduleSpanMinutes(items);
+  }
   document.getElementById('stat-hours').textContent = mins > 0 ? `${Math.floor(mins / 60)}h${mins % 60 ? mins % 60 + 'm' : ''}` : '—';
-  const cost = items.reduce((s, it) => s + (parseInt(it.cost) || 0), 0);
+  const cost = items.reduce((sum, it) => sum + (parseInt(it.cost) || 0), 0);
   document.getElementById('stat-cost').textContent = cost > 0 ? `¥${cost.toLocaleString()}` : '—';
 }
 
 function updateSummary(items) {
   const wrap = document.getElementById('day-summary');
-  const spots = items.filter(it => it.type !== 'transit');
-  wrap.innerHTML = spots.map(it => `<span class="summary-pill">${typeEmoji(it.type)} ${it.name}</span>`).join('');
+  const activities = items.filter(it => !['transit','commute'].includes(it.type));
+  wrap.innerHTML = activities.map(it => `<span class="summary-pill">${typeEmoji(it.type)} ${escapeHTML(it.name)}</span>`).join('');
 }
 
 function typeEmoji(t) { return {spot:'🏛',meal:'🍜',stay:'🏨',transit:'🚗',commute:'🚕',flight:'✈️',other:'📌'}[t] || '📌'; }
@@ -719,6 +734,42 @@ function compareItineraryTime(a, b) {
   const difference = timeToMinutes(a.start) - timeToMinutes(b.start);
   if (difference) return difference;
   return String(a.createdAt || '').localeCompare(String(b.createdAt || '')) || String(a._key || '').localeCompare(String(b._key || ''));
+}
+
+function effectiveTransitAfter(item, nextItem) {
+  if (!item || !nextItem) return 0;
+  if (['transit','commute'].includes(item.type) || ['transit','commute'].includes(nextItem.type)) return 0;
+  return Math.max(0, parseInt(item.transitMin) || 0);
+}
+
+function buildScheduleWarnings(allItems) {
+  const warnings = new Map();
+  const add = (item, message) => {
+    if (!item?._key) return;
+    if (!warnings.has(item._key)) warnings.set(item._key, new Set());
+    warnings.get(item._key).add(message);
+  };
+  ['carA','carB'].forEach(group => {
+    const timeline = allItems
+      .filter(item => itemGroup(item) === 'all' || itemGroup(item) === group)
+      .slice().sort(compareItineraryTime);
+    for (let i = 1; i < timeline.length; i++) {
+      const prev = timeline[i - 1];
+      const current = timeline[i];
+      const prevStart = timeToMinutes(prev.start);
+      const currentStart = timeToMinutes(current.start);
+      if (prevStart === Number.MAX_SAFE_INTEGER || currentStart === Number.MAX_SAFE_INTEGER) continue;
+      const readyAt = prevStart + itemClockDuration(prev) + effectiveTransitAfter(prev, current);
+      if (currentStart < readyAt) {
+        const label = groupLabel(group);
+        const gap = readyAt - currentStart;
+        const transit = effectiveTransitAfter(prev, current);
+        const detail = transit ? `（含前一站交通 ${transit} 分）` : '';
+        add(current, `${label}：與「${prev.name || '前一行程'}」衝突，至少需延後 ${gap} 分${detail}`);
+      }
+    }
+  });
+  return warnings;
 }
 
 function routeStopsFor(items, group) {
@@ -770,6 +821,7 @@ function renderDay() {
   updateStats(items);
   updateSummary(items);
   renderRouteLinks(allItems);
+  const scheduleWarnings = buildScheduleWarnings(allItems);
 
   if (!items.length) {
     tl.innerHTML = `<div class="empty-day"><div class="empty-day__icon">🗓</div><div class="empty-day__text">這天還沒有行程<br>可從景點總覽挑選或手動新增</div></div>`;
@@ -784,6 +836,7 @@ function renderDay() {
     const group = itemGroup(it);
     const lock = getItineraryLock(date, it._key);
     const lockedByOther = activeLock(lock) && lock.sessionId !== COLLAB_SESSION_ID;
+    const itemWarnings = [...(scheduleWarnings.get(it._key) || [])];
     row.dataset.key = it._key || idx;
     row.innerHTML = `
         <div class="tl-time">
@@ -804,6 +857,8 @@ function renderDay() {
               <div class="tl-card__name">${escapeHTML(it.name)}</div>
               ${it.type === 'flight' && (it.origin || it.destination) ? `<div class="tl-card__hours">${escapeHTML(it.origin || '')} → ${escapeHTML(it.destination || '')}${it.durationMin ? ` · ${Math.floor(it.durationMin / 60)}h${it.durationMin % 60 ? it.durationMin % 60 + 'm' : ''}` : ''}</div>` : ''}
               ${it.hours ? `<div class="tl-card__hours">🕐 營業：${escapeHTML(it.hours)}</div>` : ''}
+              ${it.transitMin ? `<div class="tl-card__hours">🚗 到下一站：${Number(it.transitMin)} 分${it.transitMode ? ` · ${escapeHTML(it.transitMode)}` : ''}</div>` : ''}
+              ${itemWarnings.length ? `<div class="tl-card__warning">⚠ ${itemWarnings.map(escapeHTML).join('<br>')}</div>` : ''}
               ${it.note  ? `<p class="tl-card__note">${escapeHTML(it.note)}</p>` : ''}
               ${it.updatedBy ? `<div class="tl-card__updated">最後由 ${escapeHTML(it.updatedBy)} 更新${formatCollabTime(it.updatedAt) ? ` · ${formatCollabTime(it.updatedAt)}` : ''}</div>` : ''}
               ${lockedByOther ? `<div class="tl-card__updated tl-card__lock">✎ ${escapeHTML(lock.name || '其他人')}正在編輯</div>` : ''}
@@ -896,7 +951,8 @@ function guessItemType(place) {
 }
 
 function getPlaceDuration(place) {
-  return DURATION_DEFAULT[place?.subcategory] || DURATION_DEFAULT[place?.category] || 60;
+  const configured = DURATION_DEFAULT[place?.subcategory] ?? DURATION_DEFAULT[place?.category];
+  return Number.isFinite(Number(configured)) && Number(configured) > 0 ? Number(configured) : 30;
 }
 
 function setEndByStartAndPlace() {
@@ -929,7 +985,8 @@ function autofillPlaceFields() {
   if (!matches.length) return;
   const first   = matches.find(p => region && regionMatches(p.region, region)) || matches[0];
   if (!first) return;
-  document.getElementById('m-type').value = guessItemType(first);
+  const typeField = document.getElementById('m-type');
+  if (typeField.value === 'spot') typeField.value = guessItemType(first);
   if (!document.getElementById('m-hours').value.trim() && first.hours) document.getElementById('m-hours').value = first.hours;
   if (!document.getElementById('m-note').value.trim()  && first.note)  document.getElementById('m-note').value  = first.note;
   if (!document.getElementById('m-cost').value && first.cost) document.getElementById('m-cost').value = parseInt(first.cost) || 0;
@@ -1033,20 +1090,23 @@ async function addSelectedPlaces() {
   const gapMinutes = Math.max(0, parseInt(document.getElementById('picker-gap').value) || 0);
   const travelGroup = document.getElementById('picker-group').value || 'all';
   const actor = collaboratorName() || '未指定';
-  const selected = allPlaces().filter(place => selectedPlaceIds.has(getPlaceFavKey(place)));
-  for (const place of selected) {
+  const placeById = new Map(allPlaces().map(place => [String(getPlaceFavKey(place)), place]));
+  const selected = [...selectedPlaceIds].map(id => placeById.get(String(id))).filter(Boolean);
+  for (let index = 0; index < selected.length; index++) {
+    const place = selected[index];
     const duration = getPlaceDuration(place);
     const start = `${String(Math.floor(startMinutes / 60) % 24).padStart(2, '0')}:${String(startMinutes % 60).padStart(2, '0')}`;
     startMinutes += duration;
     const end = `${String(Math.floor(startMinutes / 60) % 24).padStart(2, '0')}:${String(startMinutes % 60).padStart(2, '0')}`;
+    const transitMin = index < selected.length - 1 ? gapMinutes : 0;
     await window.__push(window.__ref(window.__db, `itinerary/${date}`), {
       type: guessItemType(place), name: place.name || '', city: place.region || '', start, end,
       hours: place.hours || '', cost: parseInt(place.cost) || 0, note: place.note || '',
       region: place.region || '', category: place.category || '', subcategory: place.subcategory || '',
-      placeId: getPlaceFavKey(place), travelGroup,
+      placeId: getPlaceFavKey(place), travelGroup, transitMin,
       createdAt: new Date().toISOString(), updatedAt:new Date().toISOString(), updatedBy:actor
     });
-    startMinutes += gapMinutes;
+    startMinutes += transitMin;
   }
   document.getElementById('picker-overlay').classList.remove('open');
   selectedPlaceIds.clear();
@@ -1097,18 +1157,21 @@ document.getElementById('btn-modal-save').addEventListener('click', async () => 
   const startVal = document.getElementById('m-start').value.trim();
   const endVal   = document.getElementById('m-end').value.trim();
   if (!/^([01]?\d|2[0-3]):[0-5]\d$/.test(startVal) || !/^([01]?\d|2[0-3]):[0-5]\d$/.test(endVal)) { alert('請輸入正確的 24 小時制時間，例如 09:00'); return; }
-  if (endVal <= startVal && document.getElementById('m-type').value !== 'flight') { alert('結束時間需晚於開始時間'); return; }
+  const selectedType  = document.getElementById('m-type').value;
+  if (selectedType === 'flight') {
+    const flightDurationText = document.getElementById('m-flight-duration').value.trim();
+    if (flightDurationText && !/^\d{1,2}:[0-5]\d$/.test(flightDurationText)) { alert('飛行時間請使用 H:MM 格式，例如 2:15'); return; }
+  }
 
   const date          = editingDate || TRIP_DAYS[currentDay].date;
   const region        = document.getElementById('m-city').value || getDayRegion(date);
   const matchedPlaces = allPlaces().filter(p => normalizeName(p.name) === normalizeName(name));
   const matchedPlace  = matchedPlaces.find(p => region && regionMatches(p.region, region)) || matchedPlaces[0] || null;
-  const selectedType  = document.getElementById('m-type').value;
   const durationMin   = selectedType === 'flight' ? parseDuration(document.getElementById('m-flight-duration').value) : 0;
   const existingItem  = editingKey ? (itineraryData[date] || []).find(existing => existing._key === editingKey) : null;
 
   const item = {
-    type:        selectedType === 'flight' || selectedType === 'commute' ? selectedType : matchedPlace ? guessItemType(matchedPlace) : selectedType,
+    type:        selectedType,
     name, start: startVal, end: endVal,
     city:         region,
     hours:       document.getElementById('m-hours').value.trim() || matchedPlace?.hours || '',
