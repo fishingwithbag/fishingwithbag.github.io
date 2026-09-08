@@ -184,6 +184,15 @@
     .rental-field input,.rental-field select{padding:.45rem .6rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.8rem;outline:none;}
     .rental-field input:focus,.rental-field select:focus{border-color:var(--accent);}
     .rental-field select option{color:#1A1A1A;background:#FFF;}
+    .rental-groups{display:grid;grid-template-columns:1fr;gap:.7rem;}
+    .rental-group{border:1px solid var(--border);border-radius:8px;background:var(--surface2);overflow:hidden;}
+    .rental-group__head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.65rem .75rem;border-bottom:1px solid var(--border);}
+    .rental-group__badge{display:inline-flex;align-items:center;justify-content:center;min-width:58px;padding:.22rem .58rem;border:1px solid rgba(114,167,255,.5);border-radius:18px;color:#72a7ff;background:rgba(114,167,255,.08);font-size:.7rem;font-weight:700;}
+    .rental-group--b .rental-group__badge{color:#d2a8ff;border-color:rgba(210,168,255,.5);background:rgba(210,168,255,.08);}
+    .rental-group__hint{font-size:.62rem;color:var(--muted);}
+    .rental-group .rental-info-grid{padding:.7rem .75rem .15rem;margin-bottom:0;}
+    .btn-save-rental{width:calc(100% - 1.5rem);margin:.1rem .75rem .7rem;}
+    @media(min-width:760px){.rental-groups{grid-template-columns:1fr 1fr;}.rental-group .rental-info-grid{grid-template-columns:1fr;}}
 
     /* ── Cards ── */
     .cards-header{
@@ -802,17 +811,36 @@
     <span class="rental-block__toggle">▼</span>
   </div>
   <div class="rental-block__body">
-    <div class="rental-info-grid">
-      <div class="rental-field"><label>取車日期</label><input id="r-pickup-date" type="date"></div>
-      <div class="rental-field"><label>還車日期</label><input id="r-return-date" type="date"></div>
-      <div class="rental-field"><label>取車地點</label><input id="r-pickup-loc" type="text" placeholder="例：福岡機場"></div>
-      <div class="rental-field"><label>還車地點</label><input id="r-return-loc" type="text" placeholder="例：福岡機場"></div>
-      <div class="rental-field"><label>租車公司</label><input id="r-company" type="text" placeholder="例：Times"></div>
-      <div class="rental-field"><label>車型</label><input id="r-car" type="text" placeholder="例：Toyota Aqua"></div>
-      <div class="rental-field"><label>費用 (TWD)</label><input id="r-cost" type="number" placeholder="0"></div>
-      <div class="rental-field"><label>預訂編號</label><input id="r-booking" type="text" placeholder="訂單號碼"></div>
+    <div class="rental-groups">
+      <section class="rental-group" data-rental-group="carA">
+        <div class="rental-group__head"><span class="rental-group__badge">13號</span><span class="rental-group__hint">獨立租車資料</span></div>
+        <div class="rental-info-grid">
+          <div class="rental-field"><label>取車日期</label><input id="r-carA-pickup-date" type="date"></div>
+          <div class="rental-field"><label>還車日期</label><input id="r-carA-return-date" type="date"></div>
+          <div class="rental-field"><label>取車地點</label><input id="r-carA-pickup-loc" type="text" placeholder="例：福岡機場"></div>
+          <div class="rental-field"><label>還車地點</label><input id="r-carA-return-loc" type="text" placeholder="例：福岡機場"></div>
+          <div class="rental-field"><label>租車公司</label><input id="r-carA-company" type="text" placeholder="例：Times"></div>
+          <div class="rental-field"><label>車型</label><input id="r-carA-car" type="text" placeholder="例：Toyota Aqua"></div>
+          <div class="rental-field"><label>費用 (TWD)</label><input id="r-carA-cost" type="number" min="0" placeholder="0"></div>
+          <div class="rental-field"><label>預訂編號</label><input id="r-carA-booking" type="text" placeholder="訂單號碼"></div>
+        </div>
+        <button class="btn-add-place btn-save-rental" type="button" data-save-rental="carA">儲存 13號租車資訊</button>
+      </section>
+      <section class="rental-group rental-group--b" data-rental-group="carB">
+        <div class="rental-group__head"><span class="rental-group__badge">15號</span><span class="rental-group__hint">獨立租車資料</span></div>
+        <div class="rental-info-grid">
+          <div class="rental-field"><label>取車日期</label><input id="r-carB-pickup-date" type="date"></div>
+          <div class="rental-field"><label>還車日期</label><input id="r-carB-return-date" type="date"></div>
+          <div class="rental-field"><label>取車地點</label><input id="r-carB-pickup-loc" type="text" placeholder="例：福岡機場"></div>
+          <div class="rental-field"><label>還車地點</label><input id="r-carB-return-loc" type="text" placeholder="例：福岡機場"></div>
+          <div class="rental-field"><label>租車公司</label><input id="r-carB-company" type="text" placeholder="例：Times"></div>
+          <div class="rental-field"><label>車型</label><input id="r-carB-car" type="text" placeholder="例：Toyota Aqua"></div>
+          <div class="rental-field"><label>費用 (TWD)</label><input id="r-carB-cost" type="number" min="0" placeholder="0"></div>
+          <div class="rental-field"><label>預訂編號</label><input id="r-carB-booking" type="text" placeholder="訂單號碼"></div>
+        </div>
+        <button class="btn-add-place btn-save-rental" type="button" data-save-rental="carB">儲存 15號租車資訊</button>
+      </section>
     </div>
-    <button class="btn-add-place" id="btn-save-rental" style="margin-top:.25rem;">儲存租車資訊</button>
     <span class="sync-badge" id="rental-sync-status"></span>
   </div>
 </div>
@@ -959,7 +987,7 @@ const OVERVIEW_TOUR_STEPS = [
   { target:'.search-bar', title:'搜尋與篩選景點', body:'可用名稱、地區或備註搜尋；下方下拉選單可用地區、類別、子類別縮小結果，例如餐廳、住宿、購物或釣點。' },
   { target:'#add-section', title:'建立自己的地點', body:'展開後填入地區、類別、子類別、名稱、營業時間與備註。類別可直接重選，也能建立全新類別。' },
   { target:'#cost-block', title:'住宿費用', body:'可記錄每筆住宿費用與旅伴人數，系統會整理總額與平均分攤，資料會同步保存。' },
-  { target:'#rental-block', title:'租車資訊', body:'可保存取車日期、還車日期、地點、租車公司、車型、費用與訂單編號，方便出發前核對。' },
+  { target:'#rental-block', title:'租車資訊', body:'租車資料依 13號與15號分開保存；兩台車可各自記錄取還車日期、地點、租車公司、車型、費用與訂單編號。' },
   { target:'#driving-section', title:'日本自駕注意事項', body:'這裡整理靠左行駛、速限、停車、加油、ETC、導航、緊急電話、罰則與嬰幼兒乘車規定，出發前可集中確認。' },
   { target:'#cards', title:'景點卡片欄位與圖示', body:'卡片上方是類別與地區標籤，中段顯示名稱、營業時間與備註，底部顯示費用。自訂地點可按鉛筆圖示帶回表單修改，也能直接刪除。' },
   { target:'.qa-btn--itinerary', title:'開始編排行程', body:'進入每日行程表後，可將項目設為全員同行、13號或15號。兩台車有各自的整日 Google Maps 路線，卡片上的單點 Google Maps 也完整保留。' },
@@ -1648,24 +1676,44 @@ document.getElementById('btn-add-cost').addEventListener('click',()=>{
 document.getElementById('person-input').addEventListener('change',renderCostSummary);
 
 // ════════════════════════════════════════
-//  租車資訊（Firebase）
+//  租車資訊（Firebase）— 13號 / 15號獨立保存
 // ════════════════════════════════════════
 const RENTAL_FIELDS=['pickup-date','return-date','pickup-loc','return-loc','company','car','cost','booking'];
-function loadRentalUI(data){
-  RENTAL_FIELDS.forEach(f=>{
-    const el=document.getElementById('r-'+f);
-    if(el&&data&&data[f]) el.value=data[f];
+const RENTAL_GROUPS={carA:'13號',carB:'15號'};
+function rentalInputId(group,field){ return `r-${group}-${field}`; }
+function loadRentalGroupUI(group,data){
+  RENTAL_FIELDS.forEach(field=>{
+    const el=document.getElementById(rentalInputId(group,field));
+    if(el) el.value=data?.[field] ?? '';
   });
 }
-document.getElementById('btn-save-rental').addEventListener('click',()=>{
+function readRentalGroupUI(group){
   const data={};
-  RENTAL_FIELDS.forEach(f=>{
-    const el=document.getElementById('r-'+f);
-    if(el) data[f]=el.value;
+  RENTAL_FIELDS.forEach(field=>{
+    const el=document.getElementById(rentalInputId(group,field));
+    if(el) data[field]=el.value;
   });
-  window.__set(window.__ref(window.__db,'rental_info'),data);
-  const s=document.getElementById('rental-sync-status');
-  s.textContent='✅ 已儲存'; setTimeout(()=>s.textContent='',2500);
+  return data;
+}
+function setRentalStatus(message){
+  const status=document.getElementById('rental-sync-status');
+  if(!status) return;
+  status.textContent=message;
+  if(message) setTimeout(()=>{ if(status.textContent===message) status.textContent=''; },2500);
+}
+document.querySelectorAll('[data-save-rental]').forEach(button=>{
+  button.addEventListener('click',async()=>{
+    const group=button.dataset.saveRental;
+    if(!RENTAL_GROUPS[group]) return;
+    try{
+      await waitFirebaseReady();
+      await window.__set(window.__ref(window.__db,`rental_info/${group}`),readRentalGroupUI(group));
+      setRentalStatus(`✅ ${RENTAL_GROUPS[group]}已儲存`);
+    }catch(error){
+      console.error(`${RENTAL_GROUPS[group]}租車資訊儲存失敗:`,error);
+      setRentalStatus(`${RENTAL_GROUPS[group]}儲存失敗`);
+    }
+  });
 });
 
 // ════════════════════════════════════════
@@ -1754,13 +1802,17 @@ function normalizeCostItems(raw){
   return [];
 }
 
-// Rental 正規化：rental_info 應維持單一 Object，不轉 Array
+// Rental 正規化：支援新版 carA/carB，也相容舊版單一租車 Object
 function normalizeRentalInfo(raw){
-  if(raw && typeof raw === 'object' && !Array.isArray(raw)){
-    return raw;
+  if(!raw || typeof raw !== 'object' || Array.isArray(raw)) return {carA:null,carB:null};
+  if(raw.carA || raw.carB){
+    return {
+      carA: raw.carA && typeof raw.carA==='object' ? raw.carA : null,
+      carB: raw.carB && typeof raw.carB==='object' ? raw.carB : null
+    };
   }
-
-  return null;
+  const isLegacy=RENTAL_FIELDS.some(field=>Object.prototype.hasOwnProperty.call(raw,field));
+  return isLegacy ? {carA:raw,carB:null} : {carA:null,carB:null};
 }
 
 waitFirebase(() => {
@@ -1834,10 +1886,8 @@ waitFirebase(() => {
   // Rental
   window.__onValue(window.__ref(db, 'rental_info'), snap => {
     const rentalInfo = normalizeRentalInfo(snap.val());
-
-    if(rentalInfo){
-      loadRentalUI(rentalInfo);
-    }
+    loadRentalGroupUI('carA', rentalInfo.carA);
+    loadRentalGroupUI('carB', rentalInfo.carB);
   }, err => {
     console.error('rental_info 讀取失敗:', err);
     document.getElementById('rental-sync-status').textContent = '租車資料連線失敗';
