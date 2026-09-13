@@ -125,6 +125,37 @@
     .gmap-icon__red { fill:#EA4335; }
     [data-theme="light"] .tl-map { background:#fff; border-color:rgba(0,0,0,.14); box-shadow:0 1px 4px rgba(0,0,0,.12); }
 
+    /* Parking */
+    .tl-parking { margin-top:.42rem; display:flex; flex-direction:column; gap:.28rem; }
+    .tl-parking__row { display:flex; align-items:center; gap:.42rem; min-width:0; }
+    .tl-parking__badge { flex:0 0 auto; min-width:28px; padding:.12rem .35rem; border:1px solid rgba(114,167,255,.42); border-radius:999px; color:#8fc6ff; background:rgba(114,167,255,.08); font-size:.58rem; text-align:center; }
+    .tl-parking__link { min-width:0; color:#8fc6ff; font-size:.68rem; line-height:1.4; text-decoration:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .tl-parking__meta { flex:0 0 auto; color:var(--muted); font-size:.6rem; white-space:nowrap; }
+    .tl-parking__backup { opacity:.68; }
+    .parking-panel { margin:.25rem 0 .75rem; border:1px solid var(--border); border-radius:10px; background:var(--surface2); overflow:hidden; }
+    .parking-panel__toggle { width:100%; min-height:44px; display:flex; align-items:center; justify-content:space-between; gap:.7rem; padding:.65rem .75rem; color:var(--text); text-align:left; }
+    .parking-panel__toggle strong { font-size:.78rem; }
+    .parking-panel__toggle small { display:block; margin-top:.12rem; color:var(--muted); font-size:.62rem; font-weight:400; }
+    .parking-panel__chev { color:var(--muted); transition:transform .2s; }
+    .parking-panel.open .parking-panel__chev { transform:rotate(180deg); }
+    .parking-panel__body { display:none; padding:.7rem .75rem .8rem; border-top:1px solid var(--border); }
+    .parking-panel.open .parking-panel__body { display:block; }
+    .parking-mode { display:grid; grid-template-columns:1fr 1fr; gap:.45rem; margin-bottom:.7rem; }
+    .parking-mode button { min-height:40px; padding:.45rem .55rem; border:1px solid var(--border); border-radius:8px; color:var(--muted); background:var(--surface); font-size:.68rem; }
+    .parking-mode button.active { border-color:#72a7ff; color:#8fc6ff; background:rgba(114,167,255,.08); }
+    .parking-set { padding:.65rem; border:1px solid var(--border); border-radius:8px; background:var(--surface); margin-top:.55rem; }
+    .parking-set__title { display:flex; align-items:center; justify-content:space-between; gap:.5rem; margin-bottom:.55rem; font-size:.7rem; font-weight:700; }
+    .parking-set__grid { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; }
+    .parking-set__grid .wide { grid-column:1/-1; }
+    .parking-mini { display:flex; flex-direction:column; gap:.25rem; }
+    .parking-mini label { color:var(--muted); font-size:.62rem; }
+    .parking-mini input,.parking-mini textarea { width:100%; min-height:38px; padding:.45rem .55rem; border:1px solid var(--border); border-radius:7px; background:var(--surface2); color:var(--text); outline:none; font-size:.74rem; }
+    .parking-mini textarea { min-height:56px; resize:vertical; }
+    .parking-backup-toggle { width:100%; min-height:36px; margin-top:.55rem; border:1px dashed var(--border); border-radius:7px; color:var(--muted); font-size:.66rem; }
+    .parking-backup-fields { display:none; margin-top:.55rem; }
+    .parking-backup-fields.open { display:block; }
+    @media(max-width:520px){.parking-set__grid{grid-template-columns:1fr}.parking-set__grid .wide{grid-column:auto}.tl-parking__row{flex-wrap:wrap}.tl-parking__link{flex:1 1 180px}.tl-parking__meta{flex:0 0 auto}}
+
     /* Fav btn — 與 index 一致 */
     .tl-fav { font-size:1rem; line-height:1; color:rgba(120,120,120,.95); background:rgba(255,255,255,.88); border-color:rgba(0,0,0,.14); border-radius:999px; width:30px; height:30px; min-width:30px; display:inline-flex; align-items:center; justify-content:center; border:1px solid rgba(0,0,0,.14); -webkit-tap-highlight-color:transparent; transition:background .16s, border-color .16s, color .16s, box-shadow .16s; }
     .tl-fav.is-fav { color:#ff3f7f; background:rgba(255,63,127,.14); border-color:rgba(255,63,127,.55); text-shadow:0 0 4px rgba(255,63,127,.45), 0 0 8px rgba(255,63,127,.28); box-shadow:0 0 0 1px rgba(255,63,127,.12) inset, 0 0 8px rgba(255,63,127,.22); }
@@ -413,6 +444,19 @@
       <label>交通時間（分鐘）</label>
       <input id="m-transit-min" type="number" placeholder="例：20" min="0">
     </div>
+    <section class="parking-panel" id="parking-panel">
+      <button class="parking-panel__toggle" id="parking-panel-toggle" type="button" aria-expanded="false">
+        <span><strong>🅿️ 停車資訊（選填）</strong><small>設定後會直接顯示在行程卡，可一鍵開啟導航</small></span><span class="parking-panel__chev">⌄</span>
+      </button>
+      <div class="parking-panel__body">
+        <div class="parking-mode" id="parking-mode">
+          <button type="button" data-parking-mode="shared" class="active">兩台車共用</button>
+          <button type="button" data-parking-mode="split">13號／15號分開</button>
+        </div>
+        <div id="parking-shared"></div>
+        <div id="parking-split" hidden></div>
+      </div>
+    </section>
     <div class="modal-field">
       <label>備註</label>
       <textarea id="m-note" rows="2" placeholder="訂位提醒、注意事項…"></textarea>
@@ -520,6 +564,7 @@ const RENTAL_GROUP_LABELS = {carA:'13號',carB:'15號'};
 const rentalQueryParams = new URLSearchParams(location.search);
 const pendingRentalRequest = {group:rentalQueryParams.get('rental'), eventType:rentalQueryParams.get('event')};
 let rentalRequestHandled = false;
+let parkingMode = 'shared';
 
 function allPlaces() { return [...allBasePlaces, ...allCustomPlaces]; }
 function collaboratorName() {
@@ -845,6 +890,98 @@ function renderRouteLinks(allItems) {
   document.getElementById('route-bar').innerHTML = button('carA', aStops) + button('carB', bStops, 'route-btn--b');
 }
 
+
+function emptyParkingSpot() { return {name:'',mapsUrl:'',walkMin:0,fee:0,note:''}; }
+function normalizeParkingSpot(raw) {
+  if (!raw || typeof raw !== 'object') return emptyParkingSpot();
+  return {
+    name:String(raw.name || '').trim(), mapsUrl:String(raw.mapsUrl || '').trim(),
+    walkMin:Math.max(0, parseInt(raw.walkMin) || 0), fee:Math.max(0, parseInt(raw.fee) || 0), note:String(raw.note || '').trim()
+  };
+}
+function normalizeParking(raw) {
+  const mode = raw?.mode === 'split' ? 'split' : 'shared';
+  const set = value => ({primary:normalizeParkingSpot(value?.primary), backup:normalizeParkingSpot(value?.backup)});
+  return {mode, shared:set(raw?.shared), carA:set(raw?.carA), carB:set(raw?.carB)};
+}
+function parkingHasSpot(spot) { return Boolean(spot?.name || spot?.mapsUrl); }
+function parkingMapsUrl(spot, item) {
+  if (spot?.mapsUrl) return spot.mapsUrl;
+  if (!spot?.name) return '';
+  const area = item?.city || item?.region || '';
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${spot.name} ${area} Japan`)}`;
+}
+function parkingMeta(spot) {
+  const parts=[];
+  if (spot?.walkMin) parts.push(`步行 ${spot.walkMin} 分`);
+  if (spot?.fee) parts.push(`¥${Number(spot.fee).toLocaleString()}`);
+  return parts.join(' · ');
+}
+function parkingSetForItem(parking, group) {
+  if (parking.mode === 'shared') return parking.shared;
+  return parking[group] || {primary:emptyParkingSpot(),backup:emptyParkingSpot()};
+}
+function renderParkingRows(item) {
+  const parking=normalizeParking(item?.parking);
+  const itemG=itemGroup(item);
+  const groups = parking.mode === 'split' && itemG === 'all'
+    ? (groupView === 'carA' || groupView === 'carB' ? [groupView] : ['carA','carB'])
+    : [itemG === 'all' ? 'shared' : itemG];
+  const rows=[];
+  groups.forEach(group => {
+    const set = group === 'shared' ? parking.shared : parkingSetForItem(parking,group);
+    if (!parkingHasSpot(set.primary)) return;
+    const url=parkingMapsUrl(set.primary,item);
+    const badge = parking.mode === 'split' && group !== 'shared' ? groupLabel(group) : 'P';
+    const meta=parkingMeta(set.primary);
+    rows.push(`<div class="tl-parking__row"><span class="tl-parking__badge">${escapeHTML(badge)}</span>${url ? `<a class="tl-parking__link" href="${escapeHTML(url)}" target="_blank" rel="noopener">🅿️ ${escapeHTML(set.primary.name || '開啟停車場導航')}</a>` : `<span class="tl-parking__link">🅿️ ${escapeHTML(set.primary.name)}</span>`}${meta ? `<span class="tl-parking__meta">${escapeHTML(meta)}</span>` : ''}</div>`);
+    if (parkingHasSpot(set.backup)) {
+      const backupUrl=parkingMapsUrl(set.backup,item); const backupMeta=parkingMeta(set.backup);
+      rows.push(`<div class="tl-parking__row tl-parking__backup"><span class="tl-parking__badge">備</span>${backupUrl ? `<a class="tl-parking__link" href="${escapeHTML(backupUrl)}" target="_blank" rel="noopener">${escapeHTML(set.backup.name || '備用停車場')}</a>` : `<span class="tl-parking__link">${escapeHTML(set.backup.name)}</span>`}${backupMeta ? `<span class="tl-parking__meta">${escapeHTML(backupMeta)}</span>` : ''}</div>`);
+    }
+  });
+  return rows.length ? `<div class="tl-parking">${rows.join('')}</div>` : '';
+}
+function parkingSetHtml(prefix,title) {
+  const spot=(kind,label)=>`<div class="parking-set"><div class="parking-set__title"><span>${label}</span></div><div class="parking-set__grid"><div class="parking-mini wide"><label>停車場名稱</label><input id="${prefix}-${kind}-name" type="text" placeholder="例：草千里第一停車場"></div><div class="parking-mini wide"><label>Google Maps 連結（可留空）</label><input id="${prefix}-${kind}-maps" type="url" placeholder="貼上 Google Maps 分享連結"></div><div class="parking-mini"><label>步行到景點（分鐘）</label><input id="${prefix}-${kind}-walk" type="number" min="0" placeholder="0"></div><div class="parking-mini"><label>停車費（¥）</label><input id="${prefix}-${kind}-fee" type="number" min="0" placeholder="0"></div><div class="parking-mini wide"><label>備註</label><textarea id="${prefix}-${kind}-note" placeholder="例：假日容易客滿、入口在南側"></textarea></div></div></div>`;
+  return `<div class="parking-set__title"><span>${title}</span></div>${spot('primary','主要停車場')}<button class="parking-backup-toggle" type="button" data-parking-backup="${prefix}">＋ 新增備用停車場</button><div class="parking-backup-fields" id="${prefix}-backup-wrap">${spot('backup','備用停車場')}</div>`;
+}
+function buildParkingEditor() {
+  document.getElementById('parking-shared').innerHTML=parkingSetHtml('p-shared','共用停車場');
+  document.getElementById('parking-split').innerHTML=parkingSetHtml('p-carA','13號')+parkingSetHtml('p-carB','15號');
+  document.querySelectorAll('[data-parking-backup]').forEach(btn=>btn.addEventListener('click',()=>{
+    const wrap=document.getElementById(`${btn.dataset.parkingBackup}-backup-wrap`); const open=wrap.classList.toggle('open'); btn.textContent=open?'－ 收合備用停車場':'＋ 新增備用停車場';
+  }));
+}
+function setParkingMode(mode) {
+  parkingMode=mode==='split'?'split':'shared';
+  document.querySelectorAll('[data-parking-mode]').forEach(btn=>btn.classList.toggle('active',btn.dataset.parkingMode===parkingMode));
+  document.getElementById('parking-shared').hidden=parkingMode!=='shared';
+  document.getElementById('parking-split').hidden=parkingMode!=='split';
+}
+function parkingSpotFromFields(prefix,kind) {
+  const val=id=>document.getElementById(`${prefix}-${kind}-${id}`)?.value || '';
+  return {name:val('name').trim(),mapsUrl:val('maps').trim(),walkMin:Math.max(0,parseInt(val('walk'))||0),fee:Math.max(0,parseInt(val('fee'))||0),note:val('note').trim()};
+}
+function readParkingEditor() {
+  return {mode:parkingMode,shared:{primary:parkingSpotFromFields('p-shared','primary'),backup:parkingSpotFromFields('p-shared','backup')},carA:{primary:parkingSpotFromFields('p-carA','primary'),backup:parkingSpotFromFields('p-carA','backup')},carB:{primary:parkingSpotFromFields('p-carB','primary'),backup:parkingSpotFromFields('p-carB','backup')}};
+}
+function fillParkingSpot(prefix,kind,spot) {
+  const set=(id,v)=>{const el=document.getElementById(`${prefix}-${kind}-${id}`); if(el) el.value=v ?? '';};
+  set('name',spot?.name||''); set('maps',spot?.mapsUrl||''); set('walk',spot?.walkMin||''); set('fee',spot?.fee||''); set('note',spot?.note||'');
+}
+function fillParkingEditor(raw) {
+  const p=normalizeParking(raw); setParkingMode(p.mode);
+  [['p-shared',p.shared],['p-carA',p.carA],['p-carB',p.carB]].forEach(([prefix,set])=>{
+    fillParkingSpot(prefix,'primary',set.primary); fillParkingSpot(prefix,'backup',set.backup);
+    const wrap=document.getElementById(`${prefix}-backup-wrap`); const btn=document.querySelector(`[data-parking-backup="${prefix}"]`); const has=parkingHasSpot(set.backup);
+    if(wrap) wrap.classList.toggle('open',has); if(btn) btn.textContent=has?'－ 收合備用停車場':'＋ 新增備用停車場';
+  });
+}
+function resetParkingEditor() { fillParkingEditor(null); document.getElementById('parking-panel')?.classList.remove('open'); document.getElementById('parking-panel-toggle')?.setAttribute('aria-expanded','false'); }
+function parkingAllowedForType(type) { return !['flight','rental','transit','commute'].includes(type); }
+function toggleParkingVisibility() { const panel=document.getElementById('parking-panel'); if(panel) panel.hidden=!parkingAllowedForType(document.getElementById('m-type').value); }
+
 // ── Render Timeline ──
 function renderDay() {
   const date  = TRIP_DAYS[currentDay].date;
@@ -892,6 +1029,7 @@ function renderDay() {
               ${it.type === 'flight' && (it.origin || it.destination) ? `<div class="tl-card__hours">${escapeHTML(it.origin || '')} → ${escapeHTML(it.destination || '')}${it.durationMin ? ` · ${Math.floor(it.durationMin / 60)}h${it.durationMin % 60 ? it.durationMin % 60 + 'm' : ''}` : ''}</div>` : ''}
               ${it.hours ? `<div class="tl-card__hours">🕐 營業：${escapeHTML(it.hours)}</div>` : ''}
               ${it.transitMin ? `<div class="tl-card__hours">🚗 到下一站：${Number(it.transitMin)} 分${it.transitMode ? ` · ${escapeHTML(it.transitMode)}` : ''}</div>` : ''}
+              ${renderParkingRows(it)}
               ${itemWarnings.length ? `<div class="tl-card__warning">⚠ ${itemWarnings.map(escapeHTML).join('<br>')}</div>` : ''}
               ${it.note  ? `<p class="tl-card__note">${escapeHTML(it.note)}</p>` : ''}
               ${it.updatedBy ? `<div class="tl-card__updated">最後由 ${escapeHTML(it.updatedBy)} 更新${formatCollabTime(it.updatedAt) ? ` · ${formatCollabTime(it.updatedAt)}` : ''}</div>` : ''}
@@ -965,8 +1103,10 @@ function renderDay() {
       document.getElementById('m-flight-duration').value = item.durationMin ? `${Math.floor(item.durationMin / 60)}:${String(item.durationMin % 60).padStart(2, '0')}` : '';
       document.getElementById('m-origin').value = item.origin || '';
       document.getElementById('m-destination').value = item.destination || '';
+      fillParkingEditor(item.parking);
       document.getElementById('modal-title').textContent = '編輯行程項目';
       toggleFlightFields();
+      toggleParkingVisibility();
       document.getElementById('modal-overlay').classList.add('open');
     });
   });
@@ -1248,11 +1388,19 @@ function openNewItemModal(type = 'spot') {
   document.getElementById('m-city').value  = getDayRegion();
   document.getElementById('m-start').value = '';
   document.getElementById('m-end').value   = '';
+  resetParkingEditor();
   document.getElementById('modal-title').textContent = type === 'flight' ? '加入航班' : type === 'rental' ? '加入租車' : '新增行程項目';
   toggleFlightFields();
+  toggleParkingVisibility();
   document.getElementById('modal-overlay').classList.add('open');
 }
 
+buildParkingEditor();
+document.getElementById('parking-panel-toggle').addEventListener('click', () => {
+  const panel=document.getElementById('parking-panel'); const open=panel.classList.toggle('open'); document.getElementById('parking-panel-toggle').setAttribute('aria-expanded', String(open));
+});
+document.querySelectorAll('[data-parking-mode]').forEach(btn=>btn.addEventListener('click',()=>setParkingMode(btn.dataset.parkingMode)));
+document.getElementById('m-type').addEventListener('change', toggleParkingVisibility);
 document.getElementById('btn-add-item').addEventListener('click', () => openNewItemModal());
 document.getElementById('btn-add-flight').addEventListener('click', () => openNewItemModal('flight'));
 document.getElementById('btn-add-rental').addEventListener('click', () => openNewItemModal('rental'));
@@ -1311,6 +1459,7 @@ document.getElementById('btn-modal-save').addEventListener('click', async () => 
     origin:      document.getElementById('m-origin').value.trim(),
     destination: document.getElementById('m-destination').value.trim(),
     travelGroup: document.getElementById('m-group').value || 'all',
+    parking:     parkingAllowedForType(selectedType) ? readParkingEditor() : null,
     createdAt:   existingItem?.createdAt || new Date().toISOString(),
     updatedAt:   new Date().toISOString(),
     updatedBy:   collaboratorName() || '未指定'
@@ -1430,7 +1579,7 @@ function closeTour() {
   document.getElementById('help-overlay').classList.remove('open');
   document.getElementById('help-overlay').setAttribute('aria-hidden', 'true');
   document.getElementById('tour-card').classList.remove('open');
-  localStorage.setItem('kyushu_itinerary_tour_seen_v6', '1');
+  localStorage.setItem('kyushu_itinerary_tour_seen_v7', '1');
 }
 
 function placeTourCard() {
@@ -1483,7 +1632,7 @@ document.getElementById('tour-next').addEventListener('click', () => {
   renderTourStep();
 });
 renderRouteLinks([]);
-if (!requestedFlight && !localStorage.getItem('kyushu_itinerary_tour_seen_v6')) startTour();
+if (!requestedFlight && !localStorage.getItem('kyushu_itinerary_tour_seen_v7')) startTour();
 
 document.getElementById('m-name').addEventListener('change', autofillPlaceFields);
 document.getElementById('m-name').addEventListener('blur',   autofillPlaceFields);
