@@ -220,9 +220,14 @@
 
     /* Picker / help */
     .picker-search { width:100%; min-height:44px; padding:.55rem .75rem; border:1px solid var(--border); border-radius:8px; color:var(--text); background:var(--surface2); outline:none; }
-    .picker-filters { display:flex; gap:.4rem; overflow-x:auto; padding:.6rem 0; scrollbar-width:none; }
-    .picker-filter { flex:0 0 auto; min-height:36px; padding:0 .8rem; border:1px solid var(--border); border-radius:20px; color:var(--muted); }
-    .picker-filter.active { border-color:var(--accent); color:var(--accent); }
+    .picker-filter-block { display:grid; gap:.28rem; padding:.42rem 0 0; }
+    .picker-filter-label { color:var(--muted); font-size:.62rem; letter-spacing:.08em; }
+    .picker-filters { display:flex; gap:.4rem; overflow-x:auto; padding:.12rem 0 .35rem; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+    .picker-filters::-webkit-scrollbar { display:none; }
+    .picker-filter { flex:0 0 auto; min-height:36px; padding:0 .8rem; border:1px solid var(--border); border-radius:20px; color:var(--muted); background:var(--surface); }
+    .picker-filter.active { border-color:var(--accent); color:var(--accent); background:rgba(232,115,74,.08); }
+    .picker-category-filter.active { border-color:var(--accent2); color:var(--accent2); background:rgba(168,197,176,.08); }
+    .picker-subcategory-filter.active { border-color:#d2a8ff; color:#d2a8ff; background:rgba(210,168,255,.08); }
     .picker-list { border-top:1px solid var(--border); max-height:52svh; overflow-y:auto; }
     .picker-place { width:100%; min-height:62px; display:grid; grid-template-columns:28px 1fr auto; align-items:center; gap:.6rem; padding:.55rem 0; border-bottom:1px solid var(--border); color:var(--text); text-align:left; }
     .picker-place__check { width:24px; height:24px; display:grid; place-items:center; border:1px solid var(--border); border-radius:6px; }
@@ -470,7 +475,18 @@
   <div class="modal">
     <div style="display:flex;align-items:center;justify-content:space-between"><div class="modal__title" id="picker-title">從景點總覽加入</div><button class="icon-btn" data-close-modal="picker-overlay" type="button" aria-label="關閉">×</button></div>
     <input class="picker-search" id="picker-search" type="search" placeholder="搜尋景點、餐廳或城市">
-    <div class="picker-filters" id="picker-filters"></div>
+    <div class="picker-filter-block">
+      <span class="picker-filter-label">地區</span>
+      <div class="picker-filters" id="picker-filters"></div>
+    </div>
+    <div class="picker-filter-block">
+      <span class="picker-filter-label">類別</span>
+      <div class="picker-filters" id="picker-category-filters"></div>
+    </div>
+    <div class="picker-filter-block" id="picker-subcategory-block" hidden>
+      <span class="picker-filter-label">子類別</span>
+      <div class="picker-filters" id="picker-subcategory-filters"></div>
+    </div>
     <div class="picker-list" id="picker-list"></div>
     <div class="modal-field" style="margin-top:.65rem">
       <label>這批景點由誰參加</label>
@@ -554,6 +570,8 @@ let editingDate     = null;
 let selectedPlaceIds = new Set();
 let selectedTransitMinutes = new Map();
 let pickerRegion = '全部';
+let pickerCategory = '全部';
+let pickerSubcategory = '全部';
 let groupView = 'all';
 let collaboratorsPresence = {};
 let itineraryEditLocks = {};
@@ -1298,6 +1316,53 @@ function renderPickerFilters() {
   document.getElementById('picker-filters').innerHTML = regions.map(region =>
     `<button class="picker-filter${pickerRegion === region ? ' active' : ''}" type="button" data-picker-region="${escapeHTML(region)}">${escapeHTML(region)}</button>`
   ).join('');
+  renderPickerCategoryFilters();
+}
+
+function getPickerCategorySourcePlaces() {
+  const dayRegions = getDayRegions();
+  return allPlaces().filter(place => {
+    const region = String(place.region || '');
+    const matchesDay = !dayRegions.length || dayRegions.some(dayRegion => regionMatches(region, dayRegion));
+    const matchesRegion = pickerRegion === '全部' || regionMatches(region, pickerRegion);
+    return matchesDay && matchesRegion;
+  });
+}
+
+function renderPickerCategoryFilters() {
+  const categories = ['全部', ...new Set(getPickerCategorySourcePlaces()
+    .map(place => String(place.category || '景點').trim() || '景點'))];
+  if (!categories.includes(pickerCategory)) pickerCategory = '全部';
+  document.getElementById('picker-category-filters').innerHTML = categories.map(category =>
+    `<button class="picker-filter picker-category-filter${pickerCategory === category ? ' active' : ''}" type="button" data-picker-category="${escapeHTML(category)}">${escapeHTML(category)}</button>`
+  ).join('');
+  renderPickerSubcategoryFilters();
+}
+
+function getPickerSubcategorySourcePlaces() {
+  return getPickerCategorySourcePlaces().filter(place => {
+    const category = String(place.category || '景點').trim() || '景點';
+    return pickerCategory === '全部' || category === pickerCategory;
+  });
+}
+
+function renderPickerSubcategoryFilters() {
+  const subcategories = [...new Set(getPickerSubcategorySourcePlaces()
+    .map(place => String(place.subcategory || '').trim())
+    .filter(Boolean))];
+  const block = document.getElementById('picker-subcategory-block');
+  if (!subcategories.length) {
+    pickerSubcategory = '全部';
+    block.hidden = true;
+    document.getElementById('picker-subcategory-filters').innerHTML = '';
+    return;
+  }
+  block.hidden = false;
+  const options = ['全部', ...subcategories];
+  if (!options.includes(pickerSubcategory)) pickerSubcategory = '全部';
+  document.getElementById('picker-subcategory-filters').innerHTML = options.map(subcategory =>
+    `<button class="picker-filter picker-subcategory-filter${pickerSubcategory === subcategory ? ' active' : ''}" type="button" data-picker-subcategory="${escapeHTML(subcategory)}">${escapeHTML(subcategory)}</button>`
+  ).join('');
 }
 
 function renderSelectedRouteTimes() {
@@ -1328,13 +1393,17 @@ function renderPlacePicker() {
     const region = String(place.region || '');
     const matchesDay = !dayRegions.length || dayRegions.some(dayRegion => regionMatches(region, dayRegion));
     const matchesFilter = pickerRegion === '全部' || regionMatches(region, pickerRegion);
-    const haystack = `${place.name || ''} ${region} ${place.category || ''} ${place.note || ''}`.toLowerCase();
-    return matchesDay && matchesFilter && (!query || haystack.includes(query));
+    const category = String(place.category || '景點').trim() || '景點';
+    const subcategory = String(place.subcategory || '').trim();
+    const matchesCategory = pickerCategory === '全部' || category === pickerCategory;
+    const matchesSubcategory = pickerSubcategory === '全部' || subcategory === pickerSubcategory;
+    const haystack = `${place.name || ''} ${region} ${category} ${subcategory} ${place.note || ''}`.toLowerCase();
+    return matchesDay && matchesFilter && matchesCategory && matchesSubcategory && (!query || haystack.includes(query));
   });
   document.getElementById('picker-list').innerHTML = places.length ? places.map(place => {
     const id = getPlaceFavKey(place);
     const selected = selectedPlaceIds.has(id);
-    return `<button class="picker-place${selected ? ' selected' : ''}" type="button" data-place-id="${escapeHTML(id)}"><span class="picker-place__check">${selected ? '✓' : ''}</span><span><strong>${escapeHTML(place.name)}</strong><small>${escapeHTML(place.category || '景點')}${place.note ? ` · ${escapeHTML(place.note)}` : ''}</small></span><small>${escapeHTML(place.region || '')}</small></button>`;
+    return `<button class="picker-place${selected ? ' selected' : ''}" type="button" data-place-id="${escapeHTML(id)}"><span class="picker-place__check">${selected ? '✓' : ''}</span><span><strong>${escapeHTML(place.name)}</strong><small>${escapeHTML(place.category || '景點')}${place.subcategory ? ` · ${escapeHTML(place.subcategory)}` : ''}${place.note ? ` · ${escapeHTML(place.note)}` : ''}</small></span><small>${escapeHTML(place.region || '')}</small></button>`;
   }).join('') : '<div class="empty-day"><div class="empty-day__text">目前條件沒有可加入的地點</div></div>';
   document.getElementById('btn-add-selected').textContent = `加入 ${selectedPlaceIds.size} 個行程`;
   renderSelectedRouteTimes();
@@ -1510,6 +1579,8 @@ document.getElementById('btn-open-picker').addEventListener('click', () => {
   selectedPlaceIds.clear();
   selectedTransitMinutes.clear();
   pickerRegion = '全部';
+  pickerCategory = '全部';
+  pickerSubcategory = '全部';
   document.getElementById('picker-search').value = '';
   document.getElementById('picker-start').value = '';
   document.getElementById('picker-group').value = groupView === 'all' ? 'all' : groupView;
@@ -1522,7 +1593,24 @@ document.getElementById('picker-filters').addEventListener('click', event => {
   const button = event.target.closest('[data-picker-region]');
   if (!button) return;
   pickerRegion = button.dataset.pickerRegion;
+  pickerCategory = '全部';
+  pickerSubcategory = '全部';
   renderPickerFilters();
+  renderPlacePicker();
+});
+document.getElementById('picker-category-filters').addEventListener('click', event => {
+  const button = event.target.closest('[data-picker-category]');
+  if (!button) return;
+  pickerCategory = button.dataset.pickerCategory;
+  pickerSubcategory = '全部';
+  renderPickerCategoryFilters();
+  renderPlacePicker();
+});
+document.getElementById('picker-subcategory-filters').addEventListener('click', event => {
+  const button = event.target.closest('[data-picker-subcategory]');
+  if (!button) return;
+  pickerSubcategory = button.dataset.pickerSubcategory;
+  renderPickerSubcategoryFilters();
   renderPlacePicker();
 });
 document.getElementById('picker-list').addEventListener('click', event => {
@@ -1562,10 +1650,13 @@ const TOUR_STEPS = [
   { target:'#online-users', title:'查看目前在線成員', body:'這裡會即時顯示正在使用行程頁面的協作者，避免同時編輯同一筆資料。' },
   { target:'#day-region-trigger', title:'設定今日城市', body:'同一天可以選擇多個城市，景點選擇器會依這些城市縮小範圍。跨城移動或航班可選「移動日」。' },
   { target:'#group-view', title:'共同與分車行程', body:'所有行程可查看完整安排；切換 13號或 15號時，會同時顯示該車專屬行程與全員共同景點。' },
-  { target:'.action-bar', title:'加入行程項目', body:'可從景點總覽依點選順序批次加入景點，並逐站設定「到下一站交通時間」；系統會用上一站結束時間加交通時間，自動排出下一站開始時間。也可手動新增景點、餐廳、住宿、交通與航班，每筆可指定全員同行、13號或15號。' },
+  { target:'.action-bar', title:'加入行程項目', body:'可從景點總覽批次加入，或手動新增景點、餐廳、住宿、交通、航班與租車；每筆都能指定全員同行、13號或15號。' },
+  { target:'#btn-open-picker', title:'用地區、類別、子類別快速找景點', body:'開啟「從景點總覽加入」後，可依今日城市再套用地區、類別與子類別三層篩選，也能搭配搜尋文字。子類別只會顯示目前條件下實際存在的選項，沒有子類別時會自動隱藏。' },
+  { target:'#btn-open-picker', title:'逐站設定交通時間', body:'批次選取景點會保留你的點選順序，並讓每一站分別設定「到下一站交通時間」。系統用上一站結束時間＋該段交通時間，自動計算下一站開始時間。' },
   { target:'#btn-add-flight', title:'獨立加入航班', body:'「加入航班」會開啟航班表單，可套用 JX846 或 JX847。航班號、起降機場、飛行時間與報到提醒會一起帶入行程。' },
   { target:'#btn-add-rental', title:'租車取還車帶入', body:'「加入租車」可直接套用 13號或15號各自的取車／還車資料；從總覽頁按「取車加入行程」或「還車加入行程」時，也會自動切到對應日期與車輛分組。' },
-  { target:'#timeline', title:'行程卡片欄位與圖示', body:'卡片會標示共同、13號或15號及最後更新者。原本的單點 Google Maps、備註、編輯與刪除功能全部保留。' },
+  { target:'#timeline', title:'行程卡片與停車導航', body:'卡片會標示共同、13號或15號及最後更新者；有設定停車場時，會直接顯示主要／備用停車場、步行時間與費用，點停車場名稱即可開 Google Maps 導航。單點景點 Google Maps、備註、編輯與刪除功能仍保留。' },
+  { target:'#btn-add-item', title:'設定景點停車資訊', body:'新增或編輯一般景點時，可展開「停車資訊」。預設可讓兩台車共用停車場，也能切成13號／15號分開設定；每組都可保存主要與備用停車場。停車場是景點附屬資料，不會額外塞進時間軸。' },
   { target:'#route-bar', title:'兩台車的今日路線', body:'13號與15號會各自產生整日 Google Maps 路線，共同景點會自動加入兩條路線；卡片上的單點 Google Maps 仍可照常使用。' },
   { target:'#timeline', title:'依時間自動排序', body:'行程會依開始時間自動排列。修改任何項目的時間後，順序會立即重新計算，不需要拖曳。' },
   { target:'#help-btn', title:'隨時重新查看', body:'之後可按右上角問號再次啟動這份互動導覽。' }
@@ -1579,7 +1670,7 @@ function closeTour() {
   document.getElementById('help-overlay').classList.remove('open');
   document.getElementById('help-overlay').setAttribute('aria-hidden', 'true');
   document.getElementById('tour-card').classList.remove('open');
-  localStorage.setItem('kyushu_itinerary_tour_seen_v7', '1');
+  localStorage.setItem('kyushu_itinerary_tour_seen_v8', '1');
 }
 
 function placeTourCard() {
@@ -1632,7 +1723,7 @@ document.getElementById('tour-next').addEventListener('click', () => {
   renderTourStep();
 });
 renderRouteLinks([]);
-if (!requestedFlight && !localStorage.getItem('kyushu_itinerary_tour_seen_v7')) startTour();
+if (!requestedFlight && !localStorage.getItem('kyushu_itinerary_tour_seen_v8')) startTour();
 
 document.getElementById('m-name').addEventListener('change', autofillPlaceFields);
 document.getElementById('m-name').addEventListener('blur',   autofillPlaceFields);
