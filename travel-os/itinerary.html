@@ -297,36 +297,7 @@
     [data-theme="light"] .tour-actions { background:#fff; }
     @media (prefers-reduced-motion:reduce) { .tour-target { scroll-behavior:auto; } }
   </style>
-<script type="module">
-(async()=>{
-  const status=document.createElement('div');
-  status.id='firebase-status';
-  status.style.cssText='position:fixed;right:12px;top:12px;z-index:2147483647;padding:7px 10px;background:#191917;color:#fff;font:12px/1.2 sans-serif;border:1px solid rgba(255,255,255,.18)';
-  status.textContent='Firebase：連線中…';
-  document.addEventListener('DOMContentLoaded',()=>document.body.appendChild(status),{once:true});
-  const candidates=[
-    new URL('../assets/js/firebase-init.js',location.href).href,
-    new URL('./assets/js/firebase-init.js',location.href).href,
-    new URL('/assets/js/firebase-init.js',location.origin).href
-  ];
-  let lastError=null;
-  for(const url of [...new Set(candidates)]){
-    try{
-      await import(url);
-      if(window.__firebaseReady && window.__db){
-        status.textContent='Firebase：已連線';
-        status.style.background='#315c4c';
-        setTimeout(()=>status.remove(),3500);
-        return;
-      }
-    }catch(err){ lastError=err; console.warn('[Travel OS] Firebase init failed:',url,err); }
-  }
-  status.textContent='Firebase：初始化失敗';
-  status.style.background='#a73524';
-  status.title=String(lastError||'firebase-init.js not found');
-  console.error('[Travel OS] Firebase initialization failed for all candidate paths.',candidates,lastError);
-})();
-</script>
+<script src="../assets/js/firebase-init.js" type="module"></script>
 <style>
 /* ===== Travel OS v3 — structural redesign ===== */
 :root{
@@ -456,18 +427,22 @@ button:active,a:active{transform:translateY(1px)}
   .it-right .os-panel__head{padding:10px 12px!important}.it-right .os-panel__head h3{font-size:14px!important}.it-right .action-btn{min-height:40px!important;padding:8px 10px!important;font-size:11px!important}
 }
 
-</style></head>
-<body>
-<header class="topbar">
+</style><link href="travel-os.css" rel="stylesheet"/></head>
+<body class="travel-os-page" data-page="today">
+<a class="skip-link" href="#today-workspace">跳到主要內容</a>
+<header class="topbar os-topbar">
 <div class="topbar__left">
-<a class="topbar__back" href="index.html">← 返回</a>
-<span class="topbar__title">行程表</span>
+<a class="topbar__back" href="index.html" aria-label="返回總控台">‹</a>
+<span class="topbar__title">Today</span>
 </div>
-<div style="display:flex;gap:.4rem">
+<div class="topbar__actions">
+<span class="sync-state" id="os-sync-state" role="status">連線中</span>
 <button aria-label="使用說明" class="icon-btn" id="help-btn" title="使用說明" type="button">?</button>
-<button aria-label="切換主題" class="icon-btn" id="theme-btn" type="button">🌙</button>
+<button aria-label="切換主題" class="icon-btn" id="theme-btn" type="button">◐</button>
 </div>
 </header>
+<main class="today-workspace" id="today-workspace">
+<aside class="today-context" aria-label="日期與同行設定">
 <div aria-label="協作者狀態" class="collab-bar">
 <label class="collab-identity">我是
     <select class="collab-select" id="collab-user">
@@ -494,6 +469,13 @@ button:active,a:active{transform:translateY(1px)}
 <button class="group-view__btn" data-group-view="carA" type="button">13號</button>
 <button class="group-view__btn" data-group-view="carB" type="button">15號</button>
 </div>
+</aside>
+<section class="today-focus" aria-label="目前與下一站">
+<header class="today-heading"><div><span id="today-date-label">今日行程</span><h1 id="today-city-label">九州</h1></div><span id="today-day-count">DAY 1 / 8</span></header>
+<article class="today-now" id="today-now" aria-live="polite"><div class="focus-loading">正在讀取目前行程</div></article>
+<article class="today-next" id="today-next" aria-live="polite"><div class="focus-loading">正在讀取下一站</div></article>
+</section>
+<aside class="today-ops" aria-label="行程工具">
 <div class="action-bar">
 <button class="action-btn action-btn--primary" id="btn-open-picker" type="button">從景點總覽加入</button>
 <button class="action-btn" id="btn-add-item" type="button">手動新增行程</button>
@@ -507,8 +489,13 @@ button:active,a:active{transform:translateY(1px)}
 <div class="day-stat"><span class="day-stat__n" id="stat-cost">—</span><span class="day-stat__l">預估費用</span></div>
 </div>
 <div class="route-bar" id="route-bar"></div>
+</aside>
+<section class="later-plan" aria-labelledby="later-plan-title">
+<header class="later-plan__head"><div><span>LATER</span><h2 id="later-plan-title">稍後行程</h2></div><button class="later-plan__manage" id="today-manage-toggle" type="button">管理</button></header>
 <div class="day-summary" id="day-summary"></div>
 <div class="timeline" id="timeline"></div>
+</section>
+</main>
 <div class="modal-overlay" id="modal-overlay">
 <div class="modal">
 <div class="modal__title" id="modal-title">新增行程項目</div>
@@ -668,28 +655,15 @@ button:active,a:active{transform:translateY(1px)}
 <button class="tour-next" id="tour-next" type="button">下一步</button>
 </div>
 </section>
-<nav class="bottom-nav">
-<a class="bottom-nav__item" href="travel.html"><span>🏠</span><span>首頁</span></a>
-<a class="bottom-nav__item" href="index.html"><span>🔍</span><span>總覽</span></a>
-<a class="bottom-nav__item active" href="itinerary.html"><span>🗓</span><span>行程</span></a>
-<a class="bottom-nav__item" href="fukuoka.html"><span>🌆</span><span>福岡</span></a>
+<nav class="bottom-nav" aria-label="主要導覽">
+<a class="bottom-nav__item" href="index.html"><span class="nav-glyph">⌂</span><span>總控</span></a>
+<a class="bottom-nav__item active" href="itinerary.html"><span class="nav-glyph">▦</span><span>Today</span></a>
+<a class="bottom-nav__item" href="index.html?view=places"><span class="nav-glyph">⌖</span><span>景點</span></a>
+<a class="bottom-nav__item" href="index.html?view=more"><span class="nav-glyph">•••</span><span>更多</span></a>
 </nav>
 <script>
 (function(){
- const body=document.body; const topbar=body.querySelector('.topbar'),nav=body.querySelector('.bottom-nav');
- const collab=body.querySelector('.collab-bar'),dates=body.querySelector('#date-tabs'),region=body.querySelector('.region-picker'),group=body.querySelector('#group-view');
- const actions=body.querySelector('.action-bar'),stats=body.querySelector('.day-stats'),route=body.querySelector('#route-bar'),summary=body.querySelector('#day-summary'),timeline=body.querySelector('#timeline');
- const modal=body.querySelector('#modal-overlay'),picker=body.querySelector('#picker-overlay'),overlay=body.querySelector('#help-overlay'),tour=body.querySelector('#tour-card');
- const shell=document.createElement('div');shell.className='travel-os';
- const rail=document.createElement('aside');rail.className='os-rail';rail.innerHTML='<div class="os-brand"><div class="os-brand__eyebrow">Travel Operating System</div><div class="os-brand__name">九州自駕旅程</div><div class="os-brand__meta">Daily Operations</div></div><div class="os-nav"><div class="os-nav__label">Navigate</div></div><div class="os-rail__foot">Two-car shared itinerary<br>13號 / 15號 / 全員同行</div>';rail.querySelector('.os-nav').appendChild(nav);rail.insertBefore(topbar,rail.querySelector('.os-rail__foot'));
- const work=document.createElement('main');work.className='os-workspace';const inner=document.createElement('div');inner.className='os-workspace__inner';work.appendChild(inner);
- const mast=document.createElement('div');mast.className='itinerary-masthead';mast.innerHTML='<div><div class="os-kicker">Today Operations</div><h1 class="os-title">每日行程指揮台</h1><div class="os-subtitle">用日期、車組與時間軸控制一天。現場只需要看下一站、路線與臨時調整。</div></div>';inner.appendChild(mast);
- const grid=document.createElement('div');grid.className='itinerary-os';const left=document.createElement('aside');left.className='it-left';const main=document.createElement('section');main.className='it-main';const right=document.createElement('aside');right.className='it-right';grid.append(left,main,right);inner.appendChild(grid);
- function panel(label,title,node){const p=document.createElement('section');p.className='os-panel';p.innerHTML='<div class="os-panel__head"><div><div class="os-panel__label">'+label+'</div><h3>'+title+'</h3></div></div>';p.appendChild(node);return p}
- left.append(panel('Live','協作狀態',collab),panel('Day','選擇日期',dates),panel('Area','當日地區',region),panel('Group','同行模式',group));
- const focus=document.createElement('div');focus.className='day-focus';focus.innerHTML='<div><div class="day-focus__label">Active Day</div><div class="day-focus__title">今天的路線與時間軸</div><div class="day-focus__hint">先看下一站，再決定是否需要改動。</div></div><div class="day-focus__label">Realtime Sync</div>';main.append(focus,summary,timeline);
- right.append(panel('Actions','快速操作',actions),panel('Overview','今日統計',stats),panel('Route','整日路線',route));
- shell.append(rail,work);body.insertBefore(shell,body.firstChild);body.append(modal,picker,overlay,tour);
+ document.documentElement.classList.add('travel-os-ready');
 })();
 </script><script>
 const FAVICONOFF = '❤️';
@@ -1809,21 +1783,11 @@ document.querySelectorAll('[data-close-modal]').forEach(button => button.addEven
 document.getElementById('picker-overlay').addEventListener('click', event => { if (event.target.id === 'picker-overlay') event.target.classList.remove('open'); });
 
 const TOUR_STEPS = [
-  { target:'#date-tabs', title:'選擇旅遊日期', body:'先切換要安排的日期，每一天都會保存自己的城市、景點、通勤、餐廳與航班。' },
-  { target:'#collab-user', title:'選擇協作身分', body:'第一次使用先選擇自己，之後新增或修改行程時會留下最後更新者，方便四位協作者辨識變更。' },
-  { target:'#online-users', title:'查看目前在線成員', body:'這裡會即時顯示正在使用行程頁面的協作者，避免同時編輯同一筆資料。' },
-  { target:'#day-region-trigger', title:'設定今日城市', body:'同一天可以選擇多個城市，景點選擇器會依這些城市縮小範圍。跨城移動或航班可選「移動日」。' },
-  { target:'#group-view', title:'共同與分車行程', body:'所有行程可查看完整安排；切換 13號或 15號時，會同時顯示該車專屬行程與全員共同景點。' },
-  { target:'.action-bar', title:'加入行程項目', body:'可從景點總覽批次加入，或手動新增景點、餐廳、住宿、交通、航班與租車；每筆都能指定全員同行、13號或15號。' },
-  { target:'#btn-open-picker', title:'用地區、類別、子類別快速找景點', body:'開啟「從景點總覽加入」後，可依今日城市再套用地區、類別與子類別三層篩選，也能搭配搜尋文字。子類別只會顯示目前條件下實際存在的選項，沒有子類別時會自動隱藏。' },
-  { target:'#btn-open-picker', title:'逐站設定交通時間', body:'批次選取景點會保留你的點選順序，並讓每一站分別設定「到下一站交通時間」。系統用上一站結束時間＋該段交通時間，自動計算下一站開始時間。' },
-  { target:'#btn-add-flight', title:'獨立加入航班', body:'「加入航班」會開啟航班表單，可套用 JX846 或 JX847。航班號、起降機場、飛行時間與報到提醒會一起帶入行程。' },
-  { target:'#btn-add-rental', title:'租車取還車帶入', body:'「加入租車」可直接套用 13號或15號各自的取車／還車資料；從總覽頁按「取車加入行程」或「還車加入行程」時，也會自動切到對應日期與車輛分組。' },
-  { target:'#timeline', title:'行程卡片與停車導航', body:'卡片會標示共同、13號或15號及最後更新者；有設定停車場時，會直接顯示主要／備用停車場、步行時間與費用，點停車場名稱即可開 Google Maps 導航。單點景點 Google Maps、備註、編輯與刪除功能仍保留。' },
-  { target:'#btn-add-item', title:'設定景點停車資訊', body:'新增或編輯一般景點時，可展開「停車資訊」。預設可讓兩台車共用停車場，也能切成13號／15號分開設定；每組都可保存主要與備用停車場。停車場是景點附屬資料，不會額外塞進時間軸。' },
-  { target:'#route-bar', title:'兩台車的今日路線', body:'13號與15號會各自產生整日 Google Maps 路線，共同景點會自動加入兩條路線；卡片上的單點 Google Maps 仍可照常使用。' },
-  { target:'#timeline', title:'依時間自動排序', body:'行程會依開始時間自動排列。修改任何項目的時間後，順序會立即重新計算，不需要拖曳。' },
-  { target:'#help-btn', title:'隨時重新查看', body:'之後可按右上角問號再次啟動這份互動導覽。' }
+  { target:'#date-tabs', title:'選擇日期', body:'每一天保留自己的城市、景點、交通、餐廳與航班資料。' },
+  { target:'#group-view', title:'切換車組', body:'查看所有行程、13號或15號，兩組仍會共同看到全員行程。' },
+  { target:'#today-now', title:'目前行程', body:'NOW 在手機首屏直接提供地點、時間、車組與 Google Maps。' },
+  { target:'#today-next', title:'下一站', body:'NEXT 顯示下一個地點與目前行程設定的交通時間。' },
+  { target:'#today-manage-toggle', title:'管理完整行程', body:'管理內保留批次加入、手動新增、航班、租車、統計、路線與協作設定。' }
 ];
 let tourIndex = 0;
 let tourTarget = null;
@@ -1887,7 +1851,7 @@ document.getElementById('tour-next').addEventListener('click', () => {
   renderTourStep();
 });
 renderRouteLinks([]);
-if (!requestedFlight && !localStorage.getItem('kyushu_itinerary_tour_seen_v8')) startTour();
+// 使用說明由右上角按鈕開啟，避免第一次進入時遮住 Today 首屏。
 
 document.getElementById('m-name').addEventListener('change', autofillPlaceFields);
 document.getElementById('m-name').addEventListener('blur',   autofillPlaceFields);
@@ -1970,5 +1934,6 @@ window.addEventListener('pagehide', () => {
   releaseItineraryLock();
 });
 </script>
+<script src="travel-os-ui.js"></script>
 </body>
 </html>
