@@ -297,7 +297,36 @@
     [data-theme="light"] .tour-actions { background:#fff; }
     @media (prefers-reduced-motion:reduce) { .tour-target { scroll-behavior:auto; } }
   </style>
-<script src="../assets/js/firebase-init.js" type="module"></script>
+<script type="module">
+(async()=>{
+  const status=document.createElement('div');
+  status.id='firebase-status';
+  status.style.cssText='position:fixed;right:12px;top:12px;z-index:2147483647;padding:7px 10px;background:#191917;color:#fff;font:12px/1.2 sans-serif;border:1px solid rgba(255,255,255,.18)';
+  status.textContent='Firebase：連線中…';
+  document.addEventListener('DOMContentLoaded',()=>document.body.appendChild(status),{once:true});
+  const candidates=[
+    new URL('../assets/js/firebase-init.js',location.href).href,
+    new URL('./assets/js/firebase-init.js',location.href).href,
+    new URL('/assets/js/firebase-init.js',location.origin).href
+  ];
+  let lastError=null;
+  for(const url of [...new Set(candidates)]){
+    try{
+      await import(url);
+      if(window.__firebaseReady && window.__db){
+        status.textContent='Firebase：已連線';
+        status.style.background='#315c4c';
+        setTimeout(()=>status.remove(),3500);
+        return;
+      }
+    }catch(err){ lastError=err; console.warn('[Travel OS] Firebase init failed:',url,err); }
+  }
+  status.textContent='Firebase：初始化失敗';
+  status.style.background='#a73524';
+  status.title=String(lastError||'firebase-init.js not found');
+  console.error('[Travel OS] Firebase initialization failed for all candidate paths.',candidates,lastError);
+})();
+</script>
 <style>
 /* ===== Travel OS v3 — structural redesign ===== */
 :root{
@@ -373,6 +402,60 @@ button:active,a:active{transform:translateY(1px)}
 @media(max-width:1180px){.itinerary-os{grid-template-columns:200px minmax(0,1fr)}.it-right{grid-column:1/-1;position:static;display:grid;grid-template-columns:1fr 1fr 1fr;max-height:none}.it-right>.os-panel:last-child{grid-column:1/-1}}
 @media(max-width:760px){
  .travel-os{display:block}.os-rail{position:static;height:auto;border-right:0;border-bottom:1px solid var(--os-line);padding:12px 14px;display:grid;grid-template-columns:1fr auto}.os-brand{border:0;padding:0}.os-brand__name{font-size:16px}.os-brand__meta,.os-nav__label,.os-rail__foot{display:none}.os-nav{grid-column:1/-1}.os-rail .bottom-nav{position:fixed!important;left:0;right:0;bottom:0!important;z-index:500!important;background:var(--os-paper)!important;border-top:1px solid var(--os-line)!important;display:grid!important;grid-template-columns:repeat(4,1fr)!important;padding:max(5px,env(safe-area-inset-bottom)) 6px!important}.os-rail .bottom-nav__item{grid-template-columns:1fr!important;justify-items:center!important;font-size:10px!important;gap:2px!important;min-height:52px!important;padding:5px!important}.os-rail .bottom-nav__item.active{background:transparent!important;color:var(--os-accent)!important;border-color:transparent!important}.os-workspace{padding:14px 10px 92px}.itinerary-os{display:flex;flex-direction:column}.it-left,.it-right{position:static;max-height:none;width:100%}.it-left{display:flex;overflow-x:auto;gap:8px;padding-bottom:4px}.it-left>.os-panel{min-width:260px}.it-left .date-tabs{display:flex!important;min-width:max-content}.it-left .date-tab{min-width:82px!important;border-right:1px solid var(--os-line)!important;border-bottom:0!important}.it-main{order:-1;width:100%}.it-right{display:grid;grid-template-columns:1fr}.day-focus{grid-template-columns:1fr}.day-focus__title{font-size:23px}.itinerary-masthead{margin-bottom:10px}.itinerary-masthead .os-title{font-size:28px}.it-main .timeline{min-height:420px!important}}
+
+/* === Travel OS itinerary density + RWD pass / 2026-09-14 === */
+/* Timeline items should read like a schedule, not stacked content cards. */
+.it-main .timeline{min-height:0!important;padding:8px 10px 12px!important}
+.it-main .tl-item{grid-template-columns:54px minmax(0,1fr)!important}
+.it-main .tl-card{margin-left:14px!important;margin-bottom:6px!important}
+.it-main .tl-card__main{padding:8px 10px 7px!important}
+.it-main .tl-card__meta{gap:4px!important;margin-bottom:3px!important;flex-wrap:nowrap!important;overflow:hidden!important}
+.it-main .tl-card__cat{font-size:9px!important;padding:1px 5px!important;white-space:nowrap!important}
+.it-main .tl-card__dur{font-size:9px!important;white-space:nowrap!important}
+.it-main .tl-card__name{font-family:var(--sans)!important;font-size:14px!important;line-height:1.35!important;font-weight:750!important}
+.it-main .tl-card__hours{font-size:10.5px!important;margin-top:3px!important;line-height:1.35!important}
+.it-main .tl-card__footer{padding:6px 10px 7px!important;margin-top:5px!important;min-height:0!important}
+.it-main .tl-card__btn{font-size:10px!important;padding:3px 7px!important}
+.it-main .tl-map{width:28px!important;height:28px!important;padding:0!important}
+.it-main .tl-card__updated{font-size:9px!important}
+.it-main .tl-parking{margin-top:4px!important;gap:2px!important}
+.it-main .tl-parking__link{font-size:10px!important}
+.it-main .tl-parking__meta{font-size:9px!important}
+
+@media(max-width:760px){
+  .os-workspace{padding:10px 8px 78px!important}
+  .itinerary-masthead{margin-bottom:8px!important}.itinerary-masthead .os-title{font-size:24px!important}.itinerary-masthead .os-subtitle{display:none!important}
+  .itinerary-os{display:flex!important;flex-direction:column!important;gap:8px!important}
+  .it-left{order:0!important;display:grid!important;grid-template-columns:1fr!important;gap:6px!important;width:100%!important;overflow:visible!important;padding:0!important;position:static!important;max-height:none!important}
+  .it-main{order:1!important;width:100%!important;gap:8px!important}
+  .it-right{order:2!important;width:100%!important;display:grid!important;grid-template-columns:1fr!important;gap:8px!important;position:static!important;max-height:none!important}
+  .it-left>.os-panel{min-width:0!important;width:100%!important}
+  .it-left .date-tabs{order:-4!important;display:flex!important;grid-template-columns:none!important;overflow-x:auto!important;min-width:0!important;width:100%!important;scrollbar-width:none!important;border:1px solid var(--os-line)!important}
+  .it-left .date-tabs::-webkit-scrollbar{display:none!important}
+  .it-left .date-tab{min-width:70px!important;min-height:40px!important;padding:6px 8px!important;border-right:1px solid var(--os-line)!important;border-bottom:0!important;justify-content:center!important;text-align:center!important;font-size:11px!important;flex:0 0 auto!important}
+  .it-left .region-picker{order:-3!important}.it-left .region-picker__trigger{min-height:40px!important;padding:6px 10px!important;font-size:11px!important}
+  .it-left .group-view{order:-2!important;display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:4px!important;padding:4px!important}.it-left .group-view button{min-height:36px!important;padding:5px!important;font-size:10.5px!important}
+  .it-left .collab-bar{order:5!important;padding:8px 10px!important;font-size:10px!important}
+  .day-focus{padding:11px 12px!important;grid-template-columns:1fr auto!important;gap:8px!important}.day-focus__label{font-size:8px!important}.day-focus__title{font-size:19px!important;margin-top:2px!important}.day-focus__hint{display:none!important}
+  .it-main .timeline{padding:4px 4px 8px!important;border-left:0!important;border-right:0!important}
+  .it-main .tl-item{grid-template-columns:43px minmax(0,1fr)!important}
+  .it-main .tl-item::before{left:20px!important;top:27px!important}
+  .it-main .tl-time{padding-top:5px!important;padding-right:6px!important}.it-main .tl-time__h{font-size:12px!important}.it-main .tl-time__m{font-size:8px!important}
+  .it-main .tl-dot{left:16px!important;top:7px!important;width:10px!important;height:10px!important}
+  .it-main .tl-card{margin-left:8px!important;margin-bottom:5px!important;border-left:2px solid var(--os-line)!important}
+  .it-main .tl-card__main{padding:7px 8px 6px!important}
+  .it-main .tl-card__meta{margin-bottom:2px!important}.it-main .tl-card__meta .tl-card__cat:nth-child(n+3){display:none!important}
+  .it-main .tl-card__name{font-size:13px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .it-main .tl-card__hours{font-size:9.5px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .it-main .tl-parking__row{gap:3px!important}.it-main .tl-parking__backup{display:none!important}
+  .it-main .tl-card__warning{font-size:9px!important;line-height:1.35!important;padding:4px 5px!important}
+  .it-main .tl-card__updated{display:none!important}
+  .it-main .tl-card__footer{padding:5px 8px!important;margin-top:3px!important;align-items:center!important}
+  .it-main .tl-card__actions{gap:4px!important;flex-wrap:nowrap!important}.it-main .tl-card__btn{font-size:9px!important;padding:3px 6px!important}.it-main .tl-map{width:26px!important;height:26px!important;min-width:26px!important}
+  .it-main .day-summary{padding:7px 8px!important;overflow-x:auto!important}
+  .it-right .os-panel__head{padding:10px 12px!important}.it-right .os-panel__head h3{font-size:14px!important}.it-right .action-btn{min-height:40px!important;padding:8px 10px!important;font-size:11px!important}
+}
+
 </style></head>
 <body>
 <header class="topbar">
