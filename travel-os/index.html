@@ -1,1 +1,2066 @@
+<!DOCTYPE html>
 
+<html data-theme="dark" lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>九州福岡熊本旅遊 2026/9/30~10/7</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&amp;family=Noto+Sans+TC:wght@300;400&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root{
+      --bg:#0D0D0D;--surface:#141414;--surface2:#1C1C1C;
+      --border:rgba(255,255,255,0.09);--text:#E8E8E8;--muted:rgba(232,232,232,0.48);
+      --accent:#E8734A;--accent2:#A8C5B0;--purple:#B8AFFF;
+      --serif:'Noto Serif JP',serif;--sans:'Noto Sans TC',sans-serif;
+      --r:10px;--ease:cubic-bezier(.4,0,.2,1);
+      --safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px);
+    }
+    [data-theme="light"]{--bg:#F5F2EE;--surface:#FFF;--surface2:#F0EDE9;--border:rgba(0,0,0,0.1);--text:#1A1A1A;--muted:rgba(26,26,26,0.55);}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{-webkit-text-size-adjust:100%;}
+    body{font-family:var(--sans);background:var(--bg);color:var(--text);overflow-x:hidden;padding-bottom:calc(64px + var(--safe-b));transition:background .3s,color .3s;}
+    a{color:inherit;text-decoration:none;}
+    button{font-family:inherit;cursor:pointer;border:none;background:none;}
+    input,select,textarea{font-family:inherit;}
+
+    /* ── Topbar ── */
+    .topbar{position:sticky;top:0;z-index:200;background:rgba(13,13,13,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 1rem;padding-top:var(--safe-t);display:flex;align-items:center;justify-content:space-between;min-height:52px;gap:.5rem;}
+    [data-theme="light"] .topbar{background:rgba(245,242,238,.95);}
+    .topbar__title{font-family:var(--serif);font-size:.95rem;letter-spacing:.18em;}
+    .topbar__actions{display:flex;gap:.4rem;}
+    .icon-btn{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.05rem;border:1px solid var(--border);background:var(--surface);color:var(--text);-webkit-tap-highlight-color:transparent;}
+
+    /* ── 快速入口區（頁面最上方） ── */
+    .quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;padding:.75rem 1rem .25rem;}
+    .qa-btn{display:flex;align-items:center;gap:.6rem;padding:.75rem .9rem;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);color:var(--text);text-decoration:none;-webkit-tap-highlight-color:transparent;transition:border-color .2s,background .2s;}
+    .qa-btn:active{border-color:var(--accent);background:var(--surface2);}
+    .qa-btn--itinerary{background:linear-gradient(135deg,rgba(184,175,255,.1),rgba(232,115,74,.07));border-color:rgba(184,175,255,.3);}
+    .qa-btn--add{background:linear-gradient(135deg,rgba(168,197,176,.1),rgba(232,115,74,.07));border-color:rgba(168,197,176,.3);}
+    .qa-btn__icon{font-size:1.3rem;line-height:1;}
+    .qa-btn__info{}
+    .qa-btn__title{font-family:var(--serif);font-size:.85rem;font-weight:700;display:block;}
+    .qa-btn__sub{font-size:.62rem;opacity:.45;display:block;margin-top:.15rem;}
+
+    /* ── Flight board ── */
+    .flight-board{margin:.55rem 1rem .45rem;border:1px solid var(--border);border-radius:var(--r);background:var(--surface);overflow:hidden;}
+    .flight-board__head{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;padding:.8rem .9rem;border-bottom:1px solid var(--border);}
+    .flight-board__title{font-family:var(--serif);font-size:.9rem;font-weight:700;}
+    .flight-board__sub{display:block;margin-top:.18rem;color:var(--muted);font-size:.66rem;line-height:1.5;}
+    .flight-board__status{flex:0 0 auto;padding:.2rem .48rem;border:1px solid rgba(232,115,74,.38);border-radius:4px;color:var(--accent);background:rgba(232,115,74,.08);font-size:.62rem;}
+    .flight-legs{display:grid;grid-template-columns:1fr 1fr;}
+    .flight-leg{min-width:0;padding:.85rem .9rem;}
+    .flight-leg+ .flight-leg{border-left:1px solid var(--border);}
+    .flight-leg__top{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.65rem;}
+    .flight-leg__date{font-size:.7rem;color:var(--muted);}
+    .flight-leg__number{font-family:var(--serif);font-size:.9rem;font-weight:700;color:var(--accent);}
+    .flight-route{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:.65rem;margin-bottom:.75rem;}
+    .flight-airport:last-child{text-align:right;}
+    .flight-airport strong{display:block;font-family:var(--serif);font-size:1.35rem;line-height:1;}
+    .flight-airport span{display:block;margin-top:.25rem;color:var(--muted);font-size:.62rem;}
+    .flight-route__line{position:relative;width:88px;height:30px;display:block;overflow:visible;}
+    .flight-route__line::before{content:'';position:absolute;left:2px;right:2px;top:50%;height:2px;border-radius:999px;background:linear-gradient(90deg,transparent,rgba(143,198,255,.55) 14%,rgba(143,198,255,.55) 86%,transparent);transform:translateY(-50%);}
+    .flight-route__line::after{content:'';position:absolute;inset:50% 6px auto 6px;height:0;border-top:1px dashed rgba(255,255,255,.14);transform:translateY(-50%);}
+    .flight-route__plane{position:absolute;left:0;top:50%;width:34px;height:34px;color:#8FC6FF;filter:drop-shadow(0 3px 8px rgba(143,198,255,.28));animation:flightCruise 3.8s cubic-bezier(.45,.05,.35,1) infinite;will-change:transform,opacity;z-index:1;}
+    .flight-route__plane svg{width:100%;height:100%;display:block;fill:currentColor;transform:scaleX(-1);transform-origin:center;}
+    .flight-leg:nth-child(2) .flight-route__plane{animation-delay:.45s;}
+    @keyframes flightCruise{
+      0%{transform:translate(-6px,-50%) translateY(3px) rotate(-8deg);opacity:.58;}
+      10%{opacity:1;}
+      52%{transform:translate(28px,-50%) translateY(-4px) rotate(-1deg);opacity:1;}
+      88%{opacity:1;}
+      100%{transform:translate(58px,-50%) translateY(2px) rotate(6deg);opacity:.58;}
+    }
+    @media(prefers-reduced-motion:reduce){.flight-route__plane{animation:none;transform:translate(28px,-50%);}}
+    .flight-facts{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;}
+    .flight-fact{min-width:0;padding:.5rem .55rem;border:1px solid var(--border);border-radius:6px;background:var(--surface2);}
+    .flight-fact span{display:block;color:var(--muted);font-size:.58rem;}
+    .flight-fact strong{display:block;margin-top:.18rem;font-size:.68rem;line-height:1.45;overflow-wrap:anywhere;}
+    .flight-leg__actions{display:flex;gap:.4rem;margin-top:.65rem;}
+    .flight-action{min-height:38px;display:inline-flex;align-items:center;justify-content:center;flex:1;padding:.35rem .5rem;border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.67rem;text-align:center;}
+    .flight-action--primary{border-color:var(--accent);background:var(--accent);color:#fff;}
+    .flight-board__note{padding:.6rem .9rem;border-top:1px solid var(--border);color:var(--muted);font-size:.62rem;line-height:1.55;}
+    @media(max-width:640px){.flight-legs{grid-template-columns:1fr}.flight-leg+ .flight-leg{border-left:0;border-top:1px solid var(--border)}.flight-board__head{align-items:center}.flight-facts{grid-template-columns:1fr 1fr}}
+
+    /* ── Search & Filter ── */
+    .search-bar{padding:.5rem 1rem .4rem;display:flex;flex-direction:column;gap:.45rem;}
+    .search-wrap{position:relative;}
+    .search-icon{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);opacity:.4;font-size:.9rem;pointer-events:none;}
+    #search-input{width:100%;padding:.65rem .75rem .65rem 2.2rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:.88rem;outline:none;transition:border-color .2s;}
+    #search-input:focus{border-color:var(--accent);}
+    .selects-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;}
+    .filter-select{padding:.6rem .5rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:.78rem;outline:none;transition:border-color .2s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .5rem center;padding-right:1.6rem;background-color:var(--surface);}
+    [data-theme="dark"] .filter-select{color:#E8E8E8;}
+    [data-theme="light"] .filter-select{color:#1A1A1A;}
+    .filter-select option{color:#1A1A1A;background:#FFFFFF;}
+    .filter-select:focus{border-color:var(--accent);}
+    .region-tags{display:flex;flex-direction:row;flex-wrap:nowrap;gap:.4rem;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px;align-items:center;}
+    .region-tags::-webkit-scrollbar{display:none;}  
+      /* ── Region Tags：深色模式可讀性強化 ── */
+      .region-tag{
+        flex:0 0 auto;
+        scroll-snap-align:start;
+        padding:.35rem .85rem;
+        border-radius:20px;
+        border:1px solid rgba(255,255,255,.16);
+        font-size:.72rem;
+        letter-spacing:.06em;
+        white-space:nowrap;
+        -webkit-tap-highlight-color:transparent;
+        cursor:pointer;
+        color:rgba(232,232,232,.78);
+        background:rgba(255,255,255,.035);
+        transition:background .15s,border-color .15s,color .15s,opacity .15s;
+      }
+      
+      .region-tag.active{
+        background:var(--accent);
+        border-color:var(--accent);
+        color:#fff;
+        opacity:1;
+      }
+      
+      .region-tag:active{
+        border-color:var(--accent);
+        color:#fff;
+        background:rgba(232,115,74,.18);
+      }
+      
+      /* Light mode：避免淺色模式太重 */
+      [data-theme="light"] .region-tag{
+        color:rgba(26,26,26,.72);
+        background:rgba(0,0,0,.035);
+        border-color:rgba(0,0,0,.12);
+      }
+      
+      [data-theme="light"] .region-tag.active{
+        color:#fff;
+        background:var(--accent);
+        border-color:var(--accent);
+      }
+
+    .fav-toggle{padding:.38rem 1rem;border-radius:20px;border:1px solid var(--border);font-size:.72rem;letter-spacing:.06em;white-space:nowrap;-webkit-tap-highlight-color:transparent;cursor:pointer;background:var(--surface);color:var(--text);transition:background .15s,border-color .15s;}
+    .fav-toggle.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+    /* ── 新增地點 Collapsible ── */
+    .add-section{margin:.3rem 1rem .5rem;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--surface);}
+    .add-section__header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;cursor:pointer;-webkit-tap-highlight-color:transparent;min-height:44px;}
+    .add-section__title{font-size:.84rem;font-weight:700;letter-spacing:.08em;}
+    .add-toggle-icon{font-size:.75rem;opacity:.5;transition:transform .25s;}
+    .add-section.open .add-toggle-icon{transform:rotate(180deg);}
+    .add-section__body{display:none;padding:.5rem 1rem .85rem;border-top:1px solid var(--border);}
+    .add-section.open .add-section__body{display:block;}
+    .add-field{display:flex;flex-direction:column;gap:.28rem;margin-bottom:.55rem;}
+    .add-field label{font-size:.7rem;opacity:.5;letter-spacing:.08em;}
+    .add-field input,.add-field select,.add-field textarea{padding:.5rem .7rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.84rem;outline:none;transition:border-color .2s;}
+    .add-field input:focus,.add-field select:focus,.add-field textarea:focus{border-color:var(--accent);}
+    .add-field .custom-choice-input{margin-top:.35rem;}
+    .add-field textarea{resize:vertical;}
+    .add-field select option{color:#1A1A1A;background:#FFF;}
+    .btn-add-place{width:100%;padding:.65rem;border-radius:8px;background:var(--accent);color:#fff;font-size:.88rem;letter-spacing:.1em;margin-top:.35rem;}
+    .btn-export{width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--border);color:var(--text);font-size:.78rem;letter-spacing:.08em;margin-top:.4rem;opacity:.55;}
+    .sync-badge{font-size:.68rem;opacity:.45;margin-left:.5rem;display:inline-block;}
+
+    /* ── Cost Block ── */
+    .cost-block{margin:.3rem 1rem .5rem;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--surface);}
+    .cost-block__header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;cursor:pointer;-webkit-tap-highlight-color:transparent;min-height:44px;}
+    .cost-block__title{font-size:.84rem;font-weight:700;letter-spacing:.08em;}
+    .cost-block__toggle{font-size:.75rem;opacity:.5;transition:transform .25s;}
+    .cost-block.open .cost-block__toggle{transform:rotate(180deg);}
+    .cost-block__body{display:none;padding:.5rem 1rem .85rem;border-top:1px solid var(--border);}
+    .cost-block.open .cost-block__body{display:block;}
+    .cost-person-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem;font-size:.82rem;}
+    #person-input{width:56px;padding:.35rem .5rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.84rem;text-align:center;outline:none;}
+    .cost-entry-header{display:flex;align-items:center;font-size:.68rem;opacity:.4;letter-spacing:.08em;padding-bottom:.3rem;border-bottom:1px solid var(--border);margin-bottom:.35rem;}
+    .cost-entry-header span:first-child{flex:1;}
+    .cost-entry{display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem;}
+    .cost-entry__name{flex:1;padding:.42rem .6rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.82rem;outline:none;}
+    .cost-entry__name:focus{border-color:var(--accent);}
+    .cost-entry__amount{width:100px;padding:.42rem .6rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.82rem;text-align:right;outline:none;}
+    .cost-entry__amount:focus{border-color:var(--accent);}
+    .cost-entry__del{width:28px;height:28px;border-radius:50%;font-size:.75rem;opacity:.35;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .btn-add-cost{width:100%;padding:.5rem;border-radius:8px;border:1px dashed rgba(255,255,255,.2);color:var(--text);font-size:.78rem;letter-spacing:.08em;margin-top:.2rem;opacity:.55;}
+    #cost-summary{margin-top:.75rem;padding:.75rem;background:var(--surface2);border-radius:8px;font-size:.82rem;line-height:1.8;}
+    #cost-summary strong{color:var(--accent);}
+
+    /* ── Rental Block ── */
+    .rental-block{margin:.3rem 1rem .5rem;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--surface);}
+    .rental-block__header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;cursor:pointer;-webkit-tap-highlight-color:transparent;min-height:44px;}
+    .rental-block__title{font-size:.84rem;font-weight:700;letter-spacing:.08em;}
+    .rental-block__toggle{font-size:.75rem;opacity:.5;transition:transform .25s;}
+    .rental-block.open .rental-block__toggle{transform:rotate(180deg);}
+    .rental-block__body{display:none;padding:.5rem 1rem .85rem;border-top:1px solid var(--border);}
+    .rental-block.open .rental-block__body{display:block;}
+    .rental-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.5rem;}
+    .rental-field{display:flex;flex-direction:column;gap:.25rem;}
+    .rental-field label{font-size:.68rem;opacity:.45;letter-spacing:.08em;}
+    .rental-field input,.rental-field select{padding:.45rem .6rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.8rem;outline:none;}
+    .rental-field input:focus,.rental-field select:focus{border-color:var(--accent);}
+    .rental-field select option{color:#1A1A1A;background:#FFF;}
+    .rental-groups{display:grid;grid-template-columns:1fr;gap:.7rem;}
+    .rental-group{border:1px solid var(--border);border-radius:8px;background:var(--surface2);overflow:hidden;}
+    .rental-group__head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.65rem .75rem;border-bottom:1px solid var(--border);}
+    .rental-group__badge{display:inline-flex;align-items:center;justify-content:center;min-width:58px;padding:.22rem .58rem;border:1px solid rgba(114,167,255,.5);border-radius:18px;color:#72a7ff;background:rgba(114,167,255,.08);font-size:.7rem;font-weight:700;}
+    .rental-group--b .rental-group__badge{color:#d2a8ff;border-color:rgba(210,168,255,.5);background:rgba(210,168,255,.08);}
+    .rental-group__hint{font-size:.62rem;color:var(--muted);}
+    .rental-group .rental-info-grid{padding:.7rem .75rem .15rem;margin-bottom:0;}
+    .btn-save-rental{width:calc(100% - 1.5rem);margin:.1rem .75rem .7rem;}
+    .rental-itinerary-actions{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;padding:0 .75rem .75rem;}
+    .rental-itinerary-action{min-height:38px;display:inline-flex;align-items:center;justify-content:center;padding:.4rem .55rem;border:1px solid rgba(168,197,176,.42);border-radius:7px;color:var(--accent2);background:rgba(168,197,176,.07);font-size:.68rem;text-align:center;}
+    .rental-itinerary-action:active{border-color:var(--accent2);background:rgba(168,197,176,.14);}
+    @media(min-width:760px){.rental-groups{grid-template-columns:1fr 1fr;}.rental-group .rental-info-grid{grid-template-columns:1fr;}}
+
+    /* ── Cards ── */
+    .cards-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:.3rem 1rem .2rem;
+    }
+    
+    .cards-count{
+      font-size:.72rem;
+      opacity:.35;
+      letter-spacing:.08em;
+    }
+    
+      .cards-sort{
+      font-size:.72rem;
+      opacity:1;
+      padding:.36rem 1.75rem .36rem .75rem;
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:20px;
+      background-color:rgba(255,255,255,.06);
+      color:rgba(232,232,232,.86);
+      outline:none;
+      appearance:none;
+      -webkit-appearance:none;
+      cursor:pointer;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%23E8E8E8' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;
+      background-position:right .65rem center;
+      background-size:12px 8px;
+      transition:
+        color .16s var(--ease),
+        background-color .16s var(--ease),
+        border-color .16s var(--ease),
+        box-shadow .16s var(--ease);
+    }
+    
+    [data-theme="dark"] .cards-sort{
+      color:rgba(232,232,232,.92);
+      background-color:rgba(255,255,255,.075);
+      border-color:rgba(255,255,255,.22);
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%23E8E8E8' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    }
+    
+    [data-theme="light"] .cards-sort{
+      color:rgba(26,26,26,.82);
+      background-color:#ffffff;
+      border-color:rgba(0,0,0,.14);
+      box-shadow:0 1px 4px rgba(0,0,0,.05);
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%231A1A1A' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    }
+    
+    .cards-sort:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 2px rgba(232,115,74,.16);
+    }
+    
+    .cards-sort option{
+      color:#1A1A1A;
+      background:#ffffff;
+    }
+    
+    /* 卡片容器：每張卡片撐滿同列高度 */
+    .cards{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+      gap:.6rem;
+      padding:.3rem 1rem .5rem;
+      align-items:stretch;
+    }
+    
+    /* 卡片本體：直向 flex，讓 footer 固定到底部 */
+    .card{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:var(--r);
+      overflow:hidden;
+      opacity:0;
+      transform:translateY(8px);
+      transition:opacity .35s var(--ease),transform .35s var(--ease),border-color .2s;
+    
+      height:100%;
+      display:flex;
+      flex-direction:column;
+    }
+    
+    .card.visible{
+      opacity:1;
+      transform:none;
+    }
+    
+    .card:active{
+      border-color:var(--accent);
+    }
+    
+    .card__img{
+      width:100%;
+      aspect-ratio:4/3;
+      object-fit:cover;
+      background:var(--surface2);
+      display:block;
+      flex-shrink:0;
+    }
+    
+    .card__img-placeholder{
+      width:100%;
+      aspect-ratio:4/3;
+      background:var(--surface2);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.8rem;
+      flex-shrink:0;
+    }
+    
+    .card__body{
+      padding:.55rem .65rem .5rem;
+      flex:1 1 auto;
+      display:flex;
+      flex-direction:column;
+    }
+    
+    .card__tags{
+      display:flex;
+      flex-wrap:wrap;
+      gap:.25rem;
+      margin-bottom:.28rem;
+    }
+    
+    .tag{
+      font-size:.58rem;
+      padding:.1rem .4rem;
+      border-radius:20px;
+      border:1px solid var(--border);
+      opacity:.55;
+      white-space:nowrap;
+    }
+    
+    .tag--fish{
+      border-color:var(--accent2);
+      color:var(--accent2);
+      opacity:.9;
+    }
+    
+    .card__name{
+      font-family:var(--serif);
+      font-size:.9rem;
+      font-weight:700;
+      line-height:1.35;
+      word-break:break-word;
+    }
+    
+    .card__hours{
+      font-size:.68rem;
+      color:var(--accent2);
+      margin-top:.18rem;
+    }
+    
+    .card__note{
+      font-size:.72rem;
+      color:var(--muted);
+      margin-top:.25rem;
+      line-height:1.6;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+    }
+    
+    /* Footer 固定在卡片底部 */
+    .card__footer{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      align-items:center;
+      gap:.45rem;
+      padding:.42rem .65rem .58rem;
+      border-top:1px solid var(--border);
+      margin-top:auto;
+      min-height:46px;
+    }
+    
+    .card__cost{
+      font-size:.72rem;
+      color:var(--accent);
+      font-weight:700;
+      min-height:1em;
+      line-height:1.2;
+      overflow:hidden;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+    }
+    
+    .card__actions{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:.38rem;
+      min-width:78px;
+      flex-shrink:0;
+    }
+    
+    /* ── Card Actions：收藏與地圖 icon 固定尺寸 ── */
+    .card__btn{
+      width:34px;
+      height:34px;
+      min-width:34px;
+      min-height:34px;
+      padding:0;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:.82rem;
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:999px;
+      opacity:1;
+      color:rgba(232,232,232,.86);
+      background:rgba(255,255,255,.045);
+      -webkit-tap-highlight-color:transparent;
+      white-space:nowrap;
+      transition:
+        transform .16s var(--ease),
+        background .16s var(--ease),
+        border-color .16s var(--ease),
+        color .16s var(--ease),
+        opacity .16s var(--ease),
+        box-shadow .16s var(--ease);
+    }
+    
+    .card__btn:active{
+      transform:scale(.94);
+      opacity:1;
+      border-color:var(--accent);
+    }
+    
+    /* ── 收藏 icon：紅色愛心 / 發亮愛心 ── */
+    .card__fav{
+      font-size:1.15rem;
+      line-height:1;
+      color:rgba(120,120,120,.95);
+      background:rgba(255,255,255,.88);
+      border-color:rgba(0,0,0,.14);
+      text-shadow:none;
+    }
+    
+    .card__fav.is-fav{
+      color:#ff3f7f;
+      background:rgba(255,63,127,.14);
+      border-color:rgba(255,63,127,.55);
+      text-shadow:
+        0 0 4px rgba(255,63,127,.45),
+        0 0 8px rgba(255,63,127,.28);
+      box-shadow:
+        0 0 0 1px rgba(255,63,127,.12) inset,
+        0 0 8px rgba(255,63,127,.22);
+    }
+    
+    [data-theme="dark"] .card__fav{
+      color:rgba(255,255,255,.82);
+      background:rgba(255,255,255,.08);
+      border-color:rgba(255,255,255,.22);
+    }
+    
+    [data-theme="dark"] .card__fav.is-fav{
+      color:#ff6fa3;
+      background:rgba(255,111,163,.16);
+      border-color:rgba(255,111,163,.6);
+      text-shadow:
+        0 0 5px rgba(255,111,163,.6),
+        0 0 12px rgba(255,111,163,.35);
+      box-shadow:
+        0 0 0 1px rgba(255,111,163,.18) inset,
+        0 0 12px rgba(255,111,163,.28);
+    }
+    
+    [data-theme="light"] .card__fav{
+      color:rgba(50,50,50,.72);
+      background:#fff;
+      border-color:rgba(0,0,0,.16);
+    }
+    
+    [data-theme="light"] .card__fav.is-fav{
+      color:#e72f75;
+      background:rgba(231,47,117,.1);
+      border-color:rgba(231,47,117,.42);
+      text-shadow:
+        0 0 3px rgba(231,47,117,.35),
+        0 0 7px rgba(231,47,117,.18);
+      box-shadow:
+        0 1px 4px rgba(0,0,0,.08),
+        0 0 8px rgba(231,47,117,.16);
+    }
+    
+    .card__fav:disabled{
+      opacity:.45;
+      pointer-events:none;
+    }
+
+    .card__delete{
+      font-size:1.25rem;
+      line-height:1;
+      color:rgba(255,107,107,.88);
+      background:rgba(255,107,107,.08);
+      border-color:rgba(255,107,107,.32);
+    }
+    .card__delete:hover{color:#fff;background:#d94f4f;border-color:#d94f4f;box-shadow:0 0 10px rgba(217,79,79,.25);}
+    [data-theme="light"] .card__delete{color:#c83f3f;background:rgba(200,63,63,.07);border-color:rgba(200,63,63,.25);}
+
+    .card__edit{color:#4285f4;background:rgba(66,133,244,.09);border-color:rgba(66,133,244,.32);}
+    .card__edit:hover{color:#fff;background:#4285f4;border-color:#4285f4;box-shadow:0 0 10px rgba(66,133,244,.25);}
+    .card__edit-icon{width:18px;height:18px;display:block;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
+    .btn-cancel-edit{width:100%;padding:.55rem;border-radius:8px;border:1px solid var(--border);color:var(--text);font-size:.8rem;margin-top:.4rem;background:transparent;}
+    
+    /* ── Google Maps 風格 icon ── */
+    .card__map{
+      width:34px;
+      height:34px;
+      min-width:34px;
+      min-height:34px;
+      padding:0;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
+    
+    .gmap-icon{
+      width:24px;
+      height:24px;
+      display:block;
+      flex-shrink:0;
+    }
+    
+    .gmap-icon__bg{
+      fill:#ffffff;
+    }
+    
+    .gmap-icon__green{
+      fill:#34A853;
+    }
+    
+    .gmap-icon__blue{
+      fill:#4285F4;
+    }
+    
+    .gmap-icon__yellow{
+      fill:#FBBC05;
+    }
+    
+    .gmap-icon__red{
+      fill:#EA4335;
+    }
+    
+    .gmap-icon__center{
+      fill:#ffffff;
+    }
+    
+    [data-theme="dark"] .card__map{
+      background:rgba(255,255,255,.12);
+      border-color:rgba(255,255,255,.28);
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,.04) inset,
+        0 2px 8px rgba(0,0,0,.45);
+    }
+    
+    [data-theme="dark"] .gmap-icon{
+      filter:
+        drop-shadow(0 1px 2px rgba(0,0,0,.45))
+        drop-shadow(0 0 4px rgba(255,255,255,.16));
+    }
+    
+    [data-theme="light"] .card__map{
+      background:#fff;
+      border-color:rgba(0,0,0,.14);
+      box-shadow:
+        0 1px 4px rgba(0,0,0,.12),
+        0 0 0 1px rgba(255,255,255,.65) inset;
+    }
+    
+    [data-theme="light"] .gmap-icon{
+      filter:drop-shadow(0 1px 2px rgba(0,0,0,.18));
+    }
+    
+    .card__map:active{
+      transform:scale(.94);
+    }
+    
+    @media (hover:hover){
+      [data-theme="dark"] .card__map:hover{
+        background:rgba(255,255,255,.18);
+        border-color:rgba(255,255,255,.42);
+        box-shadow:
+          0 0 0 1px rgba(255,255,255,.08) inset,
+          0 0 12px rgba(255,255,255,.12),
+          0 3px 10px rgba(0,0,0,.5);
+      }
+    
+      [data-theme="light"] .card__map:hover{
+        background:#ffffff;
+        border-color:rgba(0,0,0,.2);
+        box-shadow:
+          0 2px 8px rgba(0,0,0,.16),
+          0 0 0 1px rgba(255,255,255,.75) inset;
+      }
+    }
+    
+    .pulse{
+      animation:favPulse .22s var(--ease);
+    }
+    @keyframes favPulse{0%{transform:scale(1);}50%{transform:scale(1.28);}100%{transform:scale(1);}}
+    
+    /* ── Bottom Nav ── */
+    .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:200;display:flex;background:rgba(13,13,13,.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);padding-bottom:var(--safe-b);}
+    [data-theme="light"] .bottom-nav{background:rgba(245,242,238,.97);}
+    .bottom-nav__item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:.6rem 0;min-height:44px;opacity:.4;transition:opacity .2s;text-decoration:none;color:var(--text);-webkit-tap-highlight-color:transparent;}
+    .bottom-nav__item.active{opacity:1;}
+    .bottom-nav__item span:first-child{font-size:1.15rem;line-height:1;}
+    .bottom-nav__item span:last-child{font-size:.58rem;letter-spacing:.08em;}
+
+    @media(min-width:768px){
+      .cards{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));}
+      body{padding-bottom:0;}
+      .bottom-nav{display:none;}
+    }
+
+    /* 日本自駕注意事項 */
+    .driving-section{margin:.3rem 1rem .5rem;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--surface)}
+    .driving-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;background:var(--surface);cursor:pointer;user-select:none;gap:.5rem;min-height:44px;-webkit-tap-highlight-color:transparent}
+    .driving-header h3{margin:0;font-size:.84rem;font-weight:700;color:var(--text);letter-spacing:.08em}
+    .driving-toggle-icon{font-size:.75rem;color:var(--muted);transition:transform .25s ease}
+    .driving-section.open .driving-toggle-icon{transform:rotate(180deg)}
+    .driving-body{display:none;padding:.5rem 1rem .85rem;border-top:1px solid var(--border)}
+    .driving-section.open .driving-body{display:block}
+    .driving-tips-grid{display:grid;grid-template-columns:1fr;gap:.65rem}
+    @media(min-width:640px){.driving-tips-grid{grid-template-columns:1fr 1fr}}
+    .driving-tip-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:.85rem .9rem}
+    .driving-tip-card h4{margin:0 0 .5rem;font-size:.85rem;color:var(--accent)}
+    .driving-tip-card ul{margin:0;padding-left:1.2rem;font-size:.82rem;color:var(--text);line-height:1.7}
+    .driving-tip-card ul li strong{color:var(--text)}    
+
+    .tour-overlay{position:fixed;inset:0;z-index:2147483000;display:none}
+    .tour-overlay.open{display:block}
+    .tour-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.76)}
+    .tour-target{position:relative!important;z-index:2147483001!important;border-radius:10px;outline:3px solid var(--accent);outline-offset:4px}
+    .tour-card{position:fixed;z-index:2147483002;display:none;left:.75rem;right:.75rem;bottom:calc(var(--safe-b) + 4.75rem);max-width:420px;max-height:min(32svh,280px);margin:0 auto;padding:.9rem;border:1px solid rgba(232,115,74,.5);border-radius:10px;background:#171717;color:var(--text);overflow-y:auto;overscroll-behavior:contain;box-shadow:0 18px 48px rgba(0,0,0,.55)}
+    .tour-card[data-placement="top"]{top:max(.75rem,env(safe-area-inset-top));bottom:auto}
+    .tour-card[data-placement="bottom"]{top:auto;bottom:calc(var(--safe-b) + 4.75rem)}
+    .tour-card.open{display:block}
+    .tour-progress{color:var(--accent);font-size:.68rem;letter-spacing:.08em}
+    .tour-card h2{margin:.35rem 0;font-family:var(--serif);font-size:1rem}
+    .tour-card p{color:var(--muted);font-size:.78rem;line-height:1.65}
+    .tour-actions{position:sticky;bottom:0;display:grid;grid-template-columns:auto 1fr 1fr;gap:.45rem;margin-top:.75rem;padding-top:.5rem;background:#171717}
+    .tour-actions button{min-height:44px;padding:.55rem .75rem;border:1px solid var(--border);border-radius:8px;color:var(--text)}
+    .tour-actions .tour-next{border-color:var(--accent);background:var(--accent);color:#fff}
+    [data-theme="light"] .tour-card{background:#fff;color:#1a1a1a}
+    [data-theme="light"] .tour-actions{background:#fff}
+    @media(min-width:768px){.tour-card,.tour-card[data-placement="top"],.tour-card[data-placement="bottom"]{top:1rem;bottom:auto;max-height:calc(100dvh - 2rem)}}
+    @media(prefers-reduced-motion:reduce){.tour-target{scroll-behavior:auto}}
+  </style>
+<!-- Firebase SDK -->
+<script src="assets/js/firebase-init.js" type="module"> </script>
+<style>
+/* ===== Travel OS v3 — structural redesign ===== */
+:root{
+  --os-bg:#f2f0ea; --os-paper:#fffdf8; --os-ink:#191917; --os-muted:#77736a;
+  --os-line:#d8d3c9; --os-accent:#d34b32; --os-accent-soft:#f4dfd8; --os-green:#315c4c;
+  --os-shadow:0 18px 60px rgba(40,34,24,.08); --os-rail:232px; --os-side:318px;
+}
+*{box-sizing:border-box}
+html{background:var(--os-bg)!important}
+body{background:var(--os-bg)!important;color:var(--os-ink)!important;font-family:Inter,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif!important;margin:0!important;padding:0!important;letter-spacing:.01em}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.28;background-image:linear-gradient(rgba(25,25,23,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(25,25,23,.018) 1px,transparent 1px);background-size:24px 24px;z-index:0}
+button,input,select,textarea{font:inherit}
+button,a{transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease}
+button:active,a:active{transform:translateY(1px)}
+
+.travel-os{position:relative;z-index:1;min-height:100vh;display:grid;grid-template-columns:var(--os-rail) minmax(0,1fr);}
+.os-rail{position:sticky;top:0;height:100vh;border-right:1px solid var(--os-line);background:#ebe8e0;padding:24px 18px;display:flex;flex-direction:column;gap:22px;z-index:20}
+.os-brand{display:grid;gap:5px;padding:4px 6px 18px;border-bottom:1px solid var(--os-line)}
+.os-brand__eyebrow{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--os-accent);font-weight:800}
+.os-brand__name{font-family:"Noto Serif TC","Songti TC",serif;font-weight:700;font-size:21px;line-height:1.3}
+.os-brand__meta{font-size:11px;color:var(--os-muted)}
+.os-rail .topbar{display:block!important;position:static!important;background:transparent!important;border:0!important;padding:0!important;box-shadow:none!important;height:auto!important}
+.os-rail .topbar__title{display:none!important}
+.os-rail .topbar__actions,.os-rail .topbar>div:last-child{display:flex!important;gap:8px!important}
+.os-rail .icon-btn{width:38px!important;height:38px!important;border-radius:0!important;border:1px solid var(--os-line)!important;background:var(--os-paper)!important;color:var(--os-ink)!important;box-shadow:none!important}
+.os-nav{display:grid;gap:6px}
+.os-nav__label{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--os-muted);padding:0 6px 6px}
+.os-rail .bottom-nav{position:static!important;display:grid!important;height:auto!important;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;gap:5px!important}
+.os-rail .bottom-nav__item{min-height:44px!important;display:grid!important;grid-template-columns:24px 1fr!important;align-items:center!important;gap:10px!important;padding:8px 10px!important;border:1px solid transparent!important;border-radius:0!important;color:var(--os-muted)!important;text-decoration:none!important;font-size:13px!important}
+.os-rail .bottom-nav__item span:first-child{font-size:15px!important}
+.os-rail .bottom-nav__item.active{background:var(--os-ink)!important;color:white!important;border-color:var(--os-ink)!important}
+.os-rail .bottom-nav__item:hover{border-color:var(--os-line)!important;background:var(--os-paper)!important;color:var(--os-ink)!important}
+.os-rail .bottom-nav__item.active:hover{background:var(--os-ink)!important;color:white!important}
+.os-rail__foot{margin-top:auto;border-top:1px solid var(--os-line);padding:14px 6px 0;font-size:11px;color:var(--os-muted);line-height:1.6}
+.os-workspace{min-width:0;padding:26px 28px 44px}
+.os-workspace__inner{max-width:1440px;margin:0 auto}
+.os-kicker{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--os-accent);font-weight:800}
+.os-title{font-family:"Noto Serif TC","Songti TC",serif;font-size:clamp(28px,3vw,44px);line-height:1.14;margin:7px 0 8px;letter-spacing:-.03em}
+.os-subtitle{color:var(--os-muted);font-size:13px;line-height:1.7;max-width:720px}
+.os-rule{height:1px;background:var(--os-line);margin:20px 0}
+.os-panel{background:var(--os-paper);border:1px solid var(--os-line);border-radius:0!important;box-shadow:none!important}
+.os-panel__head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding:16px 18px;border-bottom:1px solid var(--os-line)}
+.os-panel__head h2,.os-panel__head h3{margin:0!important;font-family:"Noto Serif TC","Songti TC",serif!important;font-size:18px!important}
+.os-panel__label{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--os-muted)}
+
+/* aggressively remove old AI-card styling */
+.travel-os :is(.qa-btn,.flight-board,.flight-leg,.search-bar,.add-section,.cost-block,.rental-block,.driving-section,.cards-header,.card,.collab-bar,.region-picker,.group-view,.action-bar,.day-stats,.route-bar,.day-summary,.timeline,.day-stat){border-radius:0!important;box-shadow:none!important}
+.travel-os :is(.qa-btn,.action-btn,.flight-action,.btn-add-place,.btn-export,.btn-add-cost,.btn-modal-save,.btn-modal-cancel){border-radius:0!important}
+
+.home-dashboard{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,.75fr);gap:22px;align-items:start}
+.home-main{display:grid;gap:22px;min-width:0}
+.home-side{display:grid;gap:14px;position:sticky;top:26px}
+.trip-masthead{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:end;margin-bottom:22px}
+.trip-masthead__actions{display:flex;gap:8px;align-items:center}
+.trip-masthead .quick-actions{display:flex!important;gap:8px!important;margin:0!important;padding:0!important}
+.trip-masthead .qa-btn{min-height:44px!important;padding:9px 12px!important;border:1px solid var(--os-line)!important;background:var(--os-paper)!important;color:var(--os-ink)!important;display:flex!important;align-items:center!important;gap:8px!important}
+.trip-masthead .qa-btn--itinerary{background:var(--os-ink)!important;color:white!important;border-color:var(--os-ink)!important}
+.trip-masthead .qa-btn__icon{font-size:14px!important}.trip-masthead .qa-btn__sub{display:none!important}.trip-masthead .qa-btn__title{font-size:12px!important;font-weight:700!important}
+.flight-board{background:var(--os-ink)!important;color:white!important;border:0!important;margin:0!important;padding:0!important}
+.flight-board__head{padding:16px 18px!important;border-bottom:1px solid rgba(255,255,255,.17)!important}
+.flight-board__title{color:white!important;font-family:"Noto Serif TC","Songti TC",serif!important;font-size:20px!important}
+.flight-board__sub{color:rgba(255,255,255,.55)!important}.flight-board__status{border:1px solid rgba(255,255,255,.25)!important;background:transparent!important;color:white!important;border-radius:0!important}
+.flight-legs{display:grid!important;grid-template-columns:1fr 1fr!important;gap:0!important}
+.flight-leg{background:transparent!important;border:0!important;border-right:1px solid rgba(255,255,255,.15)!important;padding:18px!important;color:white!important}.flight-leg:last-child{border-right:0!important}
+.flight-leg :is(strong,.flight-leg__date,.flight-leg__number){color:white!important}.flight-leg span{color:rgba(255,255,255,.58)!important}.flight-route__line:before{background:rgba(255,255,255,.25)!important}.flight-route__plane svg{fill:white!important}
+.flight-facts{border-color:rgba(255,255,255,.13)!important}.flight-fact{border-color:rgba(255,255,255,.13)!important}
+.flight-action{border-color:rgba(255,255,255,.28)!important;color:white!important;background:transparent!important}.flight-action--primary{background:white!important;color:var(--os-ink)!important;border-color:white!important}
+
+.place-workbench{display:grid;grid-template-columns:minmax(0,1fr);gap:0}
+.search-bar{margin:0!important;padding:14px!important;background:#f7f4ed!important;border:0!important;border-bottom:1px solid var(--os-line)!important;display:grid!important;gap:10px!important}
+.search-wrap input,.filter-select,.cards-sort{background:var(--os-paper)!important;border:1px solid var(--os-line)!important;border-radius:0!important;min-height:42px!important;color:var(--os-ink)!important}
+.search-wrap{background:transparent!important;border:0!important}.search-icon{opacity:.55}.selects-row{gap:8px!important}.region-tags{gap:6px!important}.region-tag{border-radius:0!important;border:1px solid var(--os-line)!important;background:transparent!important}.region-tag.active{background:var(--os-accent)!important;border-color:var(--os-accent)!important;color:white!important}
+.cards-header{margin:0!important;padding:12px 14px!important;background:var(--os-paper)!important;border:0!important;border-bottom:1px solid var(--os-line)!important}
+#cards{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:0!important;background:var(--os-paper)!important}
+#cards>.card{margin:0!important;padding:16px!important;border:0!important;border-right:1px solid var(--os-line)!important;border-bottom:1px solid var(--os-line)!important;background:var(--os-paper)!important;min-height:190px!important}
+#cards>.card:nth-child(2n){border-right:0!important}
+#cards>.card:hover{background:#faf7f0!important}
+#cards .card__name{font-family:"Noto Serif TC","Songti TC",serif!important;font-size:18px!important;line-height:1.45!important}
+#cards :is(.tag,.badge,.chip){border-radius:0!important}
+
+.side-module{background:var(--os-paper);border:1px solid var(--os-line)}
+.side-module__title{display:flex;justify-content:space-between;align-items:center;padding:13px 14px;border-bottom:1px solid var(--os-line);font-size:12px;font-weight:800;letter-spacing:.04em}
+.side-module__body{padding:0}
+.home-side :is(.add-section,.cost-block,.rental-block,.driving-section){margin:0!important;border:0!important;background:transparent!important}
+.home-side :is(.add-section__header,.cost-block__header,.rental-block__header,.driving-header){min-height:46px!important;padding:12px 14px!important;background:transparent!important;border:0!important;border-bottom:1px solid var(--os-line)!important}
+.home-side input,.home-side select,.home-side textarea{border-radius:0!important;border:1px solid var(--os-line)!important;background:#fbfaf6!important}
+.home-side .rental-body,.home-side .cost-body,.home-side .driving-body,.home-side .add-section__body{padding:14px!important}
+.home-side .rental-group{border-radius:0!important;border:1px solid var(--os-line)!important;background:#faf7f0!important}
+
+@media(max-width:1100px){.home-dashboard{grid-template-columns:1fr}.home-side{position:static;grid-template-columns:1fr 1fr}.flight-legs{grid-template-columns:1fr!important}.flight-leg{border-right:0!important;border-bottom:1px solid rgba(255,255,255,.15)!important}}
+@media(max-width:760px){
+ .travel-os{display:block}.os-rail{position:static;height:auto;border-right:0;border-bottom:1px solid var(--os-line);padding:14px 14px 10px;display:grid;grid-template-columns:1fr auto;align-items:center}.os-brand{border:0;padding:0}.os-brand__name{font-size:16px}.os-brand__meta,.os-nav__label,.os-rail__foot{display:none}.os-nav{grid-column:1/-1}.os-rail .bottom-nav{position:fixed!important;left:0;right:0;bottom:0!important;z-index:500!important;background:var(--os-paper)!important;border-top:1px solid var(--os-line)!important;display:grid!important;grid-template-columns:repeat(4,1fr)!important;padding:max(5px,env(safe-area-inset-bottom)) 6px!important}.os-rail .bottom-nav__item{grid-template-columns:1fr!important;justify-items:center!important;font-size:10px!important;gap:2px!important;min-height:52px!important;padding:5px!important}.os-rail .bottom-nav__item.active{background:transparent!important;color:var(--os-accent)!important;border-color:transparent!important}.os-workspace{padding:18px 12px 90px}.trip-masthead{grid-template-columns:1fr;align-items:start}.trip-masthead__actions{width:100%}.trip-masthead .quick-actions{width:100%}.trip-masthead .qa-btn{flex:1!important;justify-content:center!important}.home-side{grid-template-columns:1fr}.flight-legs{grid-template-columns:1fr!important}#cards{grid-template-columns:1fr!important}#cards>.card{border-right:0!important}.os-title{font-size:30px}}
+</style></head>
+<body>
+<!-- ══ Topbar ══ -->
+<header class="topbar">
+<span class="topbar__title">九州福岡熊本旅遊 2026/9/30~10/7</span>
+<div class="topbar__actions">
+<button aria-label="使用說明" class="icon-btn" id="help-btn" title="使用說明">?</button>
+<button class="icon-btn" id="fav-btn" title="只看最愛">💖</button>
+<button class="icon-btn" id="theme-btn">🌙</button>
+</div>
+</header>
+<!-- ══ 快速入口（頁面最上方）══ -->
+<div class="quick-actions">
+<a class="qa-btn qa-btn--itinerary" href="itinerary.html">
+<span class="qa-btn__icon">🗓</span>
+<div class="qa-btn__info">
+<span class="qa-btn__title">每日行程表</span>
+<span class="qa-btn__sub">景點挑選與手動編排</span>
+</div>
+</a>
+<button class="qa-btn qa-btn--add" id="qa-add-btn">
+<span class="qa-btn__icon">➕</span>
+<div class="qa-btn__info">
+<span class="qa-btn__title">新增地點</span>
+<span class="qa-btn__sub">加入心願清單</span>
+</div>
+</button>
+</div>
+<section aria-labelledby="flight-board-title" class="flight-board">
+<div class="flight-board__head">
+<div><h2 class="flight-board__title" id="flight-board-title">星宇航空航班</h2><span class="flight-board__sub">台北桃園 TPE ⇄ 熊本 KMJ，時間皆為當地時間</span></div>
+<span class="flight-board__status">預定時刻</span>
+</div>
+<div class="flight-legs">
+<article class="flight-leg">
+<div class="flight-leg__top"><span class="flight-leg__date">9/30（三）去程</span><span class="flight-leg__number">JX846</span></div>
+<div class="flight-route"><div class="flight-airport"><strong>07:30</strong><span>TPE 桃園 T1</span></div><span aria-hidden="true" class="flight-route__line"><span class="flight-route__plane"><svg aria-hidden="true" focusable="false" viewbox="0 0 96 48"><path d="M3 25.5 9 22h19.5l17-18h8.5L46 22h22.5l13-7h6l-6 10.5 6 10.5h-6l-13-7H46l8 18h-8.5l-17-18H9L3 25.5z"></path><path d="M10 22h13l-5-8h5.5l10.5 8H45L52 8h5l-3.5 14H68l7-4h4.5l-4 6 4 6H75l-7-4H53.5L57 40h-5l-7-14H34l-10.5 8H18l5-8H10z" opacity=".22"></path></svg></span></span><div class="flight-airport"><strong>10:45</strong><span>KMJ 熊本</span></div></div>
+<div class="flight-facts">
+<div class="flight-fact"><span>機場報到</span><strong>05:00 開放<br/>06:30 截止</strong></div>
+<div class="flight-fact"><span>線上報到</span><strong>9/28 07:30 起</strong></div>
+<div class="flight-fact"><span>免費選位時段</span><strong>9/28 07:30<br/>至 9/30 04:30</strong></div>
+<div class="flight-fact"><span>登機門</span><strong>當日 App／看板確認</strong></div>
+</div>
+<div class="flight-leg__actions"><a class="flight-action" href="https://www.starlux-airlines.com/zh-TW/booking/manage-my-trip/manage-my-trip" rel="noopener" target="_blank">管理行程／選位</a><a class="flight-action flight-action--primary" href="itinerary.html?flight=JX846">加入行程</a></div>
+</article>
+<article class="flight-leg">
+<div class="flight-leg__top"><span class="flight-leg__date">10/7（三）回程</span><span class="flight-leg__number">JX847</span></div>
+<div class="flight-route"><div class="flight-airport"><strong>11:55</strong><span>KMJ 熊本</span></div><span aria-hidden="true" class="flight-route__line"><span class="flight-route__plane"><svg aria-hidden="true" focusable="false" viewbox="0 0 96 48"><path d="M3 25.5 9 22h19.5l17-18h8.5L46 22h22.5l13-7h6l-6 10.5 6 10.5h-6l-13-7H46l8 18h-8.5l-17-18H9L3 25.5z"></path><path d="M10 22h13l-5-8h5.5l10.5 8H45L52 8h5l-3.5 14H68l7-4h4.5l-4 6 4 6H75l-7-4H53.5L57 40h-5l-7-14H34l-10.5 8H18l5-8H10z" opacity=".22"></path></svg></span></span><div class="flight-airport"><strong>13:20</strong><span>TPE 桃園 T1</span></div></div>
+<div class="flight-facts">
+<div class="flight-fact"><span>機場報到</span><strong>09:25 開放<br/>10:55 截止</strong></div>
+<div class="flight-fact"><span>線上報到</span><strong>10/5 11:55 起</strong></div>
+<div class="flight-fact"><span>免費選位時段</span><strong>10/5 11:55<br/>至 10/7 08:55</strong></div>
+<div class="flight-fact"><span>抵達登機門</span><strong>最晚 10:55</strong></div>
+</div>
+<div class="flight-leg__actions"><a class="flight-action" href="https://www.starlux-airlines.com/zh-TW/check-in-fly/check-in-now/online-check-in" rel="noopener" target="_blank">線上報到</a><a class="flight-action flight-action--primary" href="itinerary.html?flight=JX847">加入行程</a></div>
+</article>
+</div>
+<p class="flight-board__note">航班時間、機型、報到櫃檯與登機門可能調整；出發前請再次核對電子機票、STARLUX App 與機場看板。</p>
+</section>
+<!-- ══ 搜尋與篩選 ══ -->
+<div class="search-bar">
+<div class="search-wrap">
+<span class="search-icon">🔍</span>
+<input autocomplete="off" id="search-input" placeholder="搜尋名稱、地區、備註…" type="search"/>
+</div>
+<div class="selects-row">
+<select class="filter-select" id="region-select"><option value="">全部地區</option></select>
+<select class="filter-select" id="cat-select">
+<option value="">全部類別</option>
+<option>景點</option><option>餐廳</option><option>住宿</option><option>購物</option><option>其他</option>
+</select>
+<select class="filter-select" id="sub-select"><option value="">全部子類別</option></select>
+</div>
+<div class="region-tags" id="region-tags"></div>
+</div>
+<!-- ══ 新增地點（預設折疊）══ -->
+<div class="add-section" id="add-section">
+<div class="add-section__header" id="add-toggle">
+<span class="add-section__title">＋ 新增地點</span>
+<span class="add-toggle-icon">▼</span>
+</div>
+<div class="add-section__body">
+<form id="add-place-form">
+<div class="add-field">
+<label>地區 *</label>
+<input id="add-region" placeholder="例：福岡、熊本" required="" type="text"/>
+</div>
+<div class="add-field">
+<label>類別 *</label>
+<select id="add-category-select">
+<option value="">請選擇類別</option>
+</select>
+<input autocomplete="off" class="custom-choice-input" hidden="" id="add-category" placeholder="輸入新類別" type="text"/>
+</div>
+<div class="add-field">
+<label>子類別</label>
+<select id="add-sub-select">
+<option value="">請選擇子類別</option>
+</select>
+<input autocomplete="off" class="custom-choice-input" hidden="" id="add-sub" placeholder="輸入新子類別" type="text"/>
+</div>
+<div class="add-field">
+<label>名稱 *</label>
+<input id="add-name" placeholder="景點或店家名稱" required="" type="text"/>
+</div>
+<div class="add-field">
+<label>營業時間</label>
+<input id="add-hours" placeholder="例：09:00–17:00，週三休" type="text"/>
+</div>
+<div class="add-field">
+<label>備註</label>
+<textarea id="add-note" placeholder="地址、電話、交通方式…" rows="2"></textarea>
+</div>
+<button class="btn-add-place" id="btn-save-place" type="submit">新增地點</button>
+<button class="btn-cancel-edit" hidden="" id="btn-cancel-edit" type="button">取消編輯</button>
+<span class="sync-badge" id="add-sync-status"></span>
+</form>
+<button class="btn-export" id="btn-export-csv">📥 匯出 CSV</button>
+</div>
+</div>
+<!-- ══ 住宿費用（預設折疊）══ -->
+<div class="cost-block" id="cost-block">
+<div class="cost-block__header" id="cost-toggle">
+<span class="cost-block__title">💴 住宿費用</span>
+<span class="cost-block__toggle">▼</span>
+</div>
+<div class="cost-block__body">
+<div class="cost-person-row">
+<label for="person-input">分攤人數</label>
+<input id="person-input" max="20" min="1" type="number" value="4"/>
+<span style="font-size:.75rem;opacity:.5;">人</span>
+</div>
+<div class="cost-entry-header">
+<span>項目名稱</span>
+<span style="text-align:right;width:100px;">金額 (TWD)</span>
+<span style="width:32px;"></span>
+</div>
+<div id="cost-entries"></div>
+<button class="btn-add-cost" id="btn-add-cost">＋ 新增費用項目</button>
+<div id="cost-summary"></div>
+<span class="sync-badge" id="cost-sync-status">⏳ 連線中…</span>
+</div>
+</div>
+<!-- ══ 租車資訊 ══ -->
+<div class="rental-block" id="rental-block">
+<div class="rental-block__header" id="rental-toggle">
+<span class="rental-block__title">🚗 租車資訊</span>
+<span class="rental-block__toggle">▼</span>
+</div>
+<div class="rental-block__body">
+<div class="rental-groups">
+<section class="rental-group" data-rental-group="carA">
+<div class="rental-group__head"><span class="rental-group__badge">13號</span><span class="rental-group__hint">獨立租車資料</span></div>
+<div class="rental-info-grid">
+<div class="rental-field"><label>取車日期</label><input id="r-carA-pickup-date" type="date"/></div>
+<div class="rental-field"><label>取車時間</label><input id="r-carA-pickup-time" type="time"/></div>
+<div class="rental-field"><label>還車日期</label><input id="r-carA-return-date" type="date"/></div>
+<div class="rental-field"><label>還車時間</label><input id="r-carA-return-time" type="time"/></div>
+<div class="rental-field"><label>租車地點／分店</label><input id="r-carA-rental-location" placeholder="例：Toyota Rent a Car 熊本站" type="text"/></div>
+<div class="rental-field"><label>取車地點</label><input id="r-carA-pickup-loc" placeholder="例：熊本站東口" type="text"/></div>
+<div class="rental-field"><label>還車地點</label><input id="r-carA-return-loc" placeholder="例：福岡機場店" type="text"/></div>
+<div class="rental-field"><label>租車公司</label><input id="r-carA-company" placeholder="例：Times" type="text"/></div>
+<div class="rental-field"><label>車型</label><input id="r-carA-car" placeholder="例：Toyota Aqua" type="text"/></div>
+<div class="rental-field"><label>費用 (TWD)</label><input id="r-carA-cost" min="0" placeholder="0" type="number"/></div>
+<div class="rental-field"><label>預訂編號</label><input id="r-carA-booking" placeholder="訂單號碼" type="text"/></div>
+</div>
+<button class="btn-add-place btn-save-rental" data-save-rental="carA" type="button">儲存 13號租車資訊</button>
+<div class="rental-itinerary-actions">
+<button class="rental-itinerary-action" data-add-rental="carA" data-rental-event="pickup" type="button">＋ 取車加入行程</button>
+<button class="rental-itinerary-action" data-add-rental="carA" data-rental-event="return" type="button">＋ 還車加入行程</button>
+</div>
+</section>
+<section class="rental-group rental-group--b" data-rental-group="carB">
+<div class="rental-group__head"><span class="rental-group__badge">15號</span><span class="rental-group__hint">獨立租車資料</span></div>
+<div class="rental-info-grid">
+<div class="rental-field"><label>取車日期</label><input id="r-carB-pickup-date" type="date"/></div>
+<div class="rental-field"><label>取車時間</label><input id="r-carB-pickup-time" type="time"/></div>
+<div class="rental-field"><label>還車日期</label><input id="r-carB-return-date" type="date"/></div>
+<div class="rental-field"><label>還車時間</label><input id="r-carB-return-time" type="time"/></div>
+<div class="rental-field"><label>租車地點／分店</label><input id="r-carB-rental-location" placeholder="例：Toyota Rent a Car 熊本站" type="text"/></div>
+<div class="rental-field"><label>取車地點</label><input id="r-carB-pickup-loc" placeholder="例：熊本站東口" type="text"/></div>
+<div class="rental-field"><label>還車地點</label><input id="r-carB-return-loc" placeholder="例：福岡機場店" type="text"/></div>
+<div class="rental-field"><label>租車公司</label><input id="r-carB-company" placeholder="例：Times" type="text"/></div>
+<div class="rental-field"><label>車型</label><input id="r-carB-car" placeholder="例：Toyota Aqua" type="text"/></div>
+<div class="rental-field"><label>費用 (TWD)</label><input id="r-carB-cost" min="0" placeholder="0" type="number"/></div>
+<div class="rental-field"><label>預訂編號</label><input id="r-carB-booking" placeholder="訂單號碼" type="text"/></div>
+</div>
+<button class="btn-add-place btn-save-rental" data-save-rental="carB" type="button">儲存 15號租車資訊</button>
+<div class="rental-itinerary-actions">
+<button class="rental-itinerary-action" data-add-rental="carB" data-rental-event="pickup" type="button">＋ 取車加入行程</button>
+<button class="rental-itinerary-action" data-add-rental="carB" data-rental-event="return" type="button">＋ 還車加入行程</button>
+</div>
+</section>
+</div>
+<span class="sync-badge" id="rental-sync-status"></span>
+</div>
+</div>
+<!-- 日本自駕注意事項 -->
+<div class="driving-section" id="driving-section">
+<div class="driving-header" id="driving-toggle">
+<h3>🗾 日本自駕注意事項</h3>
+<span class="driving-toggle-icon">▼</span>
+</div>
+<div class="driving-body">
+<div class="driving-tips-grid">
+<div class="driving-tip-card">
+<h4>📄 出發前必備文件</h4>
+<ul>
+<li>台灣駕照 + <strong>日本語譯本</strong>（台灣監理站辦理，需 2–3 工作天）</li>
+<li>護照正本</li>
+<li>租車確認書（印出或手機截圖）</li>
+<li>國際信用卡（租車押金用，部分需 Visa/Master）</li>
+</ul>
+</div>
+<div class="driving-tip-card">
+<h4>⚠️ 2026/9/1 生活道路新制</h4>
+<ul>
+<li>自 <strong>2026/9/1</strong> 起，日本「生活道路」在<strong>沒有另行速限標誌</strong>時，法定最高速度由 60 km/h 降為 <strong>30 km/h</strong></li>
+<li>生活道路可理解為住宅區、巷弄等主要供居民日常使用、通常<strong>沒有中央線或車道分隔</strong>的一般道路</li>
+<li>有中央線／車道劃分、以設施分隔往返方向的道路，以及汽車專用道路等，不套用這個 30 km/h 預設</li>
+<li><strong>現場有速限標誌時一律以標誌為準</strong>；導航若帶進窄巷，不要再沿用舊的 60 km/h 直覺</li>
+</ul>
+</div>
+<div class="driving-tip-card">
+<h4>🛣️ 行駛規則</h4>
+<ul>
+<li><strong>靠左行駛</strong>，方向盤在右側（與台灣相反）</li>
+<li>「止まれ」紅色倒三角標誌代表<strong>完全停止</strong>，不是只減速後滑行通過</li>
+<li><strong>平交道原則上也要先完全停止並確認安全</strong>，不是一定要看到「止まれ」標誌才停</li>
+<li>無號誌、無優先標示的路口要特別注意<strong>左方優先</strong>的判斷邏輯</li>
+<li>轉彎及行經斑馬線時優先注意行人；右轉需確認對向來車</li>
+<li>高速公路進出口在<strong>左側</strong></li>
+</ul>
+</div>
+<div class="driving-tip-card">
+<h4>🅿️ 停車</h4>
+<ul>
+<li>日本需分清楚<strong>「駐車禁止」</strong>與<strong>「駐停車禁止」</strong>，是否可短暫停靠要依現場標誌與實際停車狀態判斷</li>
+<li>不要用「白線就一定能停」這種方式判斷；觀光地建議直接使用正式停車場</li>
+<li>多為<strong>自動繳費機</strong>，可準備日幣硬幣或確認是否支援 IC／信用卡</li>
+<li>推薦 <strong>Times Park</strong> 或 <strong>Navitime</strong> App 找停車場；熱門景點假日先準備主要＋備用停車場</li>
+</ul>
+</div>
+<div class="driving-tip-card">
+<h4>⛽ 加油</h4>
+<ul>
+<li>一般車輛加 <strong>レギュラー（Regular）</strong></li>
+<li>自助加油：選油種 → 插卡/投現 → 拿油槍 → 加完按「返金」</li>
+<li>取車時確認油箱類型（汽油 or 柴油）</li>
+</ul>
+</div>
+<div class="driving-tip-card">
+<h4>🛣️ 高速公路 ETC</h4>
+<ul>
+<li>租車時建議加租 <strong>ETC 車載機</strong>（日本 ETC ≠ 台灣 ETC）</li>
+<li>沒有 ETC 走一般車道，準備日幣現金</li>
+<li>九州熊本→福岡約 ¥2,000–2,800</li>
+<li><strong>ドラぷら（Dra-pla）</strong> App 可查過路費</li>
+</ul>
+</div>
+<div class="driving-tip-card">
+<h4>📱 導航</h4>
+<ul>
+<li>推薦 <strong>Google Maps</strong>（需行動數據）</li>
+<li><strong>Navitime Japan</strong> 可離線，適合山區路段</li>
+<li>輸入目的地建議用<strong>電話號碼</strong>或<strong>郵遞區號</strong></li>
+</ul>
+</div>
+<div class="driving-tip-card">
+<h4>🚨 緊急狀況</h4>
+<ul>
+<li>報警：<strong>110</strong> / 救護車火災：<strong>119</strong></li>
+<li>JAF 道路救援：<strong>0570-00-8139</strong></li>
+<li>發生事故先拍照，不移動車輛，等警察到場</li>
+<li>取車時確認租車公司緊急聯絡電話並存入手機</li>
+</ul>
+</div>
+<div class="driving-tip-card">
+<h4>🚫 嚴禁事項</h4>
+<ul>
+<li><strong>飲酒駕車</strong>：血液酒精 0.03% 以上即違法</li>
+<li><strong>手持手機</strong>：罰款 ¥18,000，記點</li>
+<li>一般道路若<strong>超速達 30 km/h 以上</strong>，可能不再只是一般反則金處理，需特別避免沿用舊速限習慣</li>
+<li>全車乘客都必須繫安全帶（含後座）</li>
+</ul>
+</div>
+<div class="driving-tip-card">
+<h4>👶 嬰幼兒乘車規定</h4>
+<ul>
+<li><strong>6 歲未滿</strong>乘車原則上必須使用兒童安全座椅</li>
+<li>租車時需事先預約嬰兒座椅、幼童座椅或增高墊</li>
+<li>6 歲以上若身高未達約 <strong>150 cm</strong>，仍建議使用兒童座椅或增高墊</li>
+<li>不要抱著嬰幼兒乘車，急煞或碰撞時無法有效保護</li>
+</ul>
+</div>
+<div class="driving-tip-card">
+<h4>📍 本次行程租車重點</h4>
+<ul>
+<li>熊本機場取車 → 阿蘇、天草、芦北方向行駛</li>
+<li>天草公路多山路彎道，單線道會車需禮讓</li>
+<li>福岡市區停車費高，建議停郊區轉地鐵</li>
+<li>異地還車（熊本取→福岡還）需確認是否收異地費</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- ══ 地點卡片 ══ -->
+<div class="cards-header">
+<span class="cards-count" id="cards-count">載入中…</span>
+<select class="cards-sort" id="sort-select">
+<option value="default">預設排序</option>
+<option value="region">依地區</option>
+<option value="cat">依類別</option>
+<option value="fav">最愛優先</option>
+</select>
+</div>
+<div class="cards" id="cards"></div>
+<div aria-hidden="true" class="tour-overlay" id="help-overlay"><div class="tour-backdrop"></div></div>
+<section aria-labelledby="tour-title" aria-modal="true" class="tour-card" id="tour-card" role="dialog">
+<span class="tour-progress" id="tour-progress"></span>
+<h2 id="tour-title"></h2>
+<p id="tour-body"></p>
+<div class="tour-actions">
+<button id="tour-close" type="button">略過</button>
+<button id="tour-prev" type="button">上一步</button>
+<button class="tour-next" id="tour-next" type="button">下一步</button>
+</div>
+</section>
+<!-- ══ Bottom Nav ══ -->
+<nav class="bottom-nav">
+<a class="bottom-nav__item" href="travel.html"><span>🏠</span><span>首頁</span></a>
+<a class="bottom-nav__item active" href="index.html"><span>🔍</span><span>總覽</span></a>
+<a class="bottom-nav__item" href="itinerary.html"><span>🗓</span><span>行程</span></a>
+<a class="bottom-nav__item" href="fukuoka.html"><span>🌆</span><span>福岡</span></a>
+</nav>
+<script>
+(function(){
+  const body=document.body;
+  const topbar=body.querySelector('.topbar'), nav=body.querySelector('.bottom-nav');
+  const quick=body.querySelector('.quick-actions'), flight=body.querySelector('.flight-board'), search=body.querySelector('.search-bar');
+  const add=body.querySelector('#add-section'), cost=body.querySelector('#cost-block'), rental=body.querySelector('#rental-block'), driving=body.querySelector('#driving-section');
+  const ch=body.querySelector('.cards-header'), cards=body.querySelector('#cards');
+  const overlay=body.querySelector('#help-overlay'), tour=body.querySelector('#tour-card');
+  const shell=document.createElement('div'); shell.className='travel-os';
+  const rail=document.createElement('aside'); rail.className='os-rail';
+  rail.innerHTML='<div class="os-brand"><div class="os-brand__eyebrow">Travel Operating System</div><div class="os-brand__name">九州自駕旅程</div><div class="os-brand__meta">2026.09.30 — 10.07 · 8 Days</div></div><div class="os-nav"><div class="os-nav__label">Navigate</div></div><div class="os-rail__foot">Shared trip workspace<br>Realtime itinerary / route / cost</div>';
+  rail.querySelector('.os-nav').appendChild(nav); rail.insertBefore(topbar, rail.querySelector('.os-rail__foot'));
+  const work=document.createElement('main'); work.className='os-workspace'; const inner=document.createElement('div'); inner.className='os-workspace__inner'; work.appendChild(inner);
+  const mast=document.createElement('div'); mast.className='trip-masthead'; mast.innerHTML='<div><div class="os-kicker">Trip Command Center</div><h1 class="os-title">把整趟旅行，放進同一個操作介面。</h1><div class="os-subtitle">景點資料庫、航班、租車、費用與每日行程共用同一份即時資料。規劃時整理，旅行時直接操作。</div></div><div class="trip-masthead__actions"></div>';
+  mast.querySelector('.trip-masthead__actions').appendChild(quick); inner.appendChild(mast);
+  const dash=document.createElement('div'); dash.className='home-dashboard'; const main=document.createElement('section'); main.className='home-main'; const side=document.createElement('aside'); side.className='home-side'; dash.append(main,side); inner.appendChild(dash);
+  main.appendChild(flight);
+  const wb=document.createElement('section'); wb.className='os-panel place-workbench'; wb.innerHTML='<div class="os-panel__head"><div><div class="os-panel__label">Place Library</div><h2>景點資料庫</h2></div><div class="os-panel__label">搜尋 · 收藏 · 篩選 · 直接加入行程</div></div>'; wb.append(search,ch,cards); main.appendChild(wb);
+  function mod(title,node){ const m=document.createElement('section');m.className='side-module';m.innerHTML='<div class="side-module__title"><span>'+title+'</span><span>↘</span></div><div class="side-module__body"></div>';m.querySelector('.side-module__body').appendChild(node);side.appendChild(m);}
+  mod('新增／編輯地點',add); mod('旅費紀錄',cost); mod('13號／15號 租車',rental); mod('日本自駕備忘',driving);
+  shell.append(rail,work); body.insertBefore(shell, body.firstChild); body.append(overlay,tour);
+})();
+</script><script>
+const OVERVIEW_TOUR_STEPS = [
+  { target:'.quick-actions', title:'快速前往常用功能', body:'左側可進入每日行程表，右側可快速新增自訂地點。上方愛心按鈕會切換只看收藏清單。' },
+  { target:'.flight-board', title:'航班資訊看板', body:'每張航班卡會顯示航班號、去回程日期、起降機場、起飛抵達時間、機場報到開放與截止時間、線上報到時間、免費選位時段與登機門提醒。登機門通常以當日 STARLUX App 或機場看板為準。' },
+  { target:'.flight-board .flight-leg__actions', title:'航班快捷操作', body:'「管理行程／選位」會前往星宇航空官方頁面；「加入行程」會把該航班帶到行程表，航班也會和景點一樣依時間排序。' },
+  { target:'.search-bar', title:'搜尋與篩選景點', body:'可用名稱、地區或備註搜尋；下方下拉選單可用地區、類別、子類別縮小結果，例如餐廳、住宿、購物或釣點。' },
+  { target:'#add-section', title:'建立自己的地點', body:'展開後填入地區、類別、子類別、名稱、營業時間與備註。類別可直接重選，也能建立全新類別。' },
+  { target:'#cost-block', title:'住宿費用', body:'可記錄每筆住宿費用與旅伴人數，系統會整理總額與平均分攤，資料會同步保存。' },
+  { target:'#rental-block', title:'租車資訊', body:'租車資料依 13號與15號分開保存，可各自記錄租車公司、租車地點／分店、取還車日期與時間、取還車地點、車型、費用與訂單編號；「取車加入行程」與「還車加入行程」會先儲存最新資料，再帶到對應車輛的行程表。' },
+  { target:'#driving-section', title:'日本自駕注意事項', body:'已加入 2026/9/1 生活道路 30 km/h 新制，並整理現場速限標誌優先、止まれ完全停止、平交道一時停止、無號誌路口左方優先，以及駐車／駐停車標誌差異。出發前建議集中確認。' },
+  { target:'#cards', title:'景點卡片欄位與圖示', body:'卡片上方是類別與地區標籤，中段顯示名稱、營業時間與備註，底部顯示費用。自訂地點可按鉛筆圖示帶回表單修改，也能直接刪除。' },
+  { target:'.qa-btn--itinerary', title:'開始編排行程', body:'進入每日行程表後，可將項目設為全員同行、13號或15號。兩台車有各自的整日 Google Maps 路線，卡片上的單點 Google Maps 也完整保留。' },
+  { target:'#help-btn', title:'隨時重新查看', body:'之後可按右上角問號再次啟動這份互動導覽。' }
+];
+let overviewTourIndex = 0;
+let overviewTourTarget = null;
+
+function closeOverviewTour() {
+  overviewTourTarget?.classList.remove('tour-target');
+  overviewTourTarget = null;
+  document.getElementById('help-overlay').classList.remove('open');
+  document.getElementById('help-overlay').setAttribute('aria-hidden', 'true');
+  document.getElementById('tour-card').classList.remove('open');
+  localStorage.setItem('kyushu_overview_tour_seen_v6', '1');
+}
+
+function placeOverviewTourCard() {
+  const card = document.getElementById('tour-card');
+  if (!overviewTourTarget) {
+    card.dataset.placement = 'bottom';
+    return;
+  }
+  const rect = overviewTourTarget.getBoundingClientRect();
+  const viewportHeight = window.visualViewport?.height || window.innerHeight;
+  const cardHeight = Math.min(viewportHeight * 0.32, 280);
+  const bottomNavSpace = 92;
+  const spaceAbove = rect.top;
+  const spaceBelow = viewportHeight - rect.bottom - bottomNavSpace;
+  card.dataset.placement = spaceAbove >= cardHeight && spaceAbove >= spaceBelow ? 'top' : 'bottom';
+}
+
+function renderOverviewTourStep() {
+  overviewTourTarget?.classList.remove('tour-target');
+  const step = OVERVIEW_TOUR_STEPS[overviewTourIndex];
+  overviewTourTarget = document.querySelector(step.target);
+  if (overviewTourTarget) {
+    overviewTourTarget.classList.add('tour-target');
+    overviewTourTarget.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+  document.getElementById('tour-progress').textContent = `${overviewTourIndex + 1} / ${OVERVIEW_TOUR_STEPS.length}`;
+  document.getElementById('tour-title').textContent = step.title;
+  document.getElementById('tour-body').textContent = step.body;
+  document.getElementById('tour-prev').disabled = overviewTourIndex === 0;
+  document.getElementById('tour-next').textContent = overviewTourIndex === OVERVIEW_TOUR_STEPS.length - 1 ? '完成' : '下一步';
+  placeOverviewTourCard();
+  requestAnimationFrame(placeOverviewTourCard);
+  setTimeout(placeOverviewTourCard, 260);
+}
+
+function startOverviewTour() {
+  overviewTourIndex = 0;
+  document.getElementById('help-overlay').classList.add('open');
+  document.getElementById('help-overlay').setAttribute('aria-hidden', 'false');
+  document.getElementById('tour-card').classList.add('open');
+  renderOverviewTourStep();
+}
+
+document.getElementById('help-btn').addEventListener('click', startOverviewTour);
+document.getElementById('tour-close').addEventListener('click', closeOverviewTour);
+document.getElementById('tour-prev').addEventListener('click', () => { if (overviewTourIndex > 0) { overviewTourIndex--; renderOverviewTourStep(); } });
+document.getElementById('tour-next').addEventListener('click', () => {
+  if (overviewTourIndex === OVERVIEW_TOUR_STEPS.length - 1) { closeOverviewTour(); return; }
+  overviewTourIndex++;
+  renderOverviewTourStep();
+});
+if (!localStorage.getItem('kyushu_overview_tour_seen_v6')) startOverviewTour();
+
+// ════════════════════════════════════════
+//  子類別映射
+// ════════════════════════════════════════
+const SUB_MAP = {
+  '景點':['神社','公園','城堡','博物館','市場','水族館','動物園','海灘','溫泉','展望台','釣點','其他景點'],
+  '餐廳':['拉麵店','燒肉店','壽司','鰻魚料理','居酒屋','甜點','咖啡廳','海鮮','定食','其他餐廳'],
+  '住宿':['商務飯店','溫泉飯店','共居飯店','民宿','膠囊旅館'],
+  '購物':['釣具店','百貨','藥妝','超市','伴手禮','其他購物'],
+  '其他':['交通','活動','球賽','釣魚體驗','其他'],
+};
+
+// ════════════════════════════════════════
+//  狀態
+// ════════════════════════════════════════
+let PLACES = [];
+let CLOUD_PLACES = [];
+let favOnly = false;
+let searchQ = '';
+let filterRegion = '';
+let filterCat = '';
+let filterSub = '';
+let editingPlace = null;
+
+function allPlaces(){ return [...PLACES, ...CLOUD_PLACES]; }
+function allCategories(){
+  return [...new Set([...Object.keys(SUB_MAP), ...allPlaces().map(p=>p.category).filter(Boolean)])];
+}
+function subcategoriesFor(category){
+  return [...new Set([
+    ...(SUB_MAP[category] || []),
+    ...allPlaces()
+      .filter(p => !category || p.category === category)
+      .map(p=>p.subcategory)
+      .filter(Boolean)
+  ])].sort((a,b)=>String(a).localeCompare(String(b),'zh-Hant'));
+}
+function escapeHTML(v){
+  return String(v ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function showDataError(message){
+  document.getElementById('cards-count').textContent=message;
+  document.getElementById('cards').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;opacity:.45;font-size:.9rem;">資料連線失敗，請稍後重新整理</div>';
+}
+
+// ── Intersection Observer ──
+const revObs = new IntersectionObserver(entries=>{
+  entries.forEach(({isIntersecting,target},i)=>{
+    if(!isIntersecting)return;
+    setTimeout(()=>target.classList.add('visible'),i*30);
+    revObs.unobserve(target);
+  });
+},{threshold:.04,rootMargin:'0px 0px -6px 0px'});
+
+// ── Favs：Firebase Realtime Database only ──
+let _favsCache = [];
+let _favsReady = false;
+
+// 收藏 icon 顯示常數：之後只改這裡，不要再到處搜尋替換
+const FAV_ICON_OFF = '❤️';
+const FAV_ICON_ON = '💖';
+
+function getFavs(){
+  return _favsCache;
+}
+
+function waitFirebaseReady(){
+  if(window.__firebaseReady) return Promise.resolve();
+
+  return new Promise(resolve => {
+    window.addEventListener('firebase-ready', resolve, { once:true });
+  });
+}
+
+async function toggleFav(id){
+  await waitFirebaseReady();
+
+  const key = String(id);
+  const exists = _favsCache.includes(key);
+  const favRef = window.__ref(window.__db, `favs/${key}`);
+
+  if(exists){
+    await window.__remove(favRef);
+    return FAV_ICON_OFF;
+  }
+
+  await window.__set(favRef, true);
+  return FAV_ICON_ON;
+}
+
+// ── 建卡片 ──
+function buildCard(p){
+  const el=document.createElement('article');
+  el.className='card'; el.dataset.id=p.id;
+  const q=encodeURIComponent(p.name+' '+p.region+' Japan');
+  const FISH_KW=['釣','路亞','釣具'];
+  const tags=(p.tags||[]).map(t=>`<span class="tag${FISH_KW.some(k=>String(t).includes(k))?' tag--fish':''}">${escapeHTML(t)}</span>`).join('');
+  const isFav=getFavs().includes(String(p.id));
+  const sub = p.subcategory||p.category||'';
+  const canEdit=p._src==='custom'&&p._key;
+  el.innerHTML=`
+    <div class="card__img-placeholder">${catEmoji(p.category, p.subcategory)}</div>
+    <div class="card__body">
+      <div class="card__tags">
+        <span class="tag">${escapeHTML(p.region)}</span>
+        <span class="tag">${escapeHTML(sub)}</span>
+        ${tags}
+      </div>
+      <div class="card__name">${escapeHTML(p.name)}</div>
+      ${p.hours?`<div class="card__hours">🕐 ${escapeHTML(p.hours)}</div>`:''}
+      ${p.note?`<p class="card__note">${escapeHTML(p.note)}</p>`:''}
+    </div>
+    <div class="card__footer">
+      <span class="card__cost">${p.twd?'NT$'+Number(p.twd).toLocaleString():''}</span>
+      <div class="card__actions">
+        <button
+          class="card__btn card__fav ${isFav ? 'is-fav' : ''}"
+          data-id="${escapeHTML(p.id)}"
+          title="${isFav ? '取消收藏' : '加入收藏'}"
+          aria-label="${isFav ? '取消收藏' : '加入收藏'}"
+        >
+          ${isFav ? FAV_ICON_ON : FAV_ICON_OFF}
+        </button>
+        
+        <a
+          class="card__btn card__map"
+          href="https://www.google.com/maps/search/?api=1&query=${q}"
+          target="_blank"
+          rel="noopener"
+          title="開啟 Google Maps"
+          aria-label="開啟 Google Maps"
+        >
+          <svg class="gmap-icon" viewBox="0 0 36 36" aria-hidden="true">
+            <circle class="gmap-icon__bg" cx="18" cy="18" r="16"/>
+        
+            <path class="gmap-icon__green"
+              d="M18 6.2c-5.05 0-9.15 4.05-9.15 9.05 0 6.8 9.15 14.55 9.15 14.55V19.1l-3.75-3.75L18 6.2z"/>
+        
+            <path class="gmap-icon__blue"
+              d="M18 29.8s9.15-7.75 9.15-14.55c0-2.45-.98-4.67-2.57-6.3L18 15.5v14.3z"/>
+        
+            <path class="gmap-icon__yellow"
+              d="M8.85 15.25c0 2.8 1.55 5.95 3.38 8.6L18 18.1v-2.6l-5.95-5.95a8.95 8.95 0 0 0-3.2 5.7z"/>
+        
+            <path class="gmap-icon__red"
+              d="M24.58 8.95A9.08 9.08 0 0 0 18 6.2a9.02 9.02 0 0 0-5.95 2.25L18 14.4l6.58-5.45z"/>
+        
+            <circle class="gmap-icon__center" cx="18" cy="15.35" r="3.15"/>
+          </svg>
+        </a>
+        ${canEdit?`<button class="card__btn card__edit btn-edit-place" data-id="${escapeHTML(p.id)}" title="編輯地點" aria-label="編輯地點">
+          <svg class="card__edit-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 20h9"/>
+            <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/>
+          </svg>
+        </button>
+        <button class="card__btn card__delete btn-del-place" data-id="${escapeHTML(p.id)}" title="刪除地點" aria-label="刪除地點"><span aria-hidden="true">×</span></button>`:''}
+      </div>
+    </div>`;
+  // fav
+      el.querySelector('.card__fav').addEventListener('click',async function(){
+      this.disabled = true;
+    
+      try{
+        const nextIcon = await toggleFav(p.id);
+    
+        this.textContent = nextIcon;
+    
+        if(nextIcon === FAV_ICON_ON){
+          this.classList.add('is-fav');
+          this.title = '取消收藏';
+          this.setAttribute('aria-label', '取消收藏');
+        }else{
+          this.classList.remove('is-fav');
+          this.title = '加入收藏';
+          this.setAttribute('aria-label', '加入收藏');
+        }
+    
+        this.classList.add('pulse');
+        setTimeout(()=>this.classList.remove('pulse'),220);
+      }finally{
+        this.disabled = false;
+      }
+    });
+  // edit
+  el.querySelector('.btn-edit-place')?.addEventListener('click',()=>startEditPlace(p));
+  // del
+  el.querySelector('.btn-del-place')?.addEventListener('click',function(){
+    if(!confirm('確定刪除「'+p.name+'」？'))return;
+    const key=p._key;
+    if(key){
+      if(editingPlace?._key===key) resetPlaceForm();
+      window.__remove(window.__ref(window.__db,'custom_places/'+key));
+    }
+  });
+  revObs.observe(el);
+  return el;
+}
+
+// 子類別細分 icon
+const SUB_EMOJI = {
+  // 景點
+  '神社':'⛩️','公園':'🌳','城堡':'🏯','博物館':'🗿','市場':'🏮',
+  '水族館':'🐡','動物園':'🦒','海灘':'🌊','溫泉':'🛁','展望台':'🔭','釣點':'🎣','其他景點':'🗺️',
+  // 餐廳
+  '拉麵店':'🍜','燒肉店':'🥩','壽司':'🍣','鰻魚料理':'🐍','居酒屋':'🍻',
+  '甜點':'🍰','咖啡廳':'☕','海鮮':'🦐','定食':'🍱','其他餐廳':'🍽️',
+  // 住宿
+  '溫泉飯店':'🛁','商務飯店':'🛎️','共居飯店':'🏠','民宿':'🏡','膠囊旅館':'💤',
+  // 購物
+  '釣具店':'🎣','百貨':'🏬','藥妝':'💊','超市':'🛒','伴手禮':'🎁','其他購物':'🛍️',
+  // 其他
+  '交通':'🚃','活動':'🎉','球賽':'⚾','釣魚體驗':'🎣','其他':'📌',
+};
+function catEmoji(category, subcategory){
+  if(subcategory && SUB_EMOJI[subcategory]) return SUB_EMOJI[subcategory];
+  return {'景點':'🗺️','餐廳':'🍽️','住宿':'🛎️','購物':'🛒','其他':'📌'}[category]||'📌';
+}
+
+// ── Render ──
+function render(){
+  const wrap=document.getElementById('cards');
+  wrap.innerHTML='';
+  const favs=getFavs();
+  const sortVal=document.getElementById('sort-select').value;
+
+  let list=allPlaces().filter(p=>{
+    if(favOnly && !favs.includes(String(p.id))) return false;
+    if(searchQ){
+      const q=searchQ.toLowerCase();
+      if(!(p.name||'').toLowerCase().includes(q)&&
+         !(p.region||'').toLowerCase().includes(q)&&
+         !(p.note||'').toLowerCase().includes(q)&&
+         !(p.subcategory||'').toLowerCase().includes(q)) return false;
+    }
+    if(filterRegion && p.region!==filterRegion) return false;
+    if(filterCat && p.category!==filterCat) return false;
+    if(filterSub && (p.subcategory||'')!==filterSub) return false;
+    return true;
+  });
+
+  if(sortVal==='region') list.sort((a,b)=>(a.region||'').localeCompare(b.region||'','zh'));
+  else if(sortVal==='cat') list.sort((a,b)=>(a.category||'').localeCompare(b.category||'','zh'));
+  else if(sortVal==='fav') list.sort((a,b)=>{
+    const fa=favs.includes(String(a.id)),fb=favs.includes(String(b.id));
+    return fa===fb?0:fa?-1:1;
+  });
+
+  document.getElementById('cards-count').textContent=`共 ${list.length} 個地點`;
+  if(!list.length){
+    wrap.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;opacity:.3;font-size:.9rem;">沒有符合條件的地點</div>';
+    return;
+  }
+  list.forEach(p=>wrap.appendChild(buildCard(p)));
+}
+
+// ── 地區 Tags ──
+function buildRegionTags(){
+  const regions=[...new Set(allPlaces().map(p=>p.region).filter(Boolean))].sort();
+  const wrap=document.getElementById('region-tags');
+  wrap.innerHTML='';
+  const allBtn=document.createElement('button');
+  allBtn.className='region-tag'+(filterRegion===''?' active':'');
+  allBtn.textContent='全部';
+  allBtn.addEventListener('click',()=>{ filterRegion=''; buildRegionTags(); render(); });
+  wrap.appendChild(allBtn);
+  regions.forEach(r=>{
+    const btn=document.createElement('button');
+    btn.className='region-tag'+(filterRegion===r?' active':'');
+    btn.textContent=r;
+    btn.addEventListener('click',()=>{ filterRegion=r; buildRegionTags(); render(); });
+    wrap.appendChild(btn);
+  });
+}
+
+// ── Category Select / Add Form Suggestions ──
+function buildCategorySelect(){
+  const sel=document.getElementById('cat-select');
+  const categories=allCategories();
+  if(filterCat && !categories.includes(filterCat)){
+    filterCat='';
+    filterSub='';
+  }
+  sel.innerHTML='<option value="">全部類別</option>';
+  categories.forEach(category=>{
+    const option=document.createElement('option');
+    option.value=category;
+    option.textContent=category;
+    option.selected=category===filterCat;
+    sel.appendChild(option);
+  });
+}
+
+function selectedAddCategory(){
+  const select=document.getElementById('add-category-select');
+  return select.value==='__custom__'
+    ? document.getElementById('add-category').value.trim()
+    : select.value;
+}
+
+function selectedAddSubcategory(){
+  const select=document.getElementById('add-sub-select');
+  return select.value==='__custom__'
+    ? document.getElementById('add-sub').value.trim()
+    : select.value;
+}
+
+function buildAddCategoryOptions(){
+  const select=document.getElementById('add-category-select');
+  const input=document.getElementById('add-category');
+  const current=selectedAddCategory();
+  const categories=allCategories();
+
+  select.innerHTML='<option value="">請選擇類別</option>';
+  categories.forEach(category=>{
+    const option=document.createElement('option');
+    option.value=category;
+    option.textContent=category;
+    select.appendChild(option);
+  });
+  select.insertAdjacentHTML('beforeend','<option value="__custom__">＋ 新增類別…</option>');
+
+  if(current && !categories.includes(current)){
+    select.value='__custom__';
+    input.hidden=false;
+    input.value=current;
+  }else{
+    select.value=current;
+    input.hidden=true;
+  }
+}
+
+// ── Region Select ──
+function buildRegionSelect(){
+  const regions=[...new Set(allPlaces().map(p=>p.region).filter(Boolean))].sort();
+  const sel=document.getElementById('region-select');
+  const cur=sel.value;
+  sel.innerHTML='<option value="">全部地區</option>';
+  regions.forEach(r=>{ const o=document.createElement('option');o.value=r;o.textContent=r;if(r===cur)o.selected=true;sel.appendChild(o); });
+}
+
+// ── Sub Select（篩選）聯動 ──
+function updateFilterSubOptions(cat){
+  const subSel=document.getElementById('sub-select');
+  const subs=subcategoriesFor(cat);
+  if(filterSub && !subs.includes(filterSub)) filterSub='';
+  subSel.innerHTML='<option value="">全部子類別</option>';
+  subs.forEach(subcategory=>{
+    const option=document.createElement('option');
+    option.value=subcategory;
+    option.textContent=subcategory;
+    option.selected=subcategory===filterSub;
+    subSel.appendChild(option);
+  });
+}
+
+// ── Add Form 子類別聯動 ──
+function updateAddSubOptions(cat,preserve=true){
+  const select=document.getElementById('add-sub-select');
+  const input=document.getElementById('add-sub');
+  const current=preserve ? selectedAddSubcategory() : '';
+  const subcategories=subcategoriesFor(cat);
+
+  select.innerHTML='<option value="">請選擇子類別</option>';
+  subcategories.forEach(subcategory=>{
+    const option=document.createElement('option');
+    option.value=subcategory;
+    option.textContent=subcategory;
+    select.appendChild(option);
+  });
+  select.insertAdjacentHTML('beforeend','<option value="__custom__">＋ 新增子類別…</option>');
+
+  if(current && !subcategories.includes(current)){
+    select.value='__custom__';
+    input.hidden=false;
+    input.value=current;
+  }else{
+    select.value=current;
+    input.hidden=true;
+    if(!current) input.value='';
+  }
+}
+
+function setAddCategoryValue(category,subcategory){
+  const categorySelect=document.getElementById('add-category-select');
+  const categoryInput=document.getElementById('add-category');
+  const categories=allCategories();
+  if(categories.includes(category)){
+    categorySelect.value=category;
+    categoryInput.value='';
+    categoryInput.hidden=true;
+  }else{
+    categorySelect.value='__custom__';
+    categoryInput.value=category||'';
+    categoryInput.hidden=false;
+  }
+
+  updateAddSubOptions(category,false);
+  const subSelect=document.getElementById('add-sub-select');
+  const subInput=document.getElementById('add-sub');
+  const subcategories=subcategoriesFor(category);
+  if(!subcategory){
+    subSelect.value='';
+    subInput.value='';
+    subInput.hidden=true;
+  }else if(subcategories.includes(subcategory)){
+    subSelect.value=subcategory;
+    subInput.value='';
+    subInput.hidden=true;
+  }else{
+    subSelect.value='__custom__';
+    subInput.value=subcategory;
+    subInput.hidden=false;
+  }
+}
+
+function resetPlaceForm(){
+  editingPlace=null;
+  const form=document.getElementById('add-place-form');
+  form.reset();
+  document.getElementById('add-category').hidden=true;
+  document.getElementById('add-sub').hidden=true;
+  document.getElementById('btn-save-place').textContent='新增地點';
+  document.getElementById('btn-cancel-edit').hidden=true;
+  document.querySelector('#add-section .add-section__title').textContent='＋ 新增地點';
+  buildAddCategoryOptions();
+  updateAddSubOptions('',false);
+}
+
+function startEditPlace(place){
+  editingPlace={...place};
+  document.getElementById('add-region').value=place.region||'';
+  document.getElementById('add-name').value=place.name||'';
+  document.getElementById('add-hours').value=place.hours||'';
+  document.getElementById('add-note').value=place.note||'';
+  buildAddCategoryOptions();
+  setAddCategoryValue(place.category||'',place.subcategory||'');
+  document.getElementById('btn-save-place').textContent='儲存修改';
+  document.getElementById('btn-cancel-edit').hidden=false;
+  document.querySelector('#add-section .add-section__title').textContent='✎ 編輯地點';
+  const section=document.getElementById('add-section');
+  section.classList.add('open');
+  section.scrollIntoView({behavior:'smooth',block:'start'});
+  setTimeout(()=>document.getElementById('add-region').focus({preventScroll:true}),350);
+}
+
+// ════════════════════════════════════════
+//  事件綁定
+// ════════════════════════════════════════
+
+// 搜尋
+document.getElementById('search-input').addEventListener('input',e=>{ searchQ=e.target.value.trim(); render(); });
+
+// 地區 select
+document.getElementById('region-select').addEventListener('change',e=>{ filterRegion=e.target.value; buildRegionTags(); render(); });
+
+// 類別 select → 聯動子類別
+document.getElementById('cat-select').addEventListener('change',e=>{
+  filterCat=e.target.value;
+  filterSub='';
+  updateFilterSubOptions(filterCat);
+  render();
+});
+
+// 子類別 select
+document.getElementById('sub-select').addEventListener('change',e=>{ filterSub=e.target.value; render(); });
+
+// 排序
+document.getElementById('sort-select').addEventListener('change',render);
+
+// Fav toggle（topbar icon）
+  document.getElementById('fav-btn').addEventListener('click',()=>{
+  favOnly = !favOnly;
+  document.getElementById('fav-btn').textContent = favOnly ? FAV_ICON_ON : FAV_ICON_OFF;
+  render();
+});
+
+// 快速入口「新增地點」按鈕 → 展開表單並滾到表單
+document.getElementById('qa-add-btn').addEventListener('click',()=>{
+  if(editingPlace) resetPlaceForm();
+  const sec=document.getElementById('add-section');
+  sec.classList.add('open');
+  sec.scrollIntoView({behavior:'smooth',block:'start'});
+});
+
+// 新增表單展開/折疊
+document.getElementById('add-toggle').addEventListener('click',()=>{
+  document.getElementById('add-section').classList.toggle('open');
+});
+
+// Add form 類別／子類別聯動：既有項目直接選；選「新增」時才顯示文字欄位
+document.getElementById('add-category-select').addEventListener('change',e=>{
+  const input=document.getElementById('add-category');
+  const isCustom=e.target.value==='__custom__';
+  input.hidden=!isCustom;
+  if(!isCustom) input.value='';
+  updateAddSubOptions(isCustom ? input.value.trim() : e.target.value,false);
+  if(isCustom) input.focus();
+});
+document.getElementById('add-category').addEventListener('input',e=>{
+  updateAddSubOptions(e.target.value.trim(),false);
+});
+document.getElementById('add-sub-select').addEventListener('change',e=>{
+  const input=document.getElementById('add-sub');
+  const isCustom=e.target.value==='__custom__';
+  input.hidden=!isCustom;
+  if(!isCustom) input.value='';
+  if(isCustom) input.focus();
+});
+document.getElementById('btn-cancel-edit').addEventListener('click',resetPlaceForm);
+
+// 提交新增地點
+document.getElementById('add-place-form').addEventListener('submit',e=>{
+  e.preventDefault();
+  const region=document.getElementById('add-region').value.trim();
+  const category=selectedAddCategory();
+  const sub=selectedAddSubcategory();
+  const name=document.getElementById('add-name').value.trim();
+  const hours=document.getElementById('add-hours').value.trim();
+  const note=document.getElementById('add-note').value.trim();
+  if(!region||!category||!name){alert('請填寫地區、類別與名稱');return;}
+  const status=document.getElementById('add-sync-status');
+  const original=editingPlace;
+  const existingTags=Array.isArray(original?.tags) ? original.tags : [];
+  const tags=original
+    ? [...new Set(existingTags.map(tag=>tag===original.region ? region : tag).filter(Boolean).concat(region))]
+    : [region];
+  const payload={
+    id:original?.id||Date.now(),region,category,subcategory:sub||category,name,hours,note,
+    twd:original?.twd??null,tags,fav:original?.fav??false,photo:original?.photo??null,
+    createdAt:original?.createdAt||new Date().toISOString(),
+    updatedAt:new Date().toISOString(),_src:'custom'
+  };
+  status.textContent=original?'⏳ 更新中…':'⏳ 儲存中…';
+  const savePromise=original
+    ? window.__set(window.__ref(window.__db,'custom_places/'+original._key),payload)
+    : window.__push(window.__ref(window.__db,'custom_places'),payload);
+  savePromise.then(()=>{
+    status.textContent=original?'✅ 已更新':'✅ 已儲存';
+    resetPlaceForm();
+    setTimeout(()=>status.textContent='',2500);
+  }).catch(()=>{
+    status.textContent=original?'更新失敗，請稍後再試':'儲存失敗，請稍後再試';
+    setTimeout(()=>status.textContent='',3500);
+  });
+});
+
+// 匯出 CSV
+document.getElementById('btn-export-csv').addEventListener('click',()=>{
+  const rows=[['id','region','category','subcategory','name','hours','note','twd','createdAt']];
+  allPlaces().forEach(p=>rows.push([p.id,p.region||'',p.category||'',p.subcategory||'',p.name||'',p.hours||'',p.note||'',p.twd||'',p.createdAt||'']));
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download='kyushu_places.csv'; a.click();
+});
+
+// 住宿費用 toggle（預設關閉）
+document.getElementById('cost-toggle').addEventListener('click',()=>{
+  document.getElementById('cost-block').classList.toggle('open');
+});
+
+// 租車 toggle
+document.getElementById('rental-toggle').addEventListener('click',()=>{
+  document.getElementById('rental-block').classList.toggle('open');
+});
+
+// Theme
+document.getElementById('theme-btn').addEventListener('click',()=>{
+  const t=document.documentElement.dataset.theme==='dark'?'light':'dark';
+  document.documentElement.dataset.theme=t;
+  document.getElementById('theme-btn').textContent=t==='dark'?'🌙':'☀️';
+  localStorage.setItem('kyushu_theme',t);
+});
+(()=>{ const t=localStorage.getItem('kyushu_theme')||'dark'; document.documentElement.dataset.theme=t; document.getElementById('theme-btn').textContent=t==='dark'?'🌙':'☀️'; })();
+
+// ════════════════════════════════════════
+//  住宿費用（Firebase）
+// ════════════════════════════════════════
+let costItems=[];
+function renderCostEntries(){
+  const wrap=document.getElementById('cost-entries');
+  wrap.innerHTML='';
+  costItems.forEach((item,idx)=>{
+    const row=document.createElement('div'); row.className='cost-entry';
+    row.innerHTML=`<input class="cost-entry__name" value="${escapeHTML(item.name)}" placeholder="項目名稱">
+      <input class="cost-entry__amount" type="number" value="${item.amount||0}" min="0">
+      <button class="cost-entry__del">✕</button>`;
+    row.querySelector('.cost-entry__name').addEventListener('change',e=>{
+      costItems[idx].name=e.target.value;
+      saveCostItems();
+    });
+    row.querySelector('.cost-entry__amount').addEventListener('change',e=>{
+      costItems[idx].amount=Number(e.target.value)||0;
+      saveCostItems(); renderCostSummary();
+    });
+    row.querySelector('.cost-entry__del').addEventListener('click',()=>{
+      costItems.splice(idx,1); saveCostItems(); renderCostEntries(); renderCostSummary();
+    });
+    wrap.appendChild(row);
+  });
+  renderCostSummary();
+}
+function renderCostSummary(){
+  const persons=parseInt(document.getElementById('person-input').value)||1;
+  const total=costItems.reduce((s,i)=>s+(Number(i.amount)||0),0);
+  document.getElementById('cost-summary').innerHTML=`
+    <strong>總計：NT$${total.toLocaleString()}</strong><br>
+    每人分攤：NT$${Math.ceil(total/persons).toLocaleString()}（${persons}人）`;
+}
+function saveCostItems(){
+  if(!window.__firebaseReady)return;
+  window.__set(window.__ref(window.__db,'cost_items'),costItems);
+}
+document.getElementById('btn-add-cost').addEventListener('click',()=>{
+  costItems.push({name:'',amount:0});
+  renderCostEntries();
+});
+document.getElementById('person-input').addEventListener('change',renderCostSummary);
+
+// ════════════════════════════════════════
+//  租車資訊（Firebase）— 13號 / 15號獨立保存
+// ════════════════════════════════════════
+const RENTAL_FIELDS=['pickup-date','pickup-time','return-date','return-time','rental-location','pickup-loc','return-loc','company','car','cost','booking'];
+const RENTAL_GROUPS={carA:'13號',carB:'15號'};
+function rentalInputId(group,field){ return `r-${group}-${field}`; }
+function loadRentalGroupUI(group,data){
+  RENTAL_FIELDS.forEach(field=>{
+    const el=document.getElementById(rentalInputId(group,field));
+    if(el) el.value=data?.[field] ?? '';
+  });
+}
+function readRentalGroupUI(group){
+  const data={};
+  RENTAL_FIELDS.forEach(field=>{
+    const el=document.getElementById(rentalInputId(group,field));
+    if(el) data[field]=el.value;
+  });
+  return data;
+}
+function setRentalStatus(message){
+  const status=document.getElementById('rental-sync-status');
+  if(!status) return;
+  status.textContent=message;
+  if(message) setTimeout(()=>{ if(status.textContent===message) status.textContent=''; },2500);
+}
+async function saveRentalGroup(group){
+  if(!RENTAL_GROUPS[group]) throw new Error('未知租車分組');
+  const data=readRentalGroupUI(group);
+  await waitFirebaseReady();
+  await window.__set(window.__ref(window.__db,`rental_info/${group}`),data);
+  return data;
+}
+document.querySelectorAll('[data-save-rental]').forEach(button=>{
+  button.addEventListener('click',async()=>{
+    const group=button.dataset.saveRental;
+    try{
+      await saveRentalGroup(group);
+      setRentalStatus(`✅ ${RENTAL_GROUPS[group]}已儲存`);
+    }catch(error){
+      console.error(`${RENTAL_GROUPS[group] || ''}租車資訊儲存失敗:`,error);
+      setRentalStatus(`${RENTAL_GROUPS[group] || ''}儲存失敗`);
+    }
+  });
+});
+document.querySelectorAll('[data-add-rental]').forEach(button=>{
+  button.addEventListener('click',async()=>{
+    const group=button.dataset.addRental;
+    const eventType=button.dataset.rentalEvent;
+    const data=readRentalGroupUI(group);
+    const dateField=eventType==='return' ? 'return-date' : 'pickup-date';
+    const timeField=eventType==='return' ? 'return-time' : 'pickup-time';
+    if(!data[dateField]){ alert(`請先填寫${eventType==='return' ? '還車' : '取車'}日期`); return; }
+    if(!data[timeField]){ alert(`請先填寫${eventType==='return' ? '還車' : '取車'}時間`); return; }
+    try{
+      await saveRentalGroup(group);
+      setRentalStatus(`✅ ${RENTAL_GROUPS[group]}已儲存，正在帶入行程`);
+      location.href=`itinerary.html?rental=${encodeURIComponent(group)}&event=${encodeURIComponent(eventType)}`;
+    }catch(error){
+      console.error('租車帶入行程失敗:',error);
+      setRentalStatus('租車資訊儲存失敗');
+    }
+  });
+});
+
+// ════════════════════════════════════════
+//  Firebase 初始化
+// ════════════════════════════════════════
+function waitFirebase(cb){
+  if(window.__firebaseReady){
+    cb();
+    return;
+  }
+
+  window.addEventListener('firebase-ready', cb, { once:true });
+}
+
+// Firebase list 資料正規化：支援 Array / Object / null
+function normalizeFirebaseList(raw, source){
+  if(!raw) return [];
+
+  if(Array.isArray(raw)){
+    return raw
+      .filter(Boolean)
+      .map((item, index) => ({
+        ...item,
+        _key: String(index),
+        _src: source
+      }));
+  }
+
+  if(typeof raw === 'object'){
+    return Object.entries(raw)
+      .filter(([, item]) => item && typeof item === 'object')
+      .map(([key, item]) => ({
+        ...item,
+        _key: key,
+        _src: source
+      }));
+  }
+
+  return [];
+}
+
+// Favs 正規化：支援 { id:true } / ["id"] / [true,false,true] / null
+function normalizeFavs(raw){
+  if(!raw) return [];
+
+  if(Array.isArray(raw)){
+    return raw
+      .flatMap((value, index) => {
+        if(value === true) return [String(index)];
+        if(typeof value === 'string' || typeof value === 'number') return [String(value)];
+        return [];
+      })
+      .filter(Boolean);
+  }
+
+  if(typeof raw === 'object'){
+    return Object.keys(raw)
+      .filter(key => raw[key])
+      .map(String);
+  }
+
+  return [];
+}
+
+// Cost 正規化：保證 renderCostEntries() 永遠拿到 Array
+function normalizeCostItems(raw){
+  if(!raw) return [];
+
+  const normalizeItem = item => ({
+    name: item && item.name ? String(item.name) : '',
+    amount: item && item.amount ? Number(item.amount) || 0 : 0
+  });
+
+  if(Array.isArray(raw)){
+    return raw
+      .filter(Boolean)
+      .map(normalizeItem);
+  }
+
+  if(typeof raw === 'object'){
+    return Object.values(raw)
+      .filter(Boolean)
+      .map(normalizeItem);
+  }
+
+  return [];
+}
+
+// Rental 正規化：支援新版 carA/carB，也相容舊版單一租車 Object
+function normalizeRentalInfo(raw){
+  if(!raw || typeof raw !== 'object' || Array.isArray(raw)) return {carA:null,carB:null};
+  if(raw.carA || raw.carB){
+    return {
+      carA: raw.carA && typeof raw.carA==='object' ? raw.carA : null,
+      carB: raw.carB && typeof raw.carB==='object' ? raw.carB : null
+    };
+  }
+  const isLegacy=RENTAL_FIELDS.some(field=>Object.prototype.hasOwnProperty.call(raw,field));
+  return isLegacy ? {carA:raw,carB:null} : {carA:null,carB:null};
+}
+
+waitFirebase(() => {
+  const db = window.__db;
+
+  console.log('[index.html] firebase-ready received:', !!db);
+
+  // Base places
+  window.__onValue(window.__ref(db, 'base_places'), snap => {
+    const raw = snap.val();
+
+    PLACES = normalizeFirebaseList(raw, 'base');
+
+    buildRegionSelect();
+    buildCategorySelect();
+    buildAddCategoryOptions();
+    updateFilterSubOptions(filterCat);
+    buildRegionTags();
+    render();
+  }, err => {
+    console.error('base_places 讀取失敗:', err);
+    showDataError('基準資料連線失敗');
+  });
+
+  // Custom places
+  window.__onValue(window.__ref(db, 'custom_places'), snap => {
+    const raw = snap.val();
+
+    CLOUD_PLACES = normalizeFirebaseList(raw, 'custom');
+
+    buildRegionSelect();
+    buildCategorySelect();
+    buildAddCategoryOptions();
+    updateFilterSubOptions(filterCat);
+    buildRegionTags();
+    render();
+  }, err => {
+    console.error('custom_places 讀取失敗:', err);
+    showDataError('新增資料連線失敗');
+  });
+
+  // Favs：Firebase Realtime Database 即時同步
+  window.__onValue(window.__ref(db, 'favs'), snap => {
+    const nextFavs = normalizeFavs(snap.val());
+
+    const same =
+      JSON.stringify([...nextFavs].sort()) ===
+      JSON.stringify([..._favsCache].sort());
+
+    _favsCache = nextFavs;
+    _favsReady = true;
+
+    if(!same || favOnly){
+      render();
+    }
+  }, err => {
+    console.error('favs 讀取失敗:', err);
+  });
+
+  // Cost
+  window.__onValue(window.__ref(db, 'cost_items'), snap => {
+    costItems = normalizeCostItems(snap.val());
+
+    document.getElementById('cost-sync-status').textContent = '';
+    renderCostEntries();
+  }, err => {
+    console.error('cost_items 讀取失敗:', err);
+    document.getElementById('cost-sync-status').textContent = '費用資料連線失敗';
+  });
+
+  // Rental
+  window.__onValue(window.__ref(db, 'rental_info'), snap => {
+    const rentalInfo = normalizeRentalInfo(snap.val());
+    loadRentalGroupUI('carA', rentalInfo.carA);
+    loadRentalGroupUI('carB', rentalInfo.carB);
+  }, err => {
+    console.error('rental_info 讀取失敗:', err);
+    document.getElementById('rental-sync-status').textContent = '租車資料連線失敗';
+  });
+});
+
+document.getElementById('driving-toggle').addEventListener('click', () => {
+  document.getElementById('driving-section').classList.toggle('open');
+});
+</script>
+</body>
+</html>
