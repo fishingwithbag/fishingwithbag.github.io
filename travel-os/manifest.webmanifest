@@ -1,0 +1,25 @@
+{
+  "name": "九州福岡熊本自駕旅遊",
+  "short_name": "九州自駕",
+  "description": "九州福岡熊本自駕旅行總控台與每日行程",
+  "lang": "zh-Hant",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FFFEEE",
+  "theme_color": "#4E8966",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
