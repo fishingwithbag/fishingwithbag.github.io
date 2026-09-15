@@ -295,9 +295,11 @@ body.travel-os-page a:active { transform: translateY(1px) scale(.985); }
 .dashboard-next h3 { margin: 0 0 4px; font-size: 1.02rem; line-height: 1.2; }
 .dashboard-next p { margin: 0; color: var(--os-muted); font-size: .8rem; }
 .crew-command { padding-bottom: 10px; }
-.fleet-glance { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; padding: 12px; }
-.fleet-glance p { margin: 0; padding: 10px 4px; border: 1px solid var(--os-line); border-radius: 10px; color: var(--os-ink); font: 800 .82rem/1 ui-monospace, monospace; text-align: center; }
-.fleet-glance small { display: block; margin-top: 6px; overflow: hidden; color: var(--os-muted); font: 650 .66rem/1.15 inherit; text-overflow: ellipsis; white-space: nowrap; }
+.crew-command__hint { margin: 10px 12px 0; color: var(--os-muted); font-size: .7rem; line-height: 1.45; }
+.fleet-glance { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; padding: 10px 12px 12px; }
+.fleet-glance p { min-width: 0; margin: 0; padding: 11px 10px; border: 1px solid var(--os-line); border-radius: 10px; color: var(--os-ink); font: 800 .82rem/1.15 ui-monospace, monospace; text-align: left; }
+.fleet-glance p:last-child { grid-column: 1 / -1; }
+.fleet-glance small { display: block; margin-top: 6px; overflow-wrap: anywhere; color: var(--os-muted); font: 650 .66rem/1.35 inherit; }
 .dashboard-alert { margin: 0 12px; padding: 10px; border-radius: 10px; background: var(--os-surface-2); color: var(--os-muted); font-size: .76rem; }
 
 .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin: 10px 0 18px; padding: 0; }
@@ -392,6 +394,25 @@ body.travel-os-page .rental-block__body,
 body.travel-os-page .driving-body { border-color: var(--os-line); }
 body.travel-os-page .rental-group,
 body.travel-os-page .driving-tip-card { border-color: var(--os-line); background: var(--os-surface-2); }
+body.travel-os-page .cost-block__body,
+body.travel-os-page .rental-block__body,
+body.travel-os-page .rental-group,
+body.travel-os-page .rental-info-grid,
+body.travel-os-page .rental-field { min-width: 0; }
+body.travel-os-page .cost-entry-header,
+body.travel-os-page .cost-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(88px, 31%) 38px;
+  gap: 6px;
+}
+body.travel-os-page .cost-entry-header span:first-child { min-width: 0; }
+body.travel-os-page .cost-entry-header span:nth-child(2) { width: auto !important; }
+body.travel-os-page .cost-entry__name,
+body.travel-os-page .cost-entry__amount,
+body.travel-os-page .rental-field input,
+body.travel-os-page .rental-field select { width: 100%; min-width: 0; max-width: 100%; }
+body.travel-os-page .cost-entry__del { width: 38px; min-width: 38px; height: 38px; }
+body.travel-os-page .rental-info-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 body.travel-os-page .btn-add-place,
 body.travel-os-page .btn-modal-save { border-radius: 12px; background: var(--os-accent); color: var(--os-accent-ink); }
 
@@ -561,6 +582,8 @@ body.travel-os-page .modal__title { color: var(--os-ink); font-family: inherit; 
   .flight-fact { min-height: 58px; }
   .today-now { min-height: 166px; }
   .sync-state { display: none; }
+  body.travel-os-page .rental-info-grid { grid-template-columns: minmax(0, 1fr); }
+  body.travel-os-page .rental-itinerary-actions { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (min-width: 700px) {

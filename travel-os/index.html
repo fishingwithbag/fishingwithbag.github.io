@@ -829,7 +829,7 @@ button:active,a:active{transform:translateY(1px)}
   .home-side{gap:10px!important}
 }
 
-</style><link href="travel-os.css?v=20260915d" rel="stylesheet"/></head>
+</style><link href="travel-os.css?v=20260915e" rel="stylesheet"/></head>
 <body class="travel-os-page" data-page="dashboard">
 <a class="skip-link" href="#os-workspace">跳到主要內容</a>
 <header class="topbar os-topbar">
@@ -860,7 +860,8 @@ button:active,a:active{transform:translateY(1px)}
 <div id="dashboard-next" class="dashboard-next"><p>等待行程資料</p></div>
 </section>
 <aside class="crew-command">
-<div class="command-label"><span>車組</span><span>LIVE</span></div>
+<div class="command-label"><span>今日用車</span><span>即時資料</span></div>
+<p class="crew-command__hint">確認兩台租車的取車狀態，以及今天需要一起行動的站點。</p>
 <div id="dashboard-fleet" class="fleet-glance"><p>13號</p><p>15號</p><p>全員</p></div>
 <div id="dashboard-alert" class="dashboard-alert" role="status">沒有需要立即處理的提醒</div>
 </aside>
@@ -1200,7 +1201,7 @@ button:active,a:active{transform:translateY(1px)}
 const OVERVIEW_TOUR_STEPS = [
   { target:'.now-command', title:'先看目前行程', body:'NOW 集中顯示時間、地點、車組與 Google Maps，現場不用先找行程表。' },
   { target:'.next-command', title:'下一站保持可見', body:'NEXT 會顯示下一個行程與交通時間，方便提早判斷是否需要調整。' },
-  { target:'.crew-command', title:'兩個車組', body:'13號、15號與全員行程使用既有租車和行程資料，不會建立新的資料格式。' },
+  { target:'.crew-command', title:'今日用車狀態', body:'這裡快速顯示 13 號車、15 號車的車型與取車時間；「共同行程」是兩台車今天都要前往的站點數。' },
   { target:'.bottom-nav', title:'四個主要入口', body:'旅程首頁、今日行程、景點收藏與行程管理涵蓋全部功能，名稱直接說明各區用途。' }
 ];
 let overviewTourIndex = 0;
@@ -2147,6 +2148,6 @@ document.getElementById('driving-toggle').addEventListener('click', () => {
   document.getElementById('driving-section').classList.toggle('open');
 });
 </script>
-<script src="travel-os-ui.js?v=20260915c"></script>
+<script src="travel-os-ui.js?v=20260915d"></script>
 </body>
 </html>

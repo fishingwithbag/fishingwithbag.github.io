@@ -158,10 +158,11 @@
       const fleet = document.getElementById('dashboard-fleet');
       fleet.innerHTML = ['carA', 'carB'].map((key, index) => {
         const rental = rentals[key] || {};
-        const pickup = [rental['pickup-date'], rental['pickup-time']].filter(Boolean).join(' ');
-        const details = [rental.car || rental.company || '待設定', pickup ? `取車 ${pickup}` : ''].filter(Boolean).join(' / ');
-        return `<p>${index === 0 ? '13號租車' : '15號租車'}<small>${escapeValue(details)}</small></p>`;
-      }).join('') + `<p>全員<small>${items.filter(item => groupName(item) === '全員').length} 站</small></p>`;
+        const pickupDate = String(rental['pickup-date'] || '').slice(5).replace('-', '/');
+        const pickup = [pickupDate, rental['pickup-time']].filter(Boolean).join(' ');
+        const details = [rental.car || rental.company || '車輛尚未設定', pickup ? `${pickup} 取車` : '取車時間尚未設定'].join(' · ');
+        return `<p>${index === 0 ? '13號車' : '15號車'}<small>${escapeValue(details)}</small></p>`;
+      }).join('') + `<p>共同行程<small>今天 ${items.filter(item => groupName(item) === '全員').length} 站</small></p>`;
 
       const warning = items.find((item, index) => index && minutes(item.start) < minutes(items[index - 1].end) + Number(items[index - 1].transitMin || 0));
       document.getElementById('dashboard-alert').textContent = warning ? `${warning.name} 的抵達時間可能衝突` : '沒有需要立即處理的提醒';
