@@ -822,7 +822,7 @@ button:active,a:active{transform:translateY(1px)}
   .home-side{gap:10px!important}
 }
 
-</style><link href="travel-os.css?v=20260915c" rel="stylesheet"/></head>
+</style><link href="travel-os.css?v=20260915d" rel="stylesheet"/></head>
 <body class="travel-os-page" data-page="dashboard">
 <a class="skip-link" href="#os-workspace">跳到主要內容</a>
 <header class="topbar os-topbar">
@@ -833,7 +833,7 @@ button:active,a:active{transform:translateY(1px)}
 <div class="topbar__actions">
 <span class="sync-state" id="os-sync-state" role="status">連線中</span>
 <button aria-label="使用說明" class="icon-btn help-btn" id="help-btn" title="使用說明" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.4 2.4 0 1 1 3.6 2.1c-.9.5-1.4 1.1-1.4 2.2"/><path d="M12 17h.01"/></svg><span>使用說明</span></button>
-<button aria-label="只看收藏" class="icon-btn" id="fav-btn" title="只看收藏" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.7a5.5 5.5 0 0 0-7.8 0L12 5.8l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.5a5.5 5.5 0 0 0 0-7.8Z"/></svg></button>
+<button aria-label="只看收藏" aria-pressed="false" class="icon-btn" id="fav-btn" title="只看收藏" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.7a5.5 5.5 0 0 0-7.8 0L12 5.8l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.5a5.5 5.5 0 0 0 0-7.8Z"/></svg></button>
 <button aria-label="切換為淺色模式" class="icon-btn theme-toggle" id="theme-btn" title="切換為淺色模式" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><g class="theme-icon theme-icon--sun"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/></g><path class="theme-icon theme-icon--moon" d="M20.2 15.4A8.4 8.4 0 0 1 8.6 3.8 8.5 8.5 0 1 0 20.2 15.4Z"/></svg></button>
 </div>
 </header>
@@ -905,10 +905,10 @@ button:active,a:active{transform:translateY(1px)}
 </section>
 </section>
 <section class="os-view places-view" data-view="places" hidden>
-<header class="section-heading"><div><span>PLACE LIBRARY</span><h1>景點庫</h1></div><p>搜尋、收藏並加入每天的路線。</p></header>
+<header class="section-heading"><div><span>PLACES & SAVED</span><h1>景點收藏</h1></div><p>快速篩選地點、收藏候選清單，並開啟導航。</p></header>
 <div class="search-bar">
 <div class="search-wrap">
-<span class="search-icon">🔍</span>
+<span class="search-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></span>
 <input autocomplete="off" id="search-input" placeholder="搜尋名稱、地區、備註…" type="search"/>
 </div>
 <div class="selects-row">
@@ -1316,9 +1316,10 @@ const revObs = new IntersectionObserver(entries=>{
 let _favsCache = [];
 let _favsReady = false;
 
-// 收藏 icon 顯示常數：之後只改這裡，不要再到處搜尋替換
-const FAV_ICON_OFF = '❤️';
-const FAV_ICON_ON = '💖';
+// 共用收藏 SVG，避免按鈕狀態切換時退回 Emoji。
+function favoriteIcon(){
+  return '<svg class="favorite-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.7a5.5 5.5 0 0 0-7.8 0L12 5.8l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.5a5.5 5.5 0 0 0 0-7.8Z"/></svg>';
+}
 
 function getFavs(){
   return _favsCache;
@@ -1341,11 +1342,11 @@ async function toggleFav(id){
 
   if(exists){
     await window.__remove(favRef);
-    return FAV_ICON_OFF;
+    return false;
   }
 
   await window.__set(favRef, true);
-  return FAV_ICON_ON;
+  return true;
 }
 
 // ── 建卡片 ──
@@ -1354,19 +1355,18 @@ function buildCard(p){
   el.className='card'; el.dataset.id=p.id;
   const q=encodeURIComponent(p.name+' '+p.region+' Japan');
   const FISH_KW=['釣','路亞','釣具'];
-  const tags=(p.tags||[]).map(t=>`<span class="tag${FISH_KW.some(k=>String(t).includes(k))?' tag--fish':''}">${escapeHTML(t)}</span>`).join('');
   const isFav=getFavs().includes(String(p.id));
   const sub = p.subcategory||p.category||'';
+  const tagValues=[...new Set([p.region,sub,...(p.tags||[])].map(value=>String(value||'').trim()).filter(Boolean))];
+  const tags=tagValues.map(t=>`<span class="tag${FISH_KW.some(k=>t.includes(k))?' tag--fish':''}">${escapeHTML(t)}</span>`).join('');
   const canEdit=p._src==='custom'&&p._key;
   el.innerHTML=`
     <div class="card__img-placeholder">${catEmoji(p.category, p.subcategory)}</div>
     <div class="card__body">
+      <div class="card__name">${escapeHTML(p.name)}</div>
       <div class="card__tags">
-        <span class="tag">${escapeHTML(p.region)}</span>
-        <span class="tag">${escapeHTML(sub)}</span>
         ${tags}
       </div>
-      <div class="card__name">${escapeHTML(p.name)}</div>
       ${p.hours?`<div class="card__hours">🕐 ${escapeHTML(p.hours)}</div>`:''}
       ${p.note?`<p class="card__note">${escapeHTML(p.note)}</p>`:''}
     </div>
@@ -1376,10 +1376,11 @@ function buildCard(p){
         <button
           class="card__btn card__fav ${isFav ? 'is-fav' : ''}"
           data-id="${escapeHTML(p.id)}"
+          aria-pressed="${isFav}"
           title="${isFav ? '取消收藏' : '加入收藏'}"
           aria-label="${isFav ? '取消收藏' : '加入收藏'}"
         >
-          ${isFav ? FAV_ICON_ON : FAV_ICON_OFF}
+          ${favoriteIcon()}
         </button>
         
         <a
@@ -1422,16 +1423,16 @@ function buildCard(p){
       this.disabled = true;
     
       try{
-        const nextIcon = await toggleFav(p.id);
-    
-        this.textContent = nextIcon;
-    
-        if(nextIcon === FAV_ICON_ON){
+        const isNowFavorite = await toggleFav(p.id);
+
+        if(isNowFavorite){
           this.classList.add('is-fav');
+          this.setAttribute('aria-pressed', 'true');
           this.title = '取消收藏';
           this.setAttribute('aria-label', '取消收藏');
         }else{
           this.classList.remove('is-fav');
+          this.setAttribute('aria-pressed', 'false');
           this.title = '加入收藏';
           this.setAttribute('aria-label', '加入收藏');
         }
@@ -1729,9 +1730,16 @@ document.getElementById('sub-select').addEventListener('change',e=>{ filterSub=e
 document.getElementById('sort-select').addEventListener('change',render);
 
 // Fav toggle（topbar icon）
+function setFavoriteFilterState(active){
+  const button=document.getElementById('fav-btn');
+  button.classList.toggle('is-active',active);
+  button.setAttribute('aria-pressed',String(active));
+  button.setAttribute('aria-label',active?'顯示全部地點':'只看收藏');
+  button.title=active?'顯示全部地點':'只看收藏';
+}
   document.getElementById('fav-btn').addEventListener('click',()=>{
   favOnly = !favOnly;
-  document.getElementById('fav-btn').textContent = favOnly ? FAV_ICON_ON : FAV_ICON_OFF;
+  setFavoriteFilterState(favOnly);
   render();
 });
 
