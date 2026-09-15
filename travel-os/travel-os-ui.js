@@ -153,7 +153,7 @@
       document.getElementById('dashboard-next-time').textContent = pair.next?.start || '--:--';
       next.innerHTML = pair.next
         ? `<h3>${escapeValue(pair.next.name)}</h3><p>${Number(pair.current?.transitMin || 0) ? `開車 ${Number(pair.current.transitMin)} 分` : '交通時間未設定'}　${escapeValue(groupName(pair.next))}</p>`
-        : '<h3>今天沒有下一站</h3><p>可以留白，也可以到 Today 加入行程。</p>';
+        : '<h3>今天沒有下一站</h3><p>可以留白，也可以到今日行程加入安排。</p>';
 
       const fleet = document.getElementById('dashboard-fleet');
       fleet.innerHTML = ['carA', 'carB'].map((key, index) => {
