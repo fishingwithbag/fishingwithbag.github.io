@@ -427,18 +427,18 @@ button:active,a:active{transform:translateY(1px)}
   .it-right .os-panel__head{padding:10px 12px!important}.it-right .os-panel__head h3{font-size:14px!important}.it-right .action-btn{min-height:40px!important;padding:8px 10px!important;font-size:11px!important}
 }
 
-</style><link href="travel-os.css?v=20260915" rel="stylesheet"/></head>
+</style><link href="travel-os.css?v=20260915b" rel="stylesheet"/></head>
 <body class="travel-os-page" data-page="today">
 <a class="skip-link" href="#today-workspace">跳到主要內容</a>
 <header class="topbar os-topbar">
 <div class="topbar__left">
-<a class="topbar__back" href="index.html" aria-label="返回總控台">‹</a>
+<a class="topbar__back" href="index.html" aria-label="返回總控台"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></a>
 <span class="topbar__title">Today</span>
 </div>
 <div class="topbar__actions">
 <span class="sync-state" id="os-sync-state" role="status">連線中</span>
-<button aria-label="使用說明" class="icon-btn" id="help-btn" title="使用說明" type="button">?</button>
-<button aria-label="切換主題" class="icon-btn" id="theme-btn" type="button">◐</button>
+<button aria-label="使用說明" class="icon-btn help-btn" id="help-btn" title="使用說明" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.4 2.4 0 1 1 3.6 2.1c-.9.5-1.4 1.1-1.4 2.2"/><path d="M12 17h.01"/></svg><span>使用說明</span></button>
+<button aria-label="切換主題" class="icon-btn" id="theme-btn" title="切換主題" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 6.6 6.6 0 0 0 21 12.8Z"/></svg></button>
 </div>
 </header>
 <main class="today-workspace" id="today-workspace">
@@ -471,7 +471,7 @@ button:active,a:active{transform:translateY(1px)}
 </div>
 </aside>
 <section class="today-focus" aria-label="目前與下一站">
-<header class="today-heading"><div><span id="today-date-label">今日行程</span><h1 id="today-city-label">九州</h1></div><span id="today-day-count">DAY 1 / 8</span></header>
+<header class="today-heading"><div><span id="today-date-label">今日行程</span><h1 id="today-city-label">九州</h1><p class="today-heading__hint">先看目前行程，再看下一站；其餘安排依時間排列。</p></div><span id="today-day-count">DAY 1 / 8</span></header>
 <article class="today-now" id="today-now" aria-live="polite"><div class="focus-loading">正在讀取目前行程</div></article>
 <article class="today-next" id="today-next" aria-live="polite"><div class="focus-loading">正在讀取下一站</div></article>
 </section>
@@ -656,10 +656,10 @@ button:active,a:active{transform:translateY(1px)}
 </div>
 </section>
 <nav class="bottom-nav" aria-label="主要導覽">
-<a class="bottom-nav__item" href="index.html"><span class="nav-glyph">⌂</span><span>總控</span></a>
-<a class="bottom-nav__item active" href="itinerary.html"><span class="nav-glyph">▦</span><span>Today</span></a>
-<a class="bottom-nav__item" href="index.html?view=places"><span class="nav-glyph">⌖</span><span>景點</span></a>
-<a class="bottom-nav__item" href="index.html?view=more"><span class="nav-glyph">•••</span><span>更多</span></a>
+<a class="bottom-nav__item" href="index.html"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 10.5 12 3l8.5 7.5"/><path d="M5.5 9.5V21h13V9.5"/><path d="M9.5 21v-6h5v6"/></svg><span>總控</span></a>
+<a class="bottom-nav__item active" href="itinerary.html"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/><path d="m8.5 15 2 2 5-5"/></svg><span>Today</span></a>
+<a class="bottom-nav__item" href="index.html?view=places"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>景點</span></a>
+<a class="bottom-nav__item" href="index.html?view=more"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg><span>更多</span></a>
 </nav>
 <script>
 (function(){
@@ -1098,6 +1098,23 @@ function renderParkingRows(item) {
   });
   return rows.length ? `<div class="tl-parking">${rows.join('')}</div>` : '';
 }
+
+function itemMapsUrl(item) {
+  const flightNo = String(item?.flightNo || '').toUpperCase().replace(/\s+/g, '');
+  if (item?.type === 'flight') {
+    const airport = flightNo === 'JX846'
+      ? '桃園國際機場 第一航廈'
+      : flightNo === 'JX847'
+        ? '熊本機場 國內線・國際線航廈'
+        : item.origin || item.name;
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(airport || '')}`;
+  }
+  if (item?.type === 'rental') {
+    const point = item.city || item.region || item.name || '';
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${point} Japan`)}`;
+  }
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${item?.name || ''} ${item?.city || item?.region || ''} Japan`)}`;
+}
 function parkingSetHtml(prefix,title) {
   const spot=(kind,label)=>`<div class="parking-set"><div class="parking-set__title"><span>${label}</span></div><div class="parking-set__grid"><div class="parking-mini wide"><label>停車場名稱</label><input id="${prefix}-${kind}-name" type="text" placeholder="例：草千里第一停車場"></div><div class="parking-mini wide"><label>Google Maps 連結（可留空）</label><input id="${prefix}-${kind}-maps" type="url" placeholder="貼上 Google Maps 分享連結"></div><div class="parking-mini"><label>步行到景點（分鐘）</label><input id="${prefix}-${kind}-walk" type="number" min="0" placeholder="0"></div><div class="parking-mini"><label>停車費（¥）</label><input id="${prefix}-${kind}-fee" type="number" min="0" placeholder="0"></div><div class="parking-mini wide"><label>備註</label><textarea id="${prefix}-${kind}-note" placeholder="例：假日容易客滿、入口在南側"></textarea></div></div></div>`;
   return `<div class="parking-set__title"><span>${title}</span></div>${spot('primary','主要停車場')}<button class="parking-backup-toggle" type="button" data-parking-backup="${prefix}">＋ 新增備用停車場</button><div class="parking-backup-fields" id="${prefix}-backup-wrap">${spot('backup','備用停車場')}</div>`;
@@ -1195,7 +1212,7 @@ function renderDay() {
               <span class="tl-card__cost">${it.cost ? `¥${Number(it.cost).toLocaleString()}` : ''}</span>
               <div class="tl-card__actions">
                 ${it.note ? `<button class="tl-card__btn btn-note-toggle">備註</button>` : ''}
-                <a class="tl-card__btn tl-map" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(it.name + ' Japan')}" target="_blank" rel="noopener" title="開啟 Google Maps" aria-label="開啟 Google Maps">
+                <a class="tl-card__btn tl-map" href="${escapeHTML(itemMapsUrl(it))}" target="_blank" rel="noopener" title="開啟 Google Maps" aria-label="開啟 Google Maps">
                   <svg class="gmap-icon" viewBox="0 0 36 36" aria-hidden="true">
                     <circle class="gmap-icon__bg" cx="18" cy="18" r="16"/>
                     <path class="gmap-icon__green" d="M18 6.2c-5.05 0-9.15 4.05-9.15 9.05 0 6.8 9.15 14.55 9.15 14.55V19.1l-3.75-3.75L18 6.2z"/>
@@ -1783,9 +1800,10 @@ document.querySelectorAll('[data-close-modal]').forEach(button => button.addEven
 document.getElementById('picker-overlay').addEventListener('click', event => { if (event.target.id === 'picker-overlay') event.target.classList.remove('open'); });
 
 const TOUR_STEPS = [
+  { target:'.today-heading', title:'Today 的閱讀順序', body:'由上往下是日期與車組、目前行程、下一站、稍後行程；深色卡只保留現場最需要的操作。' },
   { target:'#date-tabs', title:'選擇日期', body:'每一天保留自己的城市、景點、交通、餐廳與航班資料。' },
   { target:'#group-view', title:'切換車組', body:'查看所有行程、13號或15號，兩組仍會共同看到全員行程。' },
-  { target:'#today-now', title:'目前行程', body:'NOW 在手機首屏直接提供地點、時間、車組與 Google Maps。' },
+  { target:'#today-now', title:'目前行程', body:'NOW 是行動中的操作焦點，直接提供地點、時間、車組與 Google Maps，不是裝飾 Banner。' },
   { target:'#today-next', title:'下一站', body:'NEXT 顯示下一個地點與目前行程設定的交通時間。' },
   { target:'#today-manage-toggle', title:'管理完整行程', body:'管理內保留批次加入、手動新增、航班、租車、統計、路線與協作設定。' }
 ];
@@ -1934,6 +1952,6 @@ window.addEventListener('pagehide', () => {
   releaseItineraryLock();
 });
 </script>
-<script src="travel-os-ui.js?v=20260915"></script>
+<script src="travel-os-ui.js?v=20260915b"></script>
 </body>
 </html>

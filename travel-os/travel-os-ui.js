@@ -73,6 +73,19 @@
 
   function mapsUrl(item) {
     if (!item) return '#';
+    const flightNo = String(item.flightNo || '').toUpperCase().replace(/\s+/g, '');
+    if (item.type === 'flight') {
+      const airport = flightNo === 'JX846'
+        ? '桃園國際機場 第一航廈'
+        : flightNo === 'JX847'
+          ? '熊本機場 國內線・國際線航廈'
+          : item.origin || item.name;
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(airport)}`;
+    }
+    if (item.type === 'rental') {
+      const rentalPoint = item.city || item.region || item.name;
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${rentalPoint} Japan`)}`;
+    }
     const parking = item.parking || {};
     const preferred = parking.mode === 'split'
       ? parking[item.travelGroup]?.primary?.mapsUrl
@@ -145,7 +158,9 @@
       const fleet = document.getElementById('dashboard-fleet');
       fleet.innerHTML = ['carA', 'carB'].map((key, index) => {
         const rental = rentals[key] || {};
-        return `<p>${index === 0 ? '13號' : '15號'}<small>${escapeValue(rental.car || rental.company || '待設定')}</small></p>`;
+        const pickup = [rental['pickup-date'], rental['pickup-time']].filter(Boolean).join(' ');
+        const details = [rental.car || rental.company || '待設定', pickup ? `取車 ${pickup}` : ''].filter(Boolean).join(' / ');
+        return `<p>${index === 0 ? '13號租車' : '15號租車'}<small>${escapeValue(details)}</small></p>`;
       }).join('') + `<p>全員<small>${items.filter(item => groupName(item) === '全員').length} 站</small></p>`;
 
       const warning = items.find((item, index) => index && minutes(item.start) < minutes(items[index - 1].end) + Number(items[index - 1].transitMin || 0));
