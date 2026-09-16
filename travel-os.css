@@ -294,6 +294,19 @@ body.travel-os-page a:active { transform: translateY(1px) scale(.985); }
 .dashboard-next { min-height: 88px; padding: 13px 14px; }
 .dashboard-next h3 { margin: 0 0 4px; font-size: 1.02rem; line-height: 1.2; }
 .dashboard-next p { margin: 0; color: var(--os-muted); font-size: .8rem; }
+.dashboard-next__actions { margin-top: 14px; }
+.next-detail {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+  border: 1px solid var(--os-line);
+  border-radius: 11px;
+  background: var(--os-surface-2);
+  color: var(--os-ink);
+  font: 750 .76rem/1 var(--os-sans, sans-serif);
+}
 .crew-command { padding-bottom: 10px; }
 .crew-command__hint { margin: 10px 12px 0; color: var(--os-muted); font-size: .7rem; line-height: 1.45; }
 .fleet-glance { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; padding: 10px 12px 12px; }
@@ -490,6 +503,7 @@ body.travel-os-page .btn-modal-save { border-radius: 12px; background: var(--os-
 .next-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-top: 8px; }
 .next-row h2 { min-width: 0; margin: 0; overflow: hidden; font-size: 1.08rem; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
 .next-row p { flex: 0 0 auto; margin: 0; color: var(--os-muted); font-size: .75rem; }
+.today-next .next-detail { width: 100%; margin-top: 11px; }
 .focus-loading { color: var(--os-muted); font-size: .75rem; }
 
 .today-ops { order: 5; display: none; margin-top: 10px; }
