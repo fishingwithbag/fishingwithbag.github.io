@@ -1327,6 +1327,7 @@ function setManualNameMode(enabled, focus=false){
 
 function resetGooglePlaceSelection(showSearch=true){
   selectedGooglePlace=null;
+  if(placesAutocomplete) placesAutocomplete.value='';
   const selected=document.getElementById('google-place-selected');
   selected.hidden=true;
   selected.innerHTML='';
@@ -1337,7 +1338,9 @@ function showGooglePlaceSelection(place,{existing=false}={}){
   const selected=document.getElementById('google-place-selected');
   selected.hidden=false;
   selected.innerHTML=`<strong>${escapeHTML(place.displayName)}</strong><span>${escapeHTML(place.googleAddress)}</span>${existing ? '<em>已連結 Google 地點</em>' : '<button type="button" id="clear-google-place">重新搜尋</button>'}`;
-  document.getElementById('google-place-autocomplete').hidden=true;
+  // Keep the focused Places field mounted after a mobile selection. Hiding
+  // it while the virtual keyboard is closing causes a large layout jump.
+  document.getElementById('google-place-autocomplete').hidden=existing;
   selected.querySelector('#clear-google-place')?.addEventListener('click',()=>{
     resetGooglePlaceSelection();
     placesAutocomplete?.focus();
@@ -1492,7 +1495,7 @@ function buildCard(p){
   const sub = p.subcategory||p.category||'';
   const tagValues=[...new Set([p.region,sub,...(p.tags||[])].map(value=>String(value||'').trim()).filter(Boolean))];
   const tags=tagValues.map(t=>`<span class="tag${FISH_KW.some(k=>t.includes(k))?' tag--fish':''}">${escapeHTML(t)}</span>`).join('');
-  const canEdit=p._src==='custom'&&p._key;
+  const canManage=Boolean(p._key&&(p._src==='custom'||p._src==='base'));
   el.innerHTML=`
     <div class="card__img-placeholder">${catEmoji(p.category, p.subcategory)}</div>
     <div class="card__body">
@@ -1542,7 +1545,7 @@ function buildCard(p){
             <circle class="gmap-icon__center" cx="18" cy="15.35" r="3.15"/>
           </svg>
         </a>
-        ${canEdit?`<button class="card__btn card__edit btn-edit-place" data-id="${escapeHTML(p.id)}" title="編輯地點" aria-label="編輯地點">
+        ${canManage?`<button class="card__btn card__edit btn-edit-place" data-id="${escapeHTML(p.id)}" title="編輯地點" aria-label="編輯地點">
           <svg class="card__edit-icon" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M12 20h9"/>
             <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/>
@@ -1579,12 +1582,20 @@ function buildCard(p){
   // edit
   el.querySelector('.btn-edit-place')?.addEventListener('click',()=>startEditPlace(p));
   // del
-  el.querySelector('.btn-del-place')?.addEventListener('click',function(){
-    if(!confirm('確定刪除「'+p.name+'」？'))return;
+  el.querySelector('.btn-del-place')?.addEventListener('click',async function(){
+    if(!confirm('確定刪除「'+p.name+'」？刪除後無法復原。'))return;
+    if(p._src==='base'&&!confirm('這是既有景點資料。請再次確認是否真的要刪除。'))return;
     const key=p._key;
-    if(key){
-      if(editingPlace?._key===key) resetPlaceForm();
-      window.__remove(window.__ref(window.__db,'custom_places/'+key));
+    if(!key)return;
+    this.disabled=true;
+    try{
+      if(editingPlace?._key===key&&editingPlace?._src===p._src) resetPlaceForm();
+      const sourceNode=p._src==='base'?'base_places':'custom_places';
+      await window.__remove(window.__ref(window.__db,sourceNode+'/'+key));
+    }catch(error){
+      console.error('刪除景點失敗:',error);
+      this.disabled=false;
+      alert('刪除失敗，資料沒有變更。請稍後再試。');
     }
   });
   revObs.observe(el);
@@ -1855,8 +1866,10 @@ function startEditPlace(place){
   }
   const section=document.getElementById('add-section');
   section.classList.add('open');
-  section.scrollIntoView({behavior:'smooth',block:'start'});
-  setTimeout(()=>hasGoogleLocation ? document.getElementById('add-region').focus({preventScroll:true}) : placesAutocomplete?.focus(),350);
+  section.scrollIntoView({behavior:'smooth',block:'nearest'});
+  // Avoid opening the mobile keyboard during the scroll. The user can tap
+  // the Google field when ready and the caret stays inside the viewport.
+  if(hasGoogleLocation) setTimeout(()=>document.getElementById('add-region').focus({preventScroll:true}),350);
 }
 
 // ════════════════════════════════════════
@@ -1986,8 +1999,9 @@ document.getElementById('add-place-form').addEventListener('submit',e=>{
     }
   }
   status.textContent=original?'⏳ 更新中…':'⏳ 儲存中…';
+  const sourceNode=original?._src==='base'?'base_places':'custom_places';
   const savePromise=original
-    ? window.__update(window.__ref(window.__db,'custom_places/'+original._key),payload)
+    ? window.__update(window.__ref(window.__db,sourceNode+'/'+original._key),payload)
     : window.__push(window.__ref(window.__db,'custom_places'),payload);
   savePromise.then(()=>{
     status.textContent=original?'✅ 已更新':'✅ 已儲存';

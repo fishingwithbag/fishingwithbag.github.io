@@ -674,9 +674,10 @@ body.travel-os-page .modal__title { color: var(--os-ink); font-family: inherit; 
 .google-place-search {
   position: relative;
   z-index: 260;
-  margin-bottom: 12px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--os-line);
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  margin-bottom: .55rem;
 }
 .google-place-search__label {
   display: block;
@@ -686,13 +687,34 @@ body.travel-os-page .modal__title { color: var(--os-ink); font-family: inherit; 
   font-weight: 750;
 }
 #google-place-autocomplete {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   min-height: 48px;
+  scroll-margin-block: 72px 32vh;
 }
 #google-place-autocomplete gmp-place-autocomplete {
   display: block;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   min-height: 48px;
+  box-sizing: border-box;
+  contain: inline-size;
+  touch-action: manipulation;
   color-scheme: dark;
+}
+#google-place-autocomplete gmp-place-autocomplete::part(input) {
+  /* 16px prevents iOS Safari from zooming and losing the visible caret. */
+  min-height: 48px;
+  font-size: 16px;
+}
+#google-place-autocomplete gmp-place-autocomplete::part(prediction-list) {
+  max-width: 100%;
+  max-height: min(42dvh, 320px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  font-size: 14px;
 }
 [data-theme="light"] #google-place-autocomplete gmp-place-autocomplete { color-scheme: light; }
 .google-place-search__loading,
@@ -713,6 +735,21 @@ body.travel-os-page .modal__title { color: var(--os-ink); font-family: inherit; 
   font-size: .68rem;
   line-height: 1.5;
 }
+.google-place-search__mode {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  margin-top: 5px;
+  padding: 0;
+  border: 0;
+  color: var(--os-muted);
+  background: transparent;
+  font-size: .7rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.google-place-search__mode:hover { color: var(--os-text); }
+.google-place-search #add-name { width: 100%; min-height: 48px; }
 .google-place-search__selected {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -729,6 +766,14 @@ body.travel-os-page .modal__title { color: var(--os-ink); font-family: inherit; 
 .google-place-search__selected span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .google-place-search__selected strong { font-size: .78rem; }
 .google-place-search__selected span { grid-column: 1; color: var(--os-muted); font-size: .67rem; }
+.google-place-search__selected em {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  color: var(--os-accent);
+  font-size: .66rem;
+  font-style: normal;
+  white-space: nowrap;
+}
 .google-place-search__selected button {
   grid-column: 2;
   grid-row: 1 / span 2;
@@ -740,7 +785,17 @@ body.travel-os-page .modal__title { color: var(--os-ink); font-family: inherit; 
 @media (max-width: 520px) {
   .google-place-search { z-index: 420; }
   #google-place-autocomplete,
-  #google-place-autocomplete gmp-place-autocomplete { width: 100%; max-width: calc(100vw - 44px); }
+  #google-place-autocomplete gmp-place-autocomplete {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+  #google-place-autocomplete gmp-place-autocomplete::part(prediction-item) {
+    min-height: 48px;
+    padding-inline: 12px;
+  }
+  .google-place-search__mode { min-height: 44px; }
+  .google-place-search__selected em { grid-column: 1; grid-row: auto; }
 }
 
 .journey-leg button,
