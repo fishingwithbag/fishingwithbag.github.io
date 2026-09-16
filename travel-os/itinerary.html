@@ -1184,6 +1184,7 @@ function backendCall(name, data) {
 }
 
 function numericLocation(value) {
+  if (value?.latitude === null || value?.latitude === '' || value?.longitude === null || value?.longitude === '') return null;
   const latitude = Number(value?.latitude);
   const longitude = Number(value?.longitude);
   return Number.isFinite(latitude) && latitude >= -90 && latitude <= 90 && Number.isFinite(longitude) && longitude >= -180 && longitude <= 180

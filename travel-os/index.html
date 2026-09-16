@@ -938,11 +938,13 @@ button:active,a:active{transform:translateY(1px)}
 </div>
 <div class="add-section__body">
 <form id="add-place-form">
-<div class="google-place-search" id="google-place-search">
-<label class="google-place-search__label">搜尋 Google 地點</label>
+<div class="add-field google-place-search" id="google-place-search">
+<div class="google-place-search__label">景點名稱／Google 地點 *</div>
 <div id="google-place-autocomplete"><span class="google-place-search__loading">正在載入地點搜尋…</span></div>
 <div class="google-place-search__selected" id="google-place-selected" hidden=""></div>
-<p class="google-place-search__hint" id="google-place-hint">選擇結果後會帶入正式名稱、地址與座標。也可以略過，繼續手動新增。</p>
+<input autocomplete="off" hidden="" id="add-name" placeholder="輸入景點或店家名稱" type="text"/>
+<button class="google-place-search__mode" id="toggle-manual-name" type="button">找不到地點？手動輸入名稱</button>
+<p class="google-place-search__hint" id="google-place-hint">搜尋並選擇後會直接使用正式名稱，並保存地址與座標。</p>
 </div>
 <div class="add-field">
 <label>地區 *</label>
@@ -961,10 +963,6 @@ button:active,a:active{transform:translateY(1px)}
 <option value="">請選擇子類別</option>
 </select>
 <input autocomplete="off" class="custom-choice-input" hidden="" id="add-sub" placeholder="輸入新子類別" type="text"/>
-</div>
-<div class="add-field">
-<label>名稱 *</label>
-<input id="add-name" placeholder="景點或店家名稱" required="" type="text"/>
 </div>
 <div class="add-field">
 <label>營業時間</label>
@@ -1298,6 +1296,8 @@ let filterSub = '';
 let editingPlace = null;
 let selectedGooglePlace = null;
 let placesAutocomplete = null;
+let manualNameMode = false;
+let placesUnavailable = false;
 
 function allPlaces(){ return [...PLACES, ...CLOUD_PLACES]; }
 
@@ -1306,18 +1306,39 @@ function browserMapsKey(){
   return key && key!=='PUT_BROWSER_KEY_HERE' ? key : '';
 }
 
-function resetGooglePlaceSelection(){
+function hasNumericPlaceLocation(place){
+  if(place?.latitude===null||place?.latitude===''||place?.longitude===null||place?.longitude==='') return false;
+  const latitude=Number(place?.latitude);
+  const longitude=Number(place?.longitude);
+  return Number.isFinite(latitude)&&latitude>=-90&&latitude<=90&&Number.isFinite(longitude)&&longitude>=-180&&longitude<=180;
+}
+
+function setManualNameMode(enabled, focus=false){
+  manualNameMode=enabled;
+  const host=document.getElementById('google-place-autocomplete');
+  const input=document.getElementById('add-name');
+  const toggle=document.getElementById('toggle-manual-name');
+  host.hidden=enabled;
+  input.hidden=!enabled;
+  input.required=enabled;
+  toggle.textContent=enabled ? '改用 Google 地點搜尋' : '找不到地點？手動輸入名稱';
+  if(focus) (enabled ? input : placesAutocomplete)?.focus();
+}
+
+function resetGooglePlaceSelection(showSearch=true){
   selectedGooglePlace=null;
   const selected=document.getElementById('google-place-selected');
   selected.hidden=true;
   selected.innerHTML='';
+  if(showSearch&&!manualNameMode) document.getElementById('google-place-autocomplete').hidden=false;
 }
 
-function showGooglePlaceSelection(place){
+function showGooglePlaceSelection(place,{existing=false}={}){
   const selected=document.getElementById('google-place-selected');
   selected.hidden=false;
-  selected.innerHTML=`<strong>${escapeHTML(place.displayName)}</strong><span>${escapeHTML(place.googleAddress)}</span><button type="button" id="clear-google-place">清除</button>`;
-  selected.querySelector('#clear-google-place').addEventListener('click',()=>{
+  selected.innerHTML=`<strong>${escapeHTML(place.displayName)}</strong><span>${escapeHTML(place.googleAddress)}</span>${existing ? '<em>已連結 Google 地點</em>' : '<button type="button" id="clear-google-place">重新搜尋</button>'}`;
+  document.getElementById('google-place-autocomplete').hidden=true;
+  selected.querySelector('#clear-google-place')?.addEventListener('click',()=>{
     resetGooglePlaceSelection();
     placesAutocomplete?.focus();
   });
@@ -1327,6 +1348,7 @@ async function initGooglePlaces(){
   const host=document.getElementById('google-place-autocomplete');
   try{
     const {PlaceAutocompleteElement}=await google.maps.importLibrary('places');
+    placesUnavailable=false;
     placesAutocomplete=new PlaceAutocompleteElement({includedRegionCodes:['jp']});
     placesAutocomplete.placeholder='輸入日本景點或店家名稱';
     placesAutocomplete.setAttribute('aria-label','搜尋 Google 地點');
@@ -1346,9 +1368,11 @@ async function initGooglePlaces(){
           latitude,
           longitude
         };
-        document.getElementById('add-name').value=selectedGooglePlace.displayName;
+        if(!editingPlace) document.getElementById('add-name').value=selectedGooglePlace.displayName;
         showGooglePlaceSelection(selectedGooglePlace);
-        hint.textContent='已選擇 Google 地點。請補上地區、分類與其他旅程資訊。';
+        hint.textContent=editingPlace
+          ? '位置已選擇；儲存時只補上缺少的 Google 地址與座標，不會改動原名稱。'
+          : '已選擇 Google 地點。請補上地區、分類與其他旅程資訊。';
       }catch(error){
         console.error('Google Place Details 讀取失敗:',error);
         resetGooglePlaceSelection();
@@ -1361,24 +1385,30 @@ async function initGooglePlaces(){
     host.replaceChildren(placesAutocomplete);
   }catch(error){
     console.error('Places Library 載入失敗:',error);
+    placesUnavailable=true;
     host.innerHTML='<span class="google-place-search__error">地點搜尋暫時無法使用</span>';
     document.getElementById('google-place-hint').textContent='請直接使用下方原有欄位手動新增。';
+    setManualNameMode(true);
   }
 }
 
 function loadGooglePlaces(){
   const key=browserMapsKey();
   if(!key){
+    placesUnavailable=true;
     document.getElementById('google-place-autocomplete').innerHTML='<span class="google-place-search__error">尚未設定 Google 地點搜尋</span>';
-    document.getElementById('google-place-hint').textContent='目前仍可使用下方原有欄位手動新增。';
+    document.getElementById('google-place-hint').textContent='目前仍可手動輸入景點名稱。';
+    setManualNameMode(true);
     return;
   }
   const script=document.createElement('script');
   script.src=`https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&loading=async&libraries=places&v=weekly&language=ja&region=JP&callback=initGooglePlaces`;
   script.async=true;
   script.onerror=()=>{
+    placesUnavailable=true;
     document.getElementById('google-place-autocomplete').innerHTML='<span class="google-place-search__error">地點搜尋載入失敗</span>';
-    document.getElementById('google-place-hint').textContent='請直接使用下方原有欄位手動新增。';
+    document.getElementById('google-place-hint').textContent='請改用手動輸入景點名稱。';
+    setManualNameMode(true);
   };
   document.head.appendChild(script);
 }
@@ -1780,10 +1810,14 @@ function setAddCategoryValue(category,subcategory){
 
 function resetPlaceForm(){
   editingPlace=null;
+  manualNameMode=false;
   resetGooglePlaceSelection();
   document.getElementById('google-place-search').hidden=false;
   const form=document.getElementById('add-place-form');
   form.reset();
+  document.getElementById('toggle-manual-name').hidden=false;
+  setManualNameMode(placesUnavailable);
+  document.getElementById('google-place-hint').textContent='搜尋並選擇後會直接使用正式名稱，並保存地址與座標。';
   document.getElementById('add-category').hidden=true;
   document.getElementById('add-sub').hidden=true;
   document.getElementById('btn-save-place').textContent='新增地點';
@@ -1795,8 +1829,9 @@ function resetPlaceForm(){
 
 function startEditPlace(place){
   editingPlace={...place};
+  manualNameMode=false;
   resetGooglePlaceSelection();
-  document.getElementById('google-place-search').hidden=true;
+  document.getElementById('google-place-search').hidden=false;
   document.getElementById('add-region').value=place.region||'';
   document.getElementById('add-name').value=place.name||'';
   document.getElementById('add-hours').value=place.hours||'';
@@ -1806,10 +1841,22 @@ function startEditPlace(place){
   document.getElementById('btn-save-place').textContent='儲存修改';
   document.getElementById('btn-cancel-edit').hidden=false;
   document.querySelector('#add-section .add-section__title').textContent='✎ 編輯地點';
+  const hasGoogleLocation=Boolean(place.googlePlaceId&&hasNumericPlaceLocation(place));
+  if(hasGoogleLocation){
+    showGooglePlaceSelection({displayName:place.name||'已連結地點',googleAddress:place.googleAddress||''},{existing:true});
+    setManualNameMode(true);
+    document.getElementById('toggle-manual-name').hidden=true;
+    document.getElementById('google-place-hint').textContent='此景點已有 Google 位置資料；原有名稱與分類仍可照常編輯。';
+  }else{
+    setManualNameMode(placesUnavailable);
+    document.getElementById('google-place-hint').textContent=placesUnavailable
+      ? 'Google 地點搜尋暫時無法使用；仍可照常編輯原有資料。'
+      : '搜尋並選擇正確地點，只會新增缺少的 Google 地址與座標，不會更改原名稱。';
+  }
   const section=document.getElementById('add-section');
   section.classList.add('open');
   section.scrollIntoView({behavior:'smooth',block:'start'});
-  setTimeout(()=>document.getElementById('add-region').focus({preventScroll:true}),350);
+  setTimeout(()=>hasGoogleLocation ? document.getElementById('add-region').focus({preventScroll:true}) : placesAutocomplete?.focus(),350);
 }
 
 // ════════════════════════════════════════
@@ -1883,6 +1930,15 @@ document.getElementById('add-sub-select').addEventListener('change',e=>{
   if(isCustom) input.focus();
 });
 document.getElementById('btn-cancel-edit').addEventListener('click',resetPlaceForm);
+document.getElementById('toggle-manual-name').addEventListener('click',()=>{
+  if(selectedGooglePlace) resetGooglePlaceSelection(false);
+  setManualNameMode(!manualNameMode,true);
+  document.getElementById('google-place-hint').textContent=manualNameMode
+    ? '手動輸入不會取得地址與座標；之後仍可再連結 Google 地點。'
+    : editingPlace
+      ? '搜尋並選擇正確地點，只會新增缺少的 Google 地址與座標，不會更改原名稱。'
+      : '搜尋並選擇後會直接使用正式名稱，並保存地址與座標。';
+});
 
 // 提交新增地點
 document.getElementById('add-place-form').addEventListener('submit',e=>{
@@ -1900,20 +1956,35 @@ document.getElementById('add-place-form').addEventListener('submit',e=>{
   const tags=original
     ? [...new Set(existingTags.map(tag=>tag===original.region ? region : tag).filter(Boolean).concat(region))]
     : [region];
-  const googleFields=!original&&selectedGooglePlace ? {
-    googlePlaceId:selectedGooglePlace.googlePlaceId,
-    googleAddress:selectedGooglePlace.googleAddress,
-    latitude:selectedGooglePlace.latitude,
-    longitude:selectedGooglePlace.longitude
-  } : {};
-  const payload={
-    ...(original||{}),
-    id:original?.id||Date.now(),region,category,subcategory:sub||category,name,hours,note,
-    twd:original?.twd??null,tags,fav:original?.fav??false,photo:original?.photo??null,
-    createdAt:original?.createdAt||new Date().toISOString(),
-    updatedAt:new Date().toISOString(),_src:'custom',...googleFields
+  const googleFields={};
+  if(selectedGooglePlace){
+    for(const [field,value] of Object.entries({
+      googlePlaceId:selectedGooglePlace.googlePlaceId,
+      googleAddress:selectedGooglePlace.googleAddress,
+      latitude:selectedGooglePlace.latitude,
+      longitude:selectedGooglePlace.longitude
+    })){
+      if(!original||!Object.prototype.hasOwnProperty.call(original,field)) googleFields[field]=value;
+    }
+  }
+  const payload=original ? {} : {
+    id:Date.now(),region,category,subcategory:sub||category,name,hours,note,
+    twd:null,tags,fav:false,photo:null,
+    createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),_src:'custom',...googleFields
   };
-  delete payload._key;
+  if(original){
+    const editable={region,category,subcategory:sub,name,hours,note};
+    for(const [field,value] of Object.entries(editable)){
+      if(String(original[field]??'')!==String(value??'')) payload[field]=value;
+    }
+    if(region!==String(original.region||'')) payload.tags=tags;
+    Object.assign(payload,googleFields);
+    if(!Object.keys(payload).length){
+      status.textContent='沒有需要儲存的變更';
+      setTimeout(()=>status.textContent='',2500);
+      return;
+    }
+  }
   status.textContent=original?'⏳ 更新中…':'⏳ 儲存中…';
   const savePromise=original
     ? window.__update(window.__ref(window.__db,'custom_places/'+original._key),payload)
