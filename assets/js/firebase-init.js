@@ -1,6 +1,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getDatabase, ref, onValue, push, set, remove, update } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyApX90ynhEGP2uBgxMXOhNeM-Jbrvyzgps",
@@ -15,6 +16,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
+const functions = getFunctions(app, 'asia-northeast1');
 
 function exposeFirebase() {
   window.__db = db;
@@ -24,6 +26,8 @@ function exposeFirebase() {
   window.__remove = remove;
   window.__update = update;
   window.__onValue = onValue;
+  window.__functions = functions;
+  window.__httpsCallable = httpsCallable;
   window.__firebaseReady = true;
   window.dispatchEvent(new Event('firebase-ready'));
 }
