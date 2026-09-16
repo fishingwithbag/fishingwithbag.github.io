@@ -676,6 +676,7 @@
   </style>
 <!-- Firebase SDK -->
 <script src="../assets/js/firebase-init.js" type="module"> </script>
+<script src="maps-config.js?v=20260916a"></script>
 <style media="not all">
 /* Retired Travel OS v3 structural redesign. */
 :root{
@@ -829,7 +830,7 @@ button:active,a:active{transform:translateY(1px)}
   .home-side{gap:10px!important}
 }
 
-</style><link href="travel-os.css?v=20260915e" rel="stylesheet"/></head>
+</style><link href="travel-os.css?v=20260916a" rel="stylesheet"/></head>
 <body class="travel-os-page" data-page="dashboard">
 <a class="skip-link" href="#os-workspace">跳到主要內容</a>
 <header class="topbar os-topbar">
@@ -937,6 +938,12 @@ button:active,a:active{transform:translateY(1px)}
 </div>
 <div class="add-section__body">
 <form id="add-place-form">
+<div class="google-place-search" id="google-place-search">
+<label class="google-place-search__label">搜尋 Google 地點</label>
+<div id="google-place-autocomplete"><span class="google-place-search__loading">正在載入地點搜尋…</span></div>
+<div class="google-place-search__selected" id="google-place-selected" hidden=""></div>
+<p class="google-place-search__hint" id="google-place-hint">選擇結果後會帶入正式名稱、地址與座標。也可以略過，繼續手動新增。</p>
+</div>
 <div class="add-field">
 <label>地區 *</label>
 <input id="add-region" placeholder="例：福岡、熊本" required="" type="text"/>
@@ -1289,8 +1296,93 @@ let filterRegion = '';
 let filterCat = '';
 let filterSub = '';
 let editingPlace = null;
+let selectedGooglePlace = null;
+let placesAutocomplete = null;
 
 function allPlaces(){ return [...PLACES, ...CLOUD_PLACES]; }
+
+function browserMapsKey(){
+  const key=String(window.TRAVEL_OS_MAPS_CONFIG?.GOOGLE_MAPS_BROWSER_KEY||'').trim();
+  return key && key!=='PUT_BROWSER_KEY_HERE' ? key : '';
+}
+
+function resetGooglePlaceSelection(){
+  selectedGooglePlace=null;
+  const selected=document.getElementById('google-place-selected');
+  selected.hidden=true;
+  selected.innerHTML='';
+}
+
+function showGooglePlaceSelection(place){
+  const selected=document.getElementById('google-place-selected');
+  selected.hidden=false;
+  selected.innerHTML=`<strong>${escapeHTML(place.displayName)}</strong><span>${escapeHTML(place.googleAddress)}</span><button type="button" id="clear-google-place">清除</button>`;
+  selected.querySelector('#clear-google-place').addEventListener('click',()=>{
+    resetGooglePlaceSelection();
+    placesAutocomplete?.focus();
+  });
+}
+
+async function initGooglePlaces(){
+  const host=document.getElementById('google-place-autocomplete');
+  try{
+    const {PlaceAutocompleteElement}=await google.maps.importLibrary('places');
+    placesAutocomplete=new PlaceAutocompleteElement({includedRegionCodes:['jp']});
+    placesAutocomplete.placeholder='輸入日本景點或店家名稱';
+    placesAutocomplete.setAttribute('aria-label','搜尋 Google 地點');
+    placesAutocomplete.addEventListener('gmp-select',async event=>{
+      const hint=document.getElementById('google-place-hint');
+      hint.textContent='正在取得地點資料…';
+      try{
+        const place=event.placePrediction.toPlace();
+        await place.fetchFields({fields:['id','displayName','formattedAddress','location']});
+        const latitude=typeof place.location?.lat==='function' ? place.location.lat() : Number(place.location?.lat);
+        const longitude=typeof place.location?.lng==='function' ? place.location.lng() : Number(place.location?.lng);
+        if(!place.id||!place.displayName||!Number.isFinite(latitude)||!Number.isFinite(longitude)) throw new Error('missing fields');
+        selectedGooglePlace={
+          googlePlaceId:String(place.id),
+          displayName:String(place.displayName),
+          googleAddress:String(place.formattedAddress||''),
+          latitude,
+          longitude
+        };
+        document.getElementById('add-name').value=selectedGooglePlace.displayName;
+        showGooglePlaceSelection(selectedGooglePlace);
+        hint.textContent='已選擇 Google 地點。請補上地區、分類與其他旅程資訊。';
+      }catch(error){
+        console.error('Google Place Details 讀取失敗:',error);
+        resetGooglePlaceSelection();
+        hint.textContent='暫時無法取得地點資料，仍可使用下方欄位手動新增。';
+      }
+    });
+    placesAutocomplete.addEventListener('gmp-error',()=>{
+      document.getElementById('google-place-hint').textContent='Google 地點搜尋暫時無法使用，仍可手動新增。';
+    });
+    host.replaceChildren(placesAutocomplete);
+  }catch(error){
+    console.error('Places Library 載入失敗:',error);
+    host.innerHTML='<span class="google-place-search__error">地點搜尋暫時無法使用</span>';
+    document.getElementById('google-place-hint').textContent='請直接使用下方原有欄位手動新增。';
+  }
+}
+
+function loadGooglePlaces(){
+  const key=browserMapsKey();
+  if(!key){
+    document.getElementById('google-place-autocomplete').innerHTML='<span class="google-place-search__error">尚未設定 Google 地點搜尋</span>';
+    document.getElementById('google-place-hint').textContent='目前仍可使用下方原有欄位手動新增。';
+    return;
+  }
+  const script=document.createElement('script');
+  script.src=`https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&loading=async&libraries=places&v=weekly&language=ja&region=JP&callback=initGooglePlaces`;
+  script.async=true;
+  script.onerror=()=>{
+    document.getElementById('google-place-autocomplete').innerHTML='<span class="google-place-search__error">地點搜尋載入失敗</span>';
+    document.getElementById('google-place-hint').textContent='請直接使用下方原有欄位手動新增。';
+  };
+  document.head.appendChild(script);
+}
+window.initGooglePlaces=initGooglePlaces;
 function allCategories(){
   return [...new Set([...Object.keys(SUB_MAP), ...allPlaces().map(p=>p.category).filter(Boolean)])];
 }
@@ -1362,6 +1454,9 @@ function buildCard(p){
   const el=document.createElement('article');
   el.className='card'; el.dataset.id=p.id;
   const q=encodeURIComponent(p.name+' '+p.region+' Japan');
+  const mapUrl=p.googlePlaceId
+    ? `https://www.google.com/maps/search/?api=1&query=${q}&query_place_id=${encodeURIComponent(p.googlePlaceId)}`
+    : `https://www.google.com/maps/search/?api=1&query=${q}`;
   const FISH_KW=['釣','路亞','釣具'];
   const isFav=getFavs().includes(String(p.id));
   const sub = p.subcategory||p.category||'';
@@ -1393,7 +1488,7 @@ function buildCard(p){
         
         <a
           class="card__btn card__map"
-          href="https://www.google.com/maps/search/?api=1&query=${q}"
+          href="${escapeHTML(mapUrl)}"
           target="_blank"
           rel="noopener"
           title="開啟 Google Maps"
@@ -1685,6 +1780,8 @@ function setAddCategoryValue(category,subcategory){
 
 function resetPlaceForm(){
   editingPlace=null;
+  resetGooglePlaceSelection();
+  document.getElementById('google-place-search').hidden=false;
   const form=document.getElementById('add-place-form');
   form.reset();
   document.getElementById('add-category').hidden=true;
@@ -1698,6 +1795,8 @@ function resetPlaceForm(){
 
 function startEditPlace(place){
   editingPlace={...place};
+  resetGooglePlaceSelection();
+  document.getElementById('google-place-search').hidden=true;
   document.getElementById('add-region').value=place.region||'';
   document.getElementById('add-name').value=place.name||'';
   document.getElementById('add-hours').value=place.hours||'';
@@ -1801,15 +1900,23 @@ document.getElementById('add-place-form').addEventListener('submit',e=>{
   const tags=original
     ? [...new Set(existingTags.map(tag=>tag===original.region ? region : tag).filter(Boolean).concat(region))]
     : [region];
+  const googleFields=!original&&selectedGooglePlace ? {
+    googlePlaceId:selectedGooglePlace.googlePlaceId,
+    googleAddress:selectedGooglePlace.googleAddress,
+    latitude:selectedGooglePlace.latitude,
+    longitude:selectedGooglePlace.longitude
+  } : {};
   const payload={
+    ...(original||{}),
     id:original?.id||Date.now(),region,category,subcategory:sub||category,name,hours,note,
     twd:original?.twd??null,tags,fav:original?.fav??false,photo:original?.photo??null,
     createdAt:original?.createdAt||new Date().toISOString(),
-    updatedAt:new Date().toISOString(),_src:'custom'
+    updatedAt:new Date().toISOString(),_src:'custom',...googleFields
   };
+  delete payload._key;
   status.textContent=original?'⏳ 更新中…':'⏳ 儲存中…';
   const savePromise=original
-    ? window.__set(window.__ref(window.__db,'custom_places/'+original._key),payload)
+    ? window.__update(window.__ref(window.__db,'custom_places/'+original._key),payload)
     : window.__push(window.__ref(window.__db,'custom_places'),payload);
   savePromise.then(()=>{
     status.textContent=original?'✅ 已更新':'✅ 已儲存';
@@ -2147,7 +2254,8 @@ waitFirebase(() => {
 document.getElementById('driving-toggle').addEventListener('click', () => {
   document.getElementById('driving-section').classList.toggle('open');
 });
+loadGooglePlaces();
 </script>
-<script src="travel-os-ui.js?v=20260915d"></script>
+<script src="travel-os-ui.js?v=20260916a"></script>
 </body>
 </html>

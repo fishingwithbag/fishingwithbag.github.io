@@ -434,7 +434,7 @@ button:active,a:active{transform:translateY(1px)}
   .it-right .os-panel__head{padding:10px 12px!important}.it-right .os-panel__head h3{font-size:14px!important}.it-right .action-btn{min-height:40px!important;padding:8px 10px!important;font-size:11px!important}
 }
 
-</style><link href="travel-os.css?v=20260915e" rel="stylesheet"/></head>
+</style><link href="travel-os.css?v=20260916a" rel="stylesheet"/></head>
 <body class="travel-os-page" data-page="today">
 <a class="skip-link" href="#today-workspace">跳到主要內容</a>
 <header class="topbar os-topbar">
@@ -591,8 +591,9 @@ button:active,a:active{transform:translateY(1px)}
 </select>
 </div>
 <div class="modal-field">
-<label>交通時間（分鐘）</label>
+<label>手動交通時間（分鐘）</label>
 <input id="m-transit-min" min="0" placeholder="例：20" type="number"/>
+<small class="transit-field-hint">開車／步行會在儲存後自動計算；此欄保留給其他交通方式與舊資料。</small>
 </div>
 <section class="parking-panel" id="parking-panel">
 <button aria-expanded="false" class="parking-panel__toggle" id="parking-panel-toggle" type="button">
@@ -728,6 +729,8 @@ const rentalQueryParams = new URLSearchParams(location.search);
 const pendingRentalRequest = {group:rentalQueryParams.get('rental'), eventType:rentalQueryParams.get('event')};
 let rentalRequestHandled = false;
 let parkingMode = 'shared';
+const routeLegStates = new Map();
+const routeRequestIds = new Map();
 
 function allPlaces() { return [...allBasePlaces, ...allCustomPlaces]; }
 function collaboratorName() {
@@ -1128,7 +1131,10 @@ function itemMapsUrl(item) {
     const point = item.city || item.region || item.name || '';
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${point} Japan`)}`;
   }
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${item?.name || ''} ${item?.city || item?.region || ''} Japan`)}`;
+  const query = encodeURIComponent(`${item?.name || ''} ${item?.city || item?.region || ''} Japan`);
+  return item?.googlePlaceId
+    ? `https://www.google.com/maps/search/?api=1&query=${query}&query_place_id=${encodeURIComponent(item.googlePlaceId)}`
+    : `https://www.google.com/maps/search/?api=1&query=${query}`;
 }
 function parkingSetHtml(prefix,title) {
   const spot=(kind,label)=>`<div class="parking-set"><div class="parking-set__title"><span>${label}</span></div><div class="parking-set__grid"><div class="parking-mini wide"><label>停車場名稱</label><input id="${prefix}-${kind}-name" type="text" placeholder="例：草千里第一停車場"></div><div class="parking-mini wide"><label>Google Maps 連結（可留空）</label><input id="${prefix}-${kind}-maps" type="url" placeholder="貼上 Google Maps 分享連結"></div><div class="parking-mini"><label>步行到景點（分鐘）</label><input id="${prefix}-${kind}-walk" type="number" min="0" placeholder="0"></div><div class="parking-mini"><label>停車費（¥）</label><input id="${prefix}-${kind}-fee" type="number" min="0" placeholder="0"></div><div class="parking-mini wide"><label>備註</label><textarea id="${prefix}-${kind}-note" placeholder="例：假日容易客滿、入口在南側"></textarea></div></div></div>`;
@@ -1170,6 +1176,176 @@ function resetParkingEditor() { fillParkingEditor(null); document.getElementById
 function parkingAllowedForType(type) { return !['flight','rental','transit','commute'].includes(type); }
 function toggleParkingVisibility() { const panel=document.getElementById('parking-panel'); if(panel) panel.hidden=!parkingAllowedForType(document.getElementById('m-type').value); }
 
+function backendCall(name, data) {
+  return waitFirebaseReady().then(() => {
+    if (!window.__functions || !window.__httpsCallable) throw new Error('functions-unavailable');
+    return window.__httpsCallable(window.__functions, name)(data).then(result => result.data);
+  });
+}
+
+function numericLocation(value) {
+  const latitude = Number(value?.latitude);
+  const longitude = Number(value?.longitude);
+  return Number.isFinite(latitude) && latitude >= -90 && latitude <= 90 && Number.isFinite(longitude) && longitude >= -180 && longitude <= 180
+    ? {latitude, longitude}
+    : null;
+}
+
+function placeForItem(item) {
+  const key = String(item?.placeId || '');
+  return key ? allPlaces().find(place => String(getPlaceFavKey(place)) === key) || null : null;
+}
+
+function routeTravelMode(item) {
+  const value = String(item?.transitMode || '');
+  if (value === 'DRIVE' || value.includes('開車')) return 'DRIVE';
+  if (value === 'WALK' || value.includes('步行')) return 'WALK';
+  return '';
+}
+
+function itemIdentity(item) {
+  return String(item?.placeId || item?._key || item?.name || '');
+}
+
+function routeCacheKey(origin, destination, mode) {
+  const part = location => `${location.latitude.toFixed(6)},${location.longitude.toFixed(6)}`;
+  return `${part(origin)}|${part(destination)}|${mode}`;
+}
+
+function googleLegUrl(item, nextItem, mode) {
+  const query = value => {
+    const location = numericLocation(value) || numericLocation(placeForItem(value));
+    return location ? `${location.latitude},${location.longitude}` : `${value?.name || ''} ${value?.city || value?.region || ''} Japan`;
+  };
+  return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(query(item))}&destination=${encodeURIComponent(query(nextItem))}&travelmode=${mode === 'WALK' ? 'walking' : 'driving'}`;
+}
+
+function routeInfoMatches(item, nextItem) {
+  const info = item?.routeInfo;
+  const mode = routeTravelMode(item);
+  const origin = numericLocation(item) || numericLocation(placeForItem(item));
+  const destination = numericLocation(nextItem) || numericLocation(placeForItem(nextItem));
+  return Boolean(info && mode && origin && destination &&
+    info.mode === mode &&
+    info.originKey === itemIdentity(item) &&
+    info.destinationKey === itemIdentity(nextItem) &&
+    info.cacheKey === routeCacheKey(origin, destination, mode));
+}
+
+function routeErrorText(error) {
+  const code = String(error?.code || '');
+  if (code.includes('resource-exhausted')) return '請稍候再試';
+  if (code.includes('deadline-exceeded')) return '計算逾時';
+  if (code.includes('not-found')) return '找不到可用路線';
+  if (code.includes('functions-unavailable') || code.includes('unavailable')) return '路程服務暫時無法使用';
+  return '無法取得路程時間';
+}
+
+async function resolveItemLocation(item, date) {
+  const direct = numericLocation(item);
+  if (direct) return direct;
+  const place = placeForItem(item);
+  const fromPlace = numericLocation(place);
+  if (fromPlace) return fromPlace;
+  const address = String(item?.googleAddress || place?.googleAddress || '').trim();
+  if (!address) throw new Error('location-unavailable');
+  if (Object.prototype.hasOwnProperty.call(item, 'latitude') || Object.prototype.hasOwnProperty.call(item, 'longitude')) {
+    throw new Error('location-unavailable');
+  }
+  const result = await backendCall('geocodeAddress', {address});
+  const location = numericLocation(result);
+  if (!location) throw new Error('location-unavailable');
+  const fields = {
+    latitude: location.latitude,
+    longitude: location.longitude
+  };
+  if (!Object.prototype.hasOwnProperty.call(item, 'googleAddress')) fields.googleAddress = String(result.googleAddress || address);
+  if (result.googlePlaceId && !item.googlePlaceId) fields.googlePlaceId = String(result.googlePlaceId);
+  await window.__update(window.__ref(window.__db, `itinerary/${date}/${item._key}`), fields);
+  Object.assign(item, fields);
+  return location;
+}
+
+function journeyLegHtml(item, nextItem) {
+  if (!nextItem) return '';
+  const mode = routeTravelMode(item);
+  if (!mode) return '';
+  const state = routeLegStates.get(String(item._key));
+  if (state?.status === 'loading') return `<div class="journey-leg is-loading"><span>${mode === 'DRIVE' ? '🚗' : '🚶'}</span><span>正在計算…</span></div>`;
+  if (routeInfoMatches(item, nextItem)) {
+    const info = item.routeInfo;
+    return `<div class="journey-leg"><span>${mode === 'DRIVE' ? '🚗' : '🚶'}</span><strong>${Number(info.durationMinutes)} 分鐘</strong><span>· ${Number(info.distanceKm).toFixed(1)} km</span><a href="${escapeHTML(googleLegUrl(item,nextItem,mode))}" target="_blank" rel="noopener">Google Maps ↗</a><button type="button" data-route-recalc="${escapeHTML(item._key)}" aria-label="重新計算到下一站路程">重新計算</button></div>`;
+  }
+  const label = state?.status === 'error' ? state.message : Number(item.transitMin || 0) ? `${Number(item.transitMin)} 分（手動）` : '尚未計算';
+  return `<div class="journey-leg is-error"><span>${mode === 'DRIVE' ? '🚗' : '🚶'}</span><span>${escapeHTML(label)}</span><button type="button" data-route-recalc="${escapeHTML(item._key)}">重試</button></div>`;
+}
+
+async function calculateAndStoreLeg(item, nextItem, date, force = false) {
+  const mode = routeTravelMode(item);
+  if (!item?._key || !nextItem || !mode) return;
+  const requestId = (routeRequestIds.get(item._key) || 0) + 1;
+  routeRequestIds.set(item._key, requestId);
+  routeLegStates.set(item._key, {status:'loading'});
+  renderDay();
+  try {
+    const [origin, destination] = await Promise.all([
+      resolveItemLocation(item, date),
+      resolveItemLocation(nextItem, date)
+    ]);
+    const cacheKey = routeCacheKey(origin, destination, mode);
+    if (!force && routeInfoMatches(item, nextItem)) {
+      routeLegStates.delete(item._key);
+      renderDay();
+      return;
+    }
+    const result = await backendCall('calculateRoute', {origin, destination, travelMode:mode});
+    if (routeRequestIds.get(item._key) !== requestId) return;
+    const routeInfo = {
+      mode,
+      durationSeconds:Number(result.durationSeconds),
+      durationMinutes:Number(result.durationMinutes),
+      distanceMeters:Number(result.distanceMeters),
+      distanceKm:Number(result.distanceKm),
+      originKey:itemIdentity(item),
+      destinationKey:itemIdentity(nextItem),
+      cacheKey,
+      updatedAt:Date.now()
+    };
+    await window.__update(window.__ref(window.__db, `itinerary/${date}/${item._key}`), {routeInfo});
+    if (routeRequestIds.get(item._key) !== requestId) return;
+    item.routeInfo = routeInfo;
+    routeLegStates.delete(item._key);
+  } catch (error) {
+    if (routeRequestIds.get(item._key) !== requestId) return;
+    const message = error?.message === 'location-unavailable' ? '無法取得位置' : routeErrorText(error);
+    routeLegStates.set(item._key, {status:'error', message});
+  }
+  renderDay();
+}
+
+function legSignatures(items) {
+  const sorted = items.slice().sort(compareItineraryTime);
+  const signatures = new Map();
+  sorted.forEach((item, index) => {
+    const next = sorted[index + 1];
+    signatures.set(String(item._key), next ? `${itemIdentity(item)}|${itemIdentity(next)}|${routeTravelMode(item)}` : 'last');
+  });
+  return signatures;
+}
+
+async function recalculateChangedLegs(beforeItems, afterItems, date) {
+  const before = legSignatures(beforeItems);
+  const after = legSignatures(afterItems);
+  const sorted = afterItems.slice().sort(compareItineraryTime);
+  const tasks = [];
+  sorted.forEach((item, index) => {
+    if (before.get(String(item._key)) !== after.get(String(item._key))) {
+      tasks.push(calculateAndStoreLeg(item, sorted[index + 1], date));
+    }
+  });
+  await Promise.allSettled(tasks);
+}
+
 // ── Render Timeline ──
 function renderDay() {
   const date  = TRIP_DAYS[currentDay].date;
@@ -1197,6 +1373,7 @@ function renderDay() {
     const lockedByOther = activeLock(lock) && lock.sessionId !== COLLAB_SESSION_ID;
     const itemWarnings = [...(scheduleWarnings.get(it._key) || [])];
     row.dataset.key = it._key || idx;
+    const nextItem = items[idx + 1] || null;
     row.innerHTML = `
         <div class="tl-time">
           <div class="tl-time__h">${sh}</div>
@@ -1216,7 +1393,7 @@ function renderDay() {
               <div class="tl-card__name">${escapeHTML(it.name)}</div>
               ${it.type === 'flight' && (it.origin || it.destination) ? `<div class="tl-card__hours">${escapeHTML(it.origin || '')} → ${escapeHTML(it.destination || '')}${it.durationMin ? ` · ${Math.floor(it.durationMin / 60)}h${it.durationMin % 60 ? it.durationMin % 60 + 'm' : ''}` : ''}</div>` : ''}
               ${it.hours ? `<div class="tl-card__hours">🕐 營業：${escapeHTML(it.hours)}</div>` : ''}
-              ${it.transitMin ? `<div class="tl-card__hours">🚗 到下一站：${Number(it.transitMin)} 分${it.transitMode ? ` · ${escapeHTML(it.transitMode)}` : ''}</div>` : ''}
+              ${it.transitMin && !routeTravelMode(it) ? `<div class="tl-card__hours">🚗 到下一站：${Number(it.transitMin)} 分${it.transitMode ? ` · ${escapeHTML(it.transitMode)}` : ''}</div>` : ''}
               ${renderParkingRows(it)}
               ${itemWarnings.length ? `<div class="tl-card__warning">⚠ ${itemWarnings.map(escapeHTML).join('<br>')}</div>` : ''}
               ${it.note  ? `<p class="tl-card__note">${escapeHTML(it.note)}</p>` : ''}
@@ -1242,6 +1419,7 @@ function renderDay() {
               </div>
             </div>
           </div>
+          ${journeyLegHtml(it, nextItem)}
         </div>`;
     tl.appendChild(row);
   });
@@ -1255,12 +1433,15 @@ function renderDay() {
   });
 
   tl.querySelectorAll('.btn-del').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const key  = btn.dataset.key;
       const date = TRIP_DAYS[currentDay].date;
       const lock = getItineraryLock(date, key);
       if (activeLock(lock) && lock.sessionId !== COLLAB_SESSION_ID) { alert(`${lock.name || '其他人'}正在編輯，暫時不能刪除。`); return; }
-      window.__remove(window.__ref(window.__db, `itinerary/${date}/${key}`));
+      const beforeItems = (itineraryData[date] || []).map(item => ({...item}));
+      await window.__remove(window.__ref(window.__db, `itinerary/${date}/${key}`));
+      const afterItems = beforeItems.filter(item => String(item._key) !== String(key));
+      recalculateChangedLegs(beforeItems, afterItems, date);
     });
   });
 
@@ -1296,6 +1477,13 @@ function renderDay() {
       toggleFlightFields();
       toggleParkingVisibility();
       document.getElementById('modal-overlay').classList.add('open');
+    });
+  });
+
+  tl.querySelectorAll('[data-route-recalc]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const index = items.findIndex(item => String(item._key) === btn.dataset.routeRecalc);
+      if (index >= 0) calculateAndStoreLeg(items[index], items[index + 1], date, true);
     });
   });
 
@@ -1585,6 +1773,8 @@ async function addSelectedPlaces() {
   if (!pickerStart) { alert('請先填寫第一個景點的開始時間'); return; }
   await waitFirebaseReady();
   const date = TRIP_DAYS[currentDay].date;
+  const beforeItems = (itineraryData[date] || []).map(item => ({...item}));
+  const createdItems = [];
   let startMinutes = timeToMinutes(pickerStart);
   const travelGroup = document.getElementById('picker-group').value || 'all';
   const actor = collaboratorName() || '未指定';
@@ -1598,18 +1788,31 @@ async function addSelectedPlaces() {
     const end = `${String(Math.floor(startMinutes / 60) % 24).padStart(2, '0')}:${String(startMinutes % 60).padStart(2, '0')}`;
     const placeId = String(getPlaceFavKey(place));
     const transitMin = index < selected.length - 1 ? Math.max(0, parseInt(selectedTransitMinutes.get(placeId)) || 0) : 0;
-    await window.__push(window.__ref(window.__db, `itinerary/${date}`), {
+    const location = numericLocation(place);
+    const locationFields = location ? {
+      latitude:location.latitude,
+      longitude:location.longitude,
+      ...(place.googlePlaceId ? {googlePlaceId:String(place.googlePlaceId)} : {}),
+      ...(place.googleAddress ? {googleAddress:String(place.googleAddress)} : {})
+    } : {};
+    const savedRef = await window.__push(window.__ref(window.__db, `itinerary/${date}`), {
       type: guessItemType(place), name: place.name || '', city: place.region || '', start, end,
       hours: place.hours || '', cost: parseInt(place.cost) || 0, note: place.note || '',
       region: place.region || '', category: place.category || '', subcategory: place.subcategory || '',
       placeId: getPlaceFavKey(place), travelGroup, transitMin,
-      createdAt: new Date().toISOString(), updatedAt:new Date().toISOString(), updatedBy:actor
+      createdAt: new Date().toISOString(), updatedAt:new Date().toISOString(), updatedBy:actor,
+      ...locationFields
+    });
+    createdItems.push({
+      _key:savedRef.key, type:guessItemType(place), name:place.name || '', city:place.region || '', start, end,
+      region:place.region || '', placeId:getPlaceFavKey(place), travelGroup, transitMin, ...locationFields
     });
     startMinutes += transitMin;
   }
   document.getElementById('picker-overlay').classList.remove('open');
   selectedPlaceIds.clear();
   selectedTransitMinutes.clear();
+  recalculateChangedLegs(beforeItems, [...beforeItems, ...createdItems], date);
 }
 
 // ── Modal ──
@@ -1679,8 +1882,19 @@ document.getElementById('btn-modal-save').addEventListener('click', async () => 
   const matchedPlace  = matchedPlaces.find(p => region && regionMatches(p.region, region)) || matchedPlaces[0] || null;
   const durationMin   = selectedType === 'flight' ? parseDuration(document.getElementById('m-flight-duration').value) : 0;
   const existingItem  = editingKey ? (itineraryData[date] || []).find(existing => existing._key === editingKey) : null;
+  const beforeItems   = (itineraryData[date] || []).map(existing => ({...existing}));
+  const matchedLocation = numericLocation(matchedPlace);
+  const linkedFields = matchedPlace ? {
+    ...(matchedLocation && !Object.prototype.hasOwnProperty.call(existingItem || {}, 'latitude') && !Object.prototype.hasOwnProperty.call(existingItem || {}, 'longitude')
+      ? {latitude:matchedLocation.latitude, longitude:matchedLocation.longitude} : {}),
+    ...(matchedPlace.googlePlaceId && !Object.prototype.hasOwnProperty.call(existingItem || {}, 'googlePlaceId')
+      ? {googlePlaceId:String(matchedPlace.googlePlaceId)} : {}),
+    ...(matchedPlace.googleAddress && !Object.prototype.hasOwnProperty.call(existingItem || {}, 'googleAddress')
+      ? {googleAddress:String(matchedPlace.googleAddress)} : {})
+  } : {};
 
   const item = {
+    ...(existingItem || {}),
     type:        selectedType,
     name, start: startVal, end: endVal,
     city:         region,
@@ -1701,17 +1915,27 @@ document.getElementById('btn-modal-save').addEventListener('click', async () => 
     parking:     parkingAllowedForType(selectedType) ? readParkingEditor() : null,
     createdAt:   existingItem?.createdAt || new Date().toISOString(),
     updatedAt:   new Date().toISOString(),
-    updatedBy:   collaboratorName() || '未指定'
+    updatedBy:   collaboratorName() || '未指定',
+    ...linkedFields
   };
+  delete item._key;
+  const originalEditingKey = editingKey;
 
   try {
     await waitFirebaseReady();
-    if (editingKey) {
-      await window.__set(window.__ref(window.__db, `itinerary/${date}/${editingKey}`), item);
+    let savedKey = originalEditingKey;
+    if (originalEditingKey) {
+      await window.__update(window.__ref(window.__db, `itinerary/${date}/${originalEditingKey}`), item);
     } else {
-      await window.__push(window.__ref(window.__db, `itinerary/${date}`), item);
+      const savedRef = await window.__push(window.__ref(window.__db, `itinerary/${date}`), item);
+      savedKey = savedRef.key;
     }
     closeItemModal();
+    const savedItem = {...item, _key:savedKey};
+    const afterItems = originalEditingKey
+      ? beforeItems.map(existing => existing._key === originalEditingKey ? savedItem : existing)
+      : [...beforeItems, savedItem];
+    recalculateChangedLegs(beforeItems, afterItems, date);
   } catch (error) {
     console.error('行程儲存失敗：', error);
     alert('行程儲存失敗，請確認 Firebase 登入與寫入權限。');
@@ -1967,6 +2191,6 @@ window.addEventListener('pagehide', () => {
   releaseItineraryLock();
 });
 </script>
-<script src="travel-os-ui.js?v=20260915d"></script>
+<script src="travel-os-ui.js?v=20260916a"></script>
 </body>
 </html>

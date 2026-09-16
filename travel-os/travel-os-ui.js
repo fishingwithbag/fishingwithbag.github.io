@@ -90,7 +90,23 @@
     const preferred = parking.mode === 'split'
       ? parking[item.travelGroup]?.primary?.mapsUrl
       : parking.shared?.primary?.mapsUrl;
-    return preferred || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${item.name || ''} Japan`)}`;
+    if (preferred) return preferred;
+    const query = encodeURIComponent(`${item.name || ''} ${item.city || item.region || ''} Japan`);
+    return item.googlePlaceId
+      ? `https://www.google.com/maps/search/?api=1&query=${query}&query_place_id=${encodeURIComponent(item.googlePlaceId)}`
+      : `https://www.google.com/maps/search/?api=1&query=${query}`;
+  }
+
+  function legSummary(item, nextItem) {
+    const route = item?.routeInfo;
+    const transitMode = String(item?.transitMode || '');
+    const currentMode = transitMode === 'WALK' || transitMode.includes('步行') ? 'WALK' : transitMode === 'DRIVE' || transitMode.includes('開車') ? 'DRIVE' : '';
+    const sameLeg = route && nextItem && route.mode === currentMode && String(route.destinationKey || '') === String(nextItem?.placeId || nextItem?._key || nextItem?.name || '');
+    if (sameLeg && Number.isFinite(Number(route.durationMinutes)) && Number.isFinite(Number(route.distanceKm))) {
+      const icon = route.mode === 'WALK' ? '🚶' : '🚗';
+      return `${icon} ${Number(route.durationMinutes)} 分 · ${Number(route.distanceKm).toFixed(1)} km`;
+    }
+    return Number(item?.transitMin || 0) ? `${Number(item.transitMin)} 分 ${item.transitMode || ''}` : '交通未設定';
   }
 
   function mapsIcon() {
@@ -152,7 +168,7 @@
       const next = document.getElementById('dashboard-next');
       document.getElementById('dashboard-next-time').textContent = pair.next?.start || '--:--';
       next.innerHTML = pair.next
-        ? `<h3>${escapeValue(pair.next.name)}</h3><p>${Number(pair.current?.transitMin || 0) ? `開車 ${Number(pair.current.transitMin)} 分` : '交通時間未設定'}　${escapeValue(groupName(pair.next))}</p>`
+        ? `<h3>${escapeValue(pair.next.name)}</h3><p>${escapeValue(legSummary(pair.current, pair.next))}　${escapeValue(groupName(pair.next))}</p>`
         : '<h3>今天沒有下一站</h3><p>可以留白，也可以到今日行程加入安排。</p>';
 
       const fleet = document.getElementById('dashboard-fleet');
@@ -202,7 +218,7 @@
       ['城市', item.city || item.region || '未設定'],
       ['同行', groupName(item)],
       ['營業', item.hours || '未設定'],
-      ['到下一站', item.transitMin ? `${item.transitMin} 分 ${item.transitMode || ''}` : '未設定'],
+      ['到下一站', legSummary(item, null)],
       ['費用', item.cost ? `¥${Number(item.cost).toLocaleString()}` : '未設定'],
       ['停車', activeParking?.primary?.name || '未設定'],
       ['備註', item.note || '無']
@@ -249,7 +265,7 @@
 
       const next = document.getElementById('today-next');
       next.innerHTML = pair.next
-        ? `<div class="next-label"><span>NEXT</span><span>${escapeValue(pair.next.start || '--:--')}</span></div><div class="next-row"><h2>${escapeValue(pair.next.name)}</h2><p>${Number(pair.current?.transitMin || 0) ? `${Number(pair.current.transitMin)} 分車程` : '交通未設定'}</p></div>`
+        ? `<div class="next-label"><span>NEXT</span><span>${escapeValue(pair.next.start || '--:--')}</span></div><div class="next-row"><h2>${escapeValue(pair.next.name)}</h2><p>${escapeValue(legSummary(pair.current, pair.next))}</p></div>`
         : '<div class="next-label"><span>NEXT</span><span>DONE</span></div><div class="next-row"><h2>今天沒有下一站</h2><p>保留彈性</p></div>';
     };
 
