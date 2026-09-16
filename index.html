@@ -1,12 +1,20 @@
 <!DOCTYPE html>
-<html lang="zh-Hant" data-theme="dark">
+
+<html data-theme="dark" lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>九州福岡熊本旅遊 2026/9/30~10/7</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet">
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="default" name="apple-mobile-web-app-status-bar-style"/>
+<meta content="九州自駕" name="apple-mobile-web-app-title"/>
+<meta content="#FFFEEE" name="theme-color"/>
+<title>九州福岡熊本旅遊 2026/9/30~10/7</title>
+<link href="icons/apple-touch-icon.png?v=20260915" rel="apple-touch-icon" sizes="180x180"/>
+<link href="icons/favicon-32.png?v=20260915" rel="icon" sizes="32x32" type="image/png"/>
+<link href="manifest.webmanifest?v=20260915" rel="manifest"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&amp;family=Noto+Sans+TC:wght@300;400&amp;display=swap" rel="stylesheet"/>
+<style>
     :root{
       --bg:#0D0D0D;--surface:#141414;--surface2:#1C1C1C;
       --border:rgba(255,255,255,0.09);--text:#E8E8E8;--muted:rgba(232,232,232,0.48);
@@ -666,361 +674,540 @@
     @media(min-width:768px){.tour-card,.tour-card[data-placement="top"],.tour-card[data-placement="bottom"]{top:1rem;bottom:auto;max-height:calc(100dvh - 2rem)}}
     @media(prefers-reduced-motion:reduce){.tour-target{scroll-behavior:auto}}
   </style>
+<!-- Firebase SDK -->
+<script src="../assets/js/firebase-init.js" type="module"> </script>
+<script src="maps-config.js?v=20260916a"></script>
+<style media="not all">
+/* Retired Travel OS v3 structural redesign. */
+:root{
+  --os-bg:#f2f0ea; --os-paper:#fffdf8; --os-ink:#191917; --os-muted:#77736a;
+  --os-line:#d8d3c9; --os-accent:#d34b32; --os-accent-soft:#f4dfd8; --os-green:#315c4c;
+  --os-shadow:0 18px 60px rgba(40,34,24,.08); --os-rail:232px; --os-side:318px;
+}
+*{box-sizing:border-box}
+html{background:var(--os-bg)!important}
+body{background:var(--os-bg)!important;color:var(--os-ink)!important;font-family:Inter,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif!important;margin:0!important;padding:0!important;letter-spacing:.01em}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.28;background-image:linear-gradient(rgba(25,25,23,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(25,25,23,.018) 1px,transparent 1px);background-size:24px 24px;z-index:0}
+button,input,select,textarea{font:inherit}
+button,a{transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease}
+button:active,a:active{transform:translateY(1px)}
 
-  <!-- Firebase SDK -->
-  <script type="module" src="assets/js/firebase-init.js"> </script>
-</head>
-<body>
+.travel-os{position:relative;z-index:1;min-height:100vh;display:grid;grid-template-columns:var(--os-rail) minmax(0,1fr);}
+.os-rail{position:sticky;top:0;height:100vh;border-right:1px solid var(--os-line);background:#ebe8e0;padding:24px 18px;display:flex;flex-direction:column;gap:22px;z-index:20}
+.os-brand{display:grid;gap:5px;padding:4px 6px 18px;border-bottom:1px solid var(--os-line)}
+.os-brand__eyebrow{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--os-accent);font-weight:800}
+.os-brand__name{font-family:"Noto Serif TC","Songti TC",serif;font-weight:700;font-size:21px;line-height:1.3}
+.os-brand__meta{font-size:11px;color:var(--os-muted)}
+.os-rail .topbar{display:block!important;position:static!important;background:transparent!important;border:0!important;padding:0!important;box-shadow:none!important;height:auto!important}
+.os-rail .topbar__title{display:none!important}
+.os-rail .topbar__actions,.os-rail .topbar>div:last-child{display:flex!important;gap:8px!important}
+.os-rail .icon-btn{width:38px!important;height:38px!important;border-radius:0!important;border:1px solid var(--os-line)!important;background:var(--os-paper)!important;color:var(--os-ink)!important;box-shadow:none!important}
+.os-nav{display:grid;gap:6px}
+.os-nav__label{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--os-muted);padding:0 6px 6px}
+.os-rail .bottom-nav{position:static!important;display:grid!important;height:auto!important;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;gap:5px!important}
+.os-rail .bottom-nav__item{min-height:44px!important;display:grid!important;grid-template-columns:24px 1fr!important;align-items:center!important;gap:10px!important;padding:8px 10px!important;border:1px solid transparent!important;border-radius:0!important;color:var(--os-muted)!important;text-decoration:none!important;font-size:13px!important}
+.os-rail .bottom-nav__item span:first-child{font-size:15px!important}
+.os-rail .bottom-nav__item.active{background:var(--os-ink)!important;color:white!important;border-color:var(--os-ink)!important}
+.os-rail .bottom-nav__item:hover{border-color:var(--os-line)!important;background:var(--os-paper)!important;color:var(--os-ink)!important}
+.os-rail .bottom-nav__item.active:hover{background:var(--os-ink)!important;color:white!important}
+.os-rail__foot{margin-top:auto;border-top:1px solid var(--os-line);padding:14px 6px 0;font-size:11px;color:var(--os-muted);line-height:1.6}
+.os-workspace{min-width:0;padding:26px 28px 44px}
+.os-workspace__inner{max-width:1440px;margin:0 auto}
+.os-kicker{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--os-accent);font-weight:800}
+.os-title{font-family:"Noto Serif TC","Songti TC",serif;font-size:clamp(28px,3vw,44px);line-height:1.14;margin:7px 0 8px;letter-spacing:-.03em}
+.os-subtitle{color:var(--os-muted);font-size:13px;line-height:1.7;max-width:720px}
+.os-rule{height:1px;background:var(--os-line);margin:20px 0}
+.os-panel{background:var(--os-paper);border:1px solid var(--os-line);border-radius:0!important;box-shadow:none!important}
+.os-panel__head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding:16px 18px;border-bottom:1px solid var(--os-line)}
+.os-panel__head h2,.os-panel__head h3{margin:0!important;font-family:"Noto Serif TC","Songti TC",serif!important;font-size:18px!important}
+.os-panel__label{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--os-muted)}
 
-<!-- ══ Topbar ══ -->
-<header class="topbar">
-  <span class="topbar__title">九州福岡熊本旅遊 2026/9/30~10/7</span>
-  <div class="topbar__actions">
-    <button class="icon-btn" id="help-btn" title="使用說明" aria-label="使用說明">?</button>
-    <button class="icon-btn" id="fav-btn" title="只看最愛">💖</button>
-    <button class="icon-btn" id="theme-btn">🌙</button>
-  </div>
+/* aggressively remove old AI-card styling */
+.travel-os :is(.qa-btn,.flight-board,.flight-leg,.search-bar,.add-section,.cost-block,.rental-block,.driving-section,.cards-header,.card,.collab-bar,.region-picker,.group-view,.action-bar,.day-stats,.route-bar,.day-summary,.timeline,.day-stat){border-radius:0!important;box-shadow:none!important}
+.travel-os :is(.qa-btn,.action-btn,.flight-action,.btn-add-place,.btn-export,.btn-add-cost,.btn-modal-save,.btn-modal-cancel){border-radius:0!important}
+
+.home-dashboard{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,.75fr);gap:22px;align-items:start}
+.home-main{display:grid;gap:22px;min-width:0}
+.home-side{display:grid;gap:14px;position:sticky;top:26px}
+.trip-masthead{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:end;margin-bottom:22px}
+.trip-masthead__actions{display:flex;gap:8px;align-items:center}
+.trip-masthead .quick-actions{display:flex!important;gap:8px!important;margin:0!important;padding:0!important}
+.trip-masthead .qa-btn{min-height:44px!important;padding:9px 12px!important;border:1px solid var(--os-line)!important;background:var(--os-paper)!important;color:var(--os-ink)!important;display:flex!important;align-items:center!important;gap:8px!important}
+.trip-masthead .qa-btn--itinerary{background:var(--os-ink)!important;color:white!important;border-color:var(--os-ink)!important}
+.trip-masthead .qa-btn__icon{font-size:14px!important}.trip-masthead .qa-btn__sub{display:none!important}.trip-masthead .qa-btn__title{font-size:12px!important;font-weight:700!important}
+.flight-board{background:var(--os-ink)!important;color:white!important;border:0!important;margin:0!important;padding:0!important}
+.flight-board__head{padding:16px 18px!important;border-bottom:1px solid rgba(255,255,255,.17)!important}
+.flight-board__title{color:white!important;font-family:"Noto Serif TC","Songti TC",serif!important;font-size:20px!important}
+.flight-board__sub{color:rgba(255,255,255,.55)!important}.flight-board__status{border:1px solid rgba(255,255,255,.25)!important;background:transparent!important;color:white!important;border-radius:0!important}
+.flight-legs{display:grid!important;grid-template-columns:1fr 1fr!important;gap:0!important}
+.flight-leg{background:transparent!important;border:0!important;border-right:1px solid rgba(255,255,255,.15)!important;padding:18px!important;color:white!important}.flight-leg:last-child{border-right:0!important}
+.flight-leg :is(strong,.flight-leg__date,.flight-leg__number){color:white!important}.flight-leg span{color:rgba(255,255,255,.58)!important}.flight-route__line:before{background:rgba(255,255,255,.25)!important}.flight-route__plane svg{fill:white!important}
+.flight-facts{border-color:rgba(255,255,255,.13)!important}.flight-fact{border-color:rgba(255,255,255,.13)!important}
+.flight-action{border-color:rgba(255,255,255,.28)!important;color:white!important;background:transparent!important}.flight-action--primary{background:white!important;color:var(--os-ink)!important;border-color:white!important}
+
+.place-workbench{display:grid;grid-template-columns:minmax(0,1fr);gap:0}
+.search-bar{margin:0!important;padding:14px!important;background:#f7f4ed!important;border:0!important;border-bottom:1px solid var(--os-line)!important;display:grid!important;gap:10px!important}
+.search-wrap input,.filter-select,.cards-sort{background:var(--os-paper)!important;border:1px solid var(--os-line)!important;border-radius:0!important;min-height:42px!important;color:var(--os-ink)!important}
+.search-wrap{background:transparent!important;border:0!important}.search-icon{opacity:.55}.selects-row{gap:8px!important}.region-tags{gap:6px!important}.region-tag{border-radius:0!important;border:1px solid var(--os-line)!important;background:transparent!important}.region-tag.active{background:var(--os-accent)!important;border-color:var(--os-accent)!important;color:white!important}
+.cards-header{margin:0!important;padding:12px 14px!important;background:var(--os-paper)!important;border:0!important;border-bottom:1px solid var(--os-line)!important}
+#cards{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:0!important;background:var(--os-paper)!important}
+#cards>.card{margin:0!important;padding:16px!important;border:0!important;border-right:1px solid var(--os-line)!important;border-bottom:1px solid var(--os-line)!important;background:var(--os-paper)!important;min-height:190px!important}
+#cards>.card:nth-child(2n){border-right:0!important}
+#cards>.card:hover{background:#faf7f0!important}
+#cards .card__name{font-family:"Noto Serif TC","Songti TC",serif!important;font-size:18px!important;line-height:1.45!important}
+#cards :is(.tag,.badge,.chip){border-radius:0!important}
+
+.side-module{background:var(--os-paper);border:1px solid var(--os-line)}
+.side-module__title{display:flex;justify-content:space-between;align-items:center;padding:13px 14px;border-bottom:1px solid var(--os-line);font-size:12px;font-weight:800;letter-spacing:.04em}
+.side-module__body{padding:0}
+.home-side :is(.add-section,.cost-block,.rental-block,.driving-section){margin:0!important;border:0!important;background:transparent!important}
+.home-side :is(.add-section__header,.cost-block__header,.rental-block__header,.driving-header){min-height:46px!important;padding:12px 14px!important;background:transparent!important;border:0!important;border-bottom:1px solid var(--os-line)!important}
+.home-side input,.home-side select,.home-side textarea{border-radius:0!important;border:1px solid var(--os-line)!important;background:#fbfaf6!important}
+.home-side .rental-body,.home-side .cost-body,.home-side .driving-body,.home-side .add-section__body{padding:14px!important}
+.home-side .rental-group{border-radius:0!important;border:1px solid var(--os-line)!important;background:#faf7f0!important}
+
+@media(max-width:1100px){.home-dashboard{grid-template-columns:1fr}.home-side{position:static;grid-template-columns:1fr 1fr}.flight-legs{grid-template-columns:1fr!important}.flight-leg{border-right:0!important;border-bottom:1px solid rgba(255,255,255,.15)!important}}
+@media(max-width:760px){
+ .travel-os{display:block}.os-rail{position:static;height:auto;border-right:0;border-bottom:1px solid var(--os-line);padding:14px 14px 10px;display:grid;grid-template-columns:1fr auto;align-items:center}.os-brand{border:0;padding:0}.os-brand__name{font-size:16px}.os-brand__meta,.os-nav__label,.os-rail__foot{display:none}.os-nav{grid-column:1/-1}.os-rail .bottom-nav{position:fixed!important;left:0;right:0;bottom:0!important;z-index:500!important;background:var(--os-paper)!important;border-top:1px solid var(--os-line)!important;display:grid!important;grid-template-columns:repeat(4,1fr)!important;padding:max(5px,env(safe-area-inset-bottom)) 6px!important}.os-rail .bottom-nav__item{grid-template-columns:1fr!important;justify-items:center!important;font-size:10px!important;gap:2px!important;min-height:52px!important;padding:5px!important}.os-rail .bottom-nav__item.active{background:transparent!important;color:var(--os-accent)!important;border-color:transparent!important}.os-workspace{padding:18px 12px 90px}.trip-masthead{grid-template-columns:1fr;align-items:start}.trip-masthead__actions{width:100%}.trip-masthead .quick-actions{width:100%}.trip-masthead .qa-btn{flex:1!important;justify-content:center!important}.home-side{grid-template-columns:1fr}.flight-legs{grid-template-columns:1fr!important}#cards{grid-template-columns:1fr!important}#cards>.card{border-right:0!important}.os-title{font-size:30px}}
+
+/* === Travel OS density pass / 2026-09-14 === */
+/* Place cards are operational rows, not poster cards. */
+#cards{grid-template-columns:repeat(auto-fill,minmax(280px,1fr))!important}
+#cards>.card{
+  min-height:0!important;
+  display:grid!important;
+  grid-template-columns:54px minmax(0,1fr)!important;
+  grid-template-rows:auto auto!important;
+  align-content:start!important;
+  padding:12px 12px 10px!important;
+  gap:0 12px!important;
+}
+#cards .card__img-placeholder{
+  grid-column:1;grid-row:1 / span 2;
+  width:54px!important;height:54px!important;aspect-ratio:auto!important;
+  align-self:start!important;font-size:1.35rem!important;
+  background:#f1eee6!important;border:1px solid var(--os-line)!important;
+}
+#cards .card__body{grid-column:2;grid-row:1;padding:0!important;min-width:0!important}
+#cards .card__footer{grid-column:2;grid-row:2;padding:7px 0 0!important;margin:7px 0 0!important;min-height:0!important;border-top:1px solid var(--os-line)!important}
+#cards .card__tags{margin:0 0 5px!important;gap:4px!important;flex-wrap:nowrap!important;overflow:hidden!important}
+#cards .card__tags .tag{font-size:10px!important;padding:1px 5px!important;flex:0 0 auto!important}
+#cards .card__tags .tag:nth-child(n+4){display:none!important}
+#cards .card__name{font-size:15px!important;line-height:1.35!important;font-family:var(--sans)!important;font-weight:750!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#cards .card__hours{font-size:11px!important;margin-top:4px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#cards .card__note{font-size:11px!important;line-height:1.45!important;margin-top:4px!important;-webkit-line-clamp:1!important}
+#cards .card__cost{font-size:11px!important}
+#cards .card__actions{gap:5px!important;min-width:0!important}
+#cards .card__btn{width:30px!important;height:30px!important;min-width:30px!important;min-height:30px!important}
+
+@media(max-width:760px){
+  .os-workspace{padding:12px 10px 78px!important}
+  .trip-masthead{margin-bottom:12px!important;gap:10px!important}
+  .trip-masthead .os-title{font-size:25px!important;margin-bottom:3px!important}
+  .os-subtitle{font-size:11px!important;line-height:1.5!important}
+  .flight-board__head{padding:12px!important}.flight-leg{padding:12px!important}
+  .search-bar{padding:9px!important;gap:7px!important}.search-wrap input,.filter-select,.cards-sort{min-height:38px!important;font-size:12px!important}
+  .cards-header{padding:8px 10px!important}
+  #cards{display:block!important}
+  #cards>.card{
+    width:100%!important;
+    min-height:0!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    grid-template-rows:auto auto!important;
+    padding:10px 10px 9px!important;
+    border-right:0!important;
+    gap:0 8px!important;
+  }
+  #cards .card__img-placeholder{display:none!important}
+  #cards .card__body{grid-column:1 / -1!important;grid-row:1!important;padding-right:2px!important}
+  #cards .card__footer{grid-column:1 / -1!important;grid-row:2!important;display:flex!important;justify-content:space-between!important;align-items:center!important;margin-top:6px!important;padding-top:6px!important}
+  #cards .card__tags{margin-bottom:3px!important}
+  #cards .card__tags .tag:nth-child(n+3){display:none!important}
+  #cards .card__name{font-size:14px!important;line-height:1.3!important;-webkit-line-clamp:1!important}
+  #cards .card__hours{font-size:10.5px!important;margin-top:3px!important}
+  #cards .card__note{display:none!important}
+  #cards .card__btn{width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important}
+  .home-side{gap:10px!important}
+}
+
+</style><link href="travel-os.css?v=20260916a" rel="stylesheet"/></head>
+<body class="travel-os-page" data-page="dashboard">
+<a class="skip-link" href="#os-workspace">跳到主要內容</a>
+<header class="topbar os-topbar">
+<a class="os-wordmark" href="index.html" aria-label="九州自駕旅程首頁">
+<span class="os-wordmark__mark">九</span>
+<span><strong>九州自駕</strong><small>TRAVEL OS</small></span>
+</a>
+<div class="topbar__actions">
+<span class="sync-state" id="os-sync-state" role="status">連線中</span>
+<button aria-label="使用說明" class="icon-btn help-btn" id="help-btn" title="使用說明" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.4 2.4 0 1 1 3.6 2.1c-.9.5-1.4 1.1-1.4 2.2"/><path d="M12 17h.01"/></svg><span>使用說明</span></button>
+<button aria-label="只看收藏" aria-pressed="false" class="icon-btn" id="fav-btn" title="只看收藏" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.7a5.5 5.5 0 0 0-7.8 0L12 5.8l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.5a5.5 5.5 0 0 0 0-7.8Z"/></svg></button>
+<button aria-label="切換為淺色模式" class="icon-btn theme-toggle" id="theme-btn" title="切換為淺色模式" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><g class="theme-icon theme-icon--sun"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/></g><path class="theme-icon theme-icon--moon" d="M20.2 15.4A8.4 8.4 0 0 1 8.6 3.8 8.5 8.5 0 1 0 20.2 15.4Z"/></svg></button>
+</div>
 </header>
-
-<!-- ══ 快速入口（頁面最上方）══ -->
-<div class="quick-actions">
-  <a href="itinerary.html" class="qa-btn qa-btn--itinerary">
-    <span class="qa-btn__icon">🗓</span>
-    <div class="qa-btn__info">
-      <span class="qa-btn__title">每日行程表</span>
-      <span class="qa-btn__sub">景點挑選與手動編排</span>
-    </div>
-  </a>
-  <button class="qa-btn qa-btn--add" id="qa-add-btn">
-    <span class="qa-btn__icon">➕</span>
-    <div class="qa-btn__info">
-      <span class="qa-btn__title">新增地點</span>
-      <span class="qa-btn__sub">加入心願清單</span>
-    </div>
-  </button>
-</div>
-
-<section class="flight-board" aria-labelledby="flight-board-title">
-  <div class="flight-board__head">
-    <div><h2 class="flight-board__title" id="flight-board-title">星宇航空航班</h2><span class="flight-board__sub">台北桃園 TPE ⇄ 熊本 KMJ，時間皆為當地時間</span></div>
-    <span class="flight-board__status">預定時刻</span>
-  </div>
-  <div class="flight-legs">
-    <article class="flight-leg">
-      <div class="flight-leg__top"><span class="flight-leg__date">9/30（三）去程</span><span class="flight-leg__number">JX846</span></div>
-      <div class="flight-route"><div class="flight-airport"><strong>07:30</strong><span>TPE 桃園 T1</span></div><span class="flight-route__line" aria-hidden="true"><span class="flight-route__plane"><svg viewBox="0 0 96 48" focusable="false" aria-hidden="true"><path d="M3 25.5 9 22h19.5l17-18h8.5L46 22h22.5l13-7h6l-6 10.5 6 10.5h-6l-13-7H46l8 18h-8.5l-17-18H9L3 25.5z"/><path d="M10 22h13l-5-8h5.5l10.5 8H45L52 8h5l-3.5 14H68l7-4h4.5l-4 6 4 6H75l-7-4H53.5L57 40h-5l-7-14H34l-10.5 8H18l5-8H10z" opacity=".22"/></svg></span></span><div class="flight-airport"><strong>10:45</strong><span>KMJ 熊本</span></div></div>
-      <div class="flight-facts">
-        <div class="flight-fact"><span>機場報到</span><strong>05:00 開放<br>06:30 截止</strong></div>
-        <div class="flight-fact"><span>線上報到</span><strong>9/28 07:30 起</strong></div>
-        <div class="flight-fact"><span>免費選位時段</span><strong>9/28 07:30<br>至 9/30 04:30</strong></div>
-        <div class="flight-fact"><span>登機門</span><strong>當日 App／看板確認</strong></div>
-      </div>
-      <div class="flight-leg__actions"><a class="flight-action" href="https://www.starlux-airlines.com/zh-TW/booking/manage-my-trip/manage-my-trip" target="_blank" rel="noopener">管理行程／選位</a><a class="flight-action flight-action--primary" href="itinerary.html?flight=JX846">加入行程</a></div>
-    </article>
-    <article class="flight-leg">
-      <div class="flight-leg__top"><span class="flight-leg__date">10/7（三）回程</span><span class="flight-leg__number">JX847</span></div>
-      <div class="flight-route"><div class="flight-airport"><strong>11:55</strong><span>KMJ 熊本</span></div><span class="flight-route__line" aria-hidden="true"><span class="flight-route__plane"><svg viewBox="0 0 96 48" focusable="false" aria-hidden="true"><path d="M3 25.5 9 22h19.5l17-18h8.5L46 22h22.5l13-7h6l-6 10.5 6 10.5h-6l-13-7H46l8 18h-8.5l-17-18H9L3 25.5z"/><path d="M10 22h13l-5-8h5.5l10.5 8H45L52 8h5l-3.5 14H68l7-4h4.5l-4 6 4 6H75l-7-4H53.5L57 40h-5l-7-14H34l-10.5 8H18l5-8H10z" opacity=".22"/></svg></span></span><div class="flight-airport"><strong>13:20</strong><span>TPE 桃園 T1</span></div></div>
-      <div class="flight-facts">
-        <div class="flight-fact"><span>機場報到</span><strong>09:25 開放<br>10:55 截止</strong></div>
-        <div class="flight-fact"><span>線上報到</span><strong>10/5 11:55 起</strong></div>
-        <div class="flight-fact"><span>免費選位時段</span><strong>10/5 11:55<br>至 10/7 08:55</strong></div>
-        <div class="flight-fact"><span>抵達登機門</span><strong>最晚 10:55</strong></div>
-      </div>
-      <div class="flight-leg__actions"><a class="flight-action" href="https://www.starlux-airlines.com/zh-TW/check-in-fly/check-in-now/online-check-in" target="_blank" rel="noopener">線上報到</a><a class="flight-action flight-action--primary" href="itinerary.html?flight=JX847">加入行程</a></div>
-    </article>
-  </div>
-  <p class="flight-board__note">航班時間、機型、報到櫃檯與登機門可能調整；出發前請再次核對電子機票、STARLUX App 與機場看板。</p>
+<main class="os-workspace" id="os-workspace">
+<section class="os-view dashboard-view" data-view="dashboard">
+<header class="dashboard-heading">
+<div><p class="dashboard-heading__date" id="dashboard-date">2026.09.30 - 10.07</p><h1>今天，從下一站開始。</h1></div>
+<div class="trip-progress" aria-label="旅程進度"><span id="trip-progress-label">行程準備中</span><strong id="trip-progress-day">DAY 1 / 8</strong></div>
+</header>
+<div class="command-grid">
+<section class="now-command" aria-labelledby="now-command-title">
+<div class="command-label"><span>NOW</span><span id="dashboard-city">九州</span></div>
+<div id="dashboard-now" class="dashboard-focus skeleton-block"><p>正在讀取目前行程</p></div>
 </section>
-
-<!-- ══ 搜尋與篩選 ══ -->
-<div class="search-bar">
-  <div class="search-wrap">
-    <span class="search-icon">🔍</span>
-    <input id="search-input" type="search" placeholder="搜尋名稱、地區、備註…" autocomplete="off">
-  </div>
-  <div class="selects-row">
-    <select id="region-select" class="filter-select"><option value="">全部地區</option></select>
-    <select id="cat-select" class="filter-select">
-      <option value="">全部類別</option>
-      <option>景點</option><option>餐廳</option><option>住宿</option><option>購物</option><option>其他</option>
-    </select>
-    <select id="sub-select" class="filter-select"><option value="">全部子類別</option></select>
-  </div>
-  <div class="region-tags" id="region-tags"></div>
+<section class="next-command" aria-labelledby="next-command-title">
+<div class="command-label"><span>NEXT</span><span id="dashboard-next-time">--:--</span></div>
+<div id="dashboard-next" class="dashboard-next"><p>等待行程資料</p></div>
+</section>
+<aside class="crew-command">
+<div class="command-label"><span>今日用車</span><span>即時資料</span></div>
+<p class="crew-command__hint">確認兩台租車的取車狀態，以及今天需要一起行動的站點。</p>
+<div id="dashboard-fleet" class="fleet-glance"><p>13號</p><p>15號</p><p>全員</p></div>
+<div id="dashboard-alert" class="dashboard-alert" role="status">沒有需要立即處理的提醒</div>
+</aside>
 </div>
-
+<div class="quick-actions">
+<a class="qa-btn qa-btn--itinerary" href="itinerary.html">
+<div class="qa-btn__info">
+<span class="qa-btn__title">打開今日行程</span>
+<span class="qa-btn__sub">目前行程與整段導航</span>
+</div>
+</a>
+<button class="qa-btn qa-btn--add" id="qa-add-btn">
+<div class="qa-btn__info">
+<span class="qa-btn__title">新增地點</span>
+<span class="qa-btn__sub">存進景點庫</span>
+</div>
+</button>
+</div>
+<section aria-labelledby="flight-board-title" class="flight-board">
+<div class="flight-board__head">
+<div><h2 class="flight-board__title" id="flight-board-title">星宇航空航班</h2><span class="flight-board__sub">台北桃園 TPE ⇄ 熊本 KMJ，時間皆為當地時間</span></div>
+<span class="flight-board__status">預定時刻</span>
+</div>
+<div class="flight-legs">
+<article class="flight-leg">
+<div class="flight-leg__top"><span class="flight-leg__date">9/30（三）去程</span><span class="flight-leg__number">JX846</span></div>
+<div class="flight-route"><div class="flight-airport"><strong>07:30</strong><span>TPE 桃園 T1</span></div><span aria-hidden="true" class="flight-route__line"><span class="flight-route__plane"><svg aria-hidden="true" focusable="false" viewbox="0 0 96 48"><path d="M3 25.5 9 22h19.5l17-18h8.5L46 22h22.5l13-7h6l-6 10.5 6 10.5h-6l-13-7H46l8 18h-8.5l-17-18H9L3 25.5z"></path><path d="M10 22h13l-5-8h5.5l10.5 8H45L52 8h5l-3.5 14H68l7-4h4.5l-4 6 4 6H75l-7-4H53.5L57 40h-5l-7-14H34l-10.5 8H18l5-8H10z" opacity=".22"></path></svg></span></span><div class="flight-airport"><strong>10:45</strong><span>KMJ 熊本</span></div></div>
+<div class="flight-facts">
+<div class="flight-fact"><span>機場報到</span><strong>05:00 開放<br/>06:30 截止</strong></div>
+<div class="flight-fact"><span>線上報到</span><strong>9/28 07:30 起</strong></div>
+<div class="flight-fact"><span>免費選位時段</span><strong>9/28 07:30<br/>至 9/30 04:30</strong></div>
+<div class="flight-fact"><span>登機門</span><strong>當日 App／看板確認</strong></div>
+</div>
+<div class="flight-leg__actions"><a class="flight-action" href="https://www.starlux-airlines.com/zh-TW/booking/manage-my-trip/manage-my-trip" rel="noopener" target="_blank">管理行程／選位</a><a class="flight-action flight-action--primary" href="itinerary.html?flight=JX846">加入行程</a></div>
+</article>
+<article class="flight-leg">
+<div class="flight-leg__top"><span class="flight-leg__date">10/7（三）回程</span><span class="flight-leg__number">JX847</span></div>
+<div class="flight-route"><div class="flight-airport"><strong>11:55</strong><span>KMJ 熊本</span></div><span aria-hidden="true" class="flight-route__line"><span class="flight-route__plane"><svg aria-hidden="true" focusable="false" viewbox="0 0 96 48"><path d="M3 25.5 9 22h19.5l17-18h8.5L46 22h22.5l13-7h6l-6 10.5 6 10.5h-6l-13-7H46l8 18h-8.5l-17-18H9L3 25.5z"></path><path d="M10 22h13l-5-8h5.5l10.5 8H45L52 8h5l-3.5 14H68l7-4h4.5l-4 6 4 6H75l-7-4H53.5L57 40h-5l-7-14H34l-10.5 8H18l5-8H10z" opacity=".22"></path></svg></span></span><div class="flight-airport"><strong>13:20</strong><span>TPE 桃園 T1</span></div></div>
+<div class="flight-facts">
+<div class="flight-fact"><span>機場報到</span><strong>09:25 開放<br/>10:55 截止</strong></div>
+<div class="flight-fact"><span>線上報到</span><strong>10/5 11:55 起</strong></div>
+<div class="flight-fact"><span>免費選位時段</span><strong>10/5 11:55<br/>至 10/7 08:55</strong></div>
+<div class="flight-fact"><span>抵達登機門</span><strong>最晚 10:55</strong></div>
+</div>
+<div class="flight-leg__actions"><a class="flight-action" href="https://www.starlux-airlines.com/zh-TW/check-in-fly/check-in-now/online-check-in" rel="noopener" target="_blank">線上報到</a><a class="flight-action flight-action--primary" href="itinerary.html?flight=JX847">加入行程</a></div>
+</article>
+</div>
+<p class="flight-board__note">航班時間、機型、報到櫃檯與登機門可能調整；出發前請再次核對電子機票、STARLUX App 與機場看板。</p>
+</section>
+</section>
+<section class="os-view places-view" data-view="places" hidden>
+<header class="section-heading"><div><span>PLACES & SAVED</span><h1>景點收藏</h1></div><p>快速篩選地點、收藏候選清單，並開啟導航。</p></header>
+<div class="search-bar">
+<div class="search-wrap">
+<span class="search-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></span>
+<input autocomplete="off" id="search-input" placeholder="搜尋名稱、地區、備註…" type="search"/>
+</div>
+<div class="selects-row">
+<select class="filter-select" id="region-select"><option value="">全部地區</option></select>
+<select class="filter-select" id="cat-select">
+<option value="">全部類別</option>
+<option>景點</option><option>餐廳</option><option>住宿</option><option>購物</option><option>其他</option>
+</select>
+<select class="filter-select" id="sub-select"><option value="">全部子類別</option></select>
+</div>
+<div class="region-tags" id="region-tags"></div>
+</div>
 <!-- ══ 新增地點（預設折疊）══ -->
 <div class="add-section" id="add-section">
-  <div class="add-section__header" id="add-toggle">
-    <span class="add-section__title">＋ 新增地點</span>
-    <span class="add-toggle-icon">▼</span>
-  </div>
-  <div class="add-section__body">
-    <form id="add-place-form">
-      <div class="add-field">
-        <label>地區 *</label>
-        <input id="add-region" type="text" placeholder="例：福岡、熊本" required>
-      </div>
-      <div class="add-field">
-        <label>類別 *</label>
-        <select id="add-category-select">
-          <option value="">請選擇類別</option>
-        </select>
-        <input id="add-category" class="custom-choice-input" type="text" placeholder="輸入新類別" autocomplete="off" hidden>
-      </div>
-      <div class="add-field">
-        <label>子類別</label>
-        <select id="add-sub-select">
-          <option value="">請選擇子類別</option>
-        </select>
-        <input id="add-sub" class="custom-choice-input" type="text" placeholder="輸入新子類別" autocomplete="off" hidden>
-      </div>
-      <div class="add-field">
-        <label>名稱 *</label>
-        <input id="add-name" type="text" placeholder="景點或店家名稱" required>
-      </div>
-      <div class="add-field">
-        <label>營業時間</label>
-        <input id="add-hours" type="text" placeholder="例：09:00–17:00，週三休">
-      </div>
-      <div class="add-field">
-        <label>備註</label>
-        <textarea id="add-note" rows="2" placeholder="地址、電話、交通方式…"></textarea>
-      </div>
-      <button type="submit" class="btn-add-place" id="btn-save-place">新增地點</button>
-      <button type="button" class="btn-cancel-edit" id="btn-cancel-edit" hidden>取消編輯</button>
-      <span class="sync-badge" id="add-sync-status"></span>
-    </form>
-    <button class="btn-export" id="btn-export-csv">📥 匯出 CSV</button>
-  </div>
+<div class="add-section__header" id="add-toggle">
+<span class="add-section__title">＋ 新增地點</span>
+<span class="add-toggle-icon">▼</span>
 </div>
-
-<!-- ══ 住宿費用（預設折疊）══ -->
-<div class="cost-block" id="cost-block">
-  <div class="cost-block__header" id="cost-toggle">
-    <span class="cost-block__title">💴 住宿費用</span>
-    <span class="cost-block__toggle">▼</span>
-  </div>
-  <div class="cost-block__body">
-    <div class="cost-person-row">
-      <label for="person-input">分攤人數</label>
-      <input id="person-input" type="number" min="1" max="20" value="4">
-      <span style="font-size:.75rem;opacity:.5;">人</span>
-    </div>
-    <div class="cost-entry-header">
-      <span>項目名稱</span>
-      <span style="text-align:right;width:100px;">金額 (TWD)</span>
-      <span style="width:32px;"></span>
-    </div>
-    <div id="cost-entries"></div>
-    <button class="btn-add-cost" id="btn-add-cost">＋ 新增費用項目</button>
-    <div id="cost-summary"></div>
-    <span class="sync-badge" id="cost-sync-status">⏳ 連線中…</span>
-  </div>
+<div class="add-section__body">
+<form id="add-place-form">
+<div class="add-field google-place-search" id="google-place-search">
+<div class="google-place-search__label">景點名稱／Google 地點 *</div>
+<div id="google-place-autocomplete"><span class="google-place-search__loading">正在載入地點搜尋…</span></div>
+<div class="google-place-search__selected" id="google-place-selected" hidden=""></div>
+<input autocomplete="off" hidden="" id="add-name" placeholder="輸入景點或店家名稱" type="text"/>
+<button class="google-place-search__mode" id="toggle-manual-name" type="button">找不到地點？手動輸入名稱</button>
+<p class="google-place-search__hint" id="google-place-hint">搜尋並選擇後會直接使用正式名稱，並保存地址與座標。</p>
 </div>
-
-<!-- ══ 租車資訊 ══ -->
-<div class="rental-block" id="rental-block">
-  <div class="rental-block__header" id="rental-toggle">
-    <span class="rental-block__title">🚗 租車資訊</span>
-    <span class="rental-block__toggle">▼</span>
-  </div>
-  <div class="rental-block__body">
-    <div class="rental-groups">
-      <section class="rental-group" data-rental-group="carA">
-        <div class="rental-group__head"><span class="rental-group__badge">13號</span><span class="rental-group__hint">獨立租車資料</span></div>
-        <div class="rental-info-grid">
-          <div class="rental-field"><label>取車日期</label><input id="r-carA-pickup-date" type="date"></div>
-          <div class="rental-field"><label>取車時間</label><input id="r-carA-pickup-time" type="time"></div>
-          <div class="rental-field"><label>還車日期</label><input id="r-carA-return-date" type="date"></div>
-          <div class="rental-field"><label>還車時間</label><input id="r-carA-return-time" type="time"></div>
-          <div class="rental-field"><label>租車地點／分店</label><input id="r-carA-rental-location" type="text" placeholder="例：Toyota Rent a Car 熊本站"></div>
-          <div class="rental-field"><label>取車地點</label><input id="r-carA-pickup-loc" type="text" placeholder="例：熊本站東口"></div>
-          <div class="rental-field"><label>還車地點</label><input id="r-carA-return-loc" type="text" placeholder="例：福岡機場店"></div>
-          <div class="rental-field"><label>租車公司</label><input id="r-carA-company" type="text" placeholder="例：Times"></div>
-          <div class="rental-field"><label>車型</label><input id="r-carA-car" type="text" placeholder="例：Toyota Aqua"></div>
-          <div class="rental-field"><label>費用 (TWD)</label><input id="r-carA-cost" type="number" min="0" placeholder="0"></div>
-          <div class="rental-field"><label>預訂編號</label><input id="r-carA-booking" type="text" placeholder="訂單號碼"></div>
-        </div>
-        <button class="btn-add-place btn-save-rental" type="button" data-save-rental="carA">儲存 13號租車資訊</button>
-        <div class="rental-itinerary-actions">
-          <button class="rental-itinerary-action" type="button" data-add-rental="carA" data-rental-event="pickup">＋ 取車加入行程</button>
-          <button class="rental-itinerary-action" type="button" data-add-rental="carA" data-rental-event="return">＋ 還車加入行程</button>
-        </div>
-      </section>
-      <section class="rental-group rental-group--b" data-rental-group="carB">
-        <div class="rental-group__head"><span class="rental-group__badge">15號</span><span class="rental-group__hint">獨立租車資料</span></div>
-        <div class="rental-info-grid">
-          <div class="rental-field"><label>取車日期</label><input id="r-carB-pickup-date" type="date"></div>
-          <div class="rental-field"><label>取車時間</label><input id="r-carB-pickup-time" type="time"></div>
-          <div class="rental-field"><label>還車日期</label><input id="r-carB-return-date" type="date"></div>
-          <div class="rental-field"><label>還車時間</label><input id="r-carB-return-time" type="time"></div>
-          <div class="rental-field"><label>租車地點／分店</label><input id="r-carB-rental-location" type="text" placeholder="例：Toyota Rent a Car 熊本站"></div>
-          <div class="rental-field"><label>取車地點</label><input id="r-carB-pickup-loc" type="text" placeholder="例：熊本站東口"></div>
-          <div class="rental-field"><label>還車地點</label><input id="r-carB-return-loc" type="text" placeholder="例：福岡機場店"></div>
-          <div class="rental-field"><label>租車公司</label><input id="r-carB-company" type="text" placeholder="例：Times"></div>
-          <div class="rental-field"><label>車型</label><input id="r-carB-car" type="text" placeholder="例：Toyota Aqua"></div>
-          <div class="rental-field"><label>費用 (TWD)</label><input id="r-carB-cost" type="number" min="0" placeholder="0"></div>
-          <div class="rental-field"><label>預訂編號</label><input id="r-carB-booking" type="text" placeholder="訂單號碼"></div>
-        </div>
-        <button class="btn-add-place btn-save-rental" type="button" data-save-rental="carB">儲存 15號租車資訊</button>
-        <div class="rental-itinerary-actions">
-          <button class="rental-itinerary-action" type="button" data-add-rental="carB" data-rental-event="pickup">＋ 取車加入行程</button>
-          <button class="rental-itinerary-action" type="button" data-add-rental="carB" data-rental-event="return">＋ 還車加入行程</button>
-        </div>
-      </section>
-    </div>
-    <span class="sync-badge" id="rental-sync-status"></span>
-  </div>
+<div class="add-field">
+<label>地區 *</label>
+<input id="add-region" placeholder="例：福岡、熊本" required="" type="text"/>
 </div>
-
-<!-- 日本自駕注意事項 -->
-<div class="driving-section" id="driving-section">
-  <div class="driving-header" id="driving-toggle">
-    <h3>🗾 日本自駕注意事項</h3>
-    <span class="driving-toggle-icon">▼</span>
-  </div>
-  <div class="driving-body">
-    <div class="driving-tips-grid">
-      <div class="driving-tip-card">
-        <h4>📄 出發前必備文件</h4>
-        <ul>
-          <li>台灣駕照 + <strong>日本語譯本</strong>（台灣監理站辦理，需 2–3 工作天）</li>
-          <li>護照正本</li>
-          <li>租車確認書（印出或手機截圖）</li>
-          <li>國際信用卡（租車押金用，部分需 Visa/Master）</li>
-        </ul>
-      </div>
-      <div class="driving-tip-card">
-        <h4>🛣️ 行駛規則</h4>
-        <ul>
-          <li><strong>靠左行駛</strong>，方向盤在右側（與台灣相反）</li>
-          <li>市區限速 <strong>40–60 km/h</strong>，郊區 <strong>60–80 km/h</strong>，高速 <strong>100 km/h</strong></li>
-          <li>「止まれ」標誌車輛<strong>必須完全靜止</strong>，不可滑行通過</li>
-          <li>轉彎時讓行人優先，斑馬線前必須停車</li>
-          <li>右轉需等對向來車完全通過</li>
-          <li>高速公路進出口在<strong>左側</strong></li>
-        </ul>
-      </div>
-      <div class="driving-tip-card">
-        <h4>🅿️ 停車</h4>
-        <ul>
-          <li>多為<strong>自動繳費機</strong>，準備日幣硬幣或 IC 卡</li>
-          <li>路邊黃線禁停，白線可短暫停車（依標示）</li>
-          <li>推薦 <strong>Times Park</strong> 或 <strong>Navitime</strong> App 找停車場</li>
-          <li>觀光地停車場假日容易客滿，建議早去</li>
-        </ul>
-      </div>
-      <div class="driving-tip-card">
-        <h4>⛽ 加油</h4>
-        <ul>
-          <li>一般車輛加 <strong>レギュラー（Regular）</strong></li>
-          <li>自助加油：選油種 → 插卡/投現 → 拿油槍 → 加完按「返金」</li>
-          <li>取車時確認油箱類型（汽油 or 柴油）</li>
-        </ul>
-      </div>
-      <div class="driving-tip-card">
-        <h4>🛣️ 高速公路 ETC</h4>
-        <ul>
-          <li>租車時建議加租 <strong>ETC 車載機</strong>（日本 ETC ≠ 台灣 ETC）</li>
-          <li>沒有 ETC 走一般車道，準備日幣現金</li>
-          <li>九州熊本→福岡約 ¥2,000–2,800</li>
-          <li><strong>ドラぷら（Dra-pla）</strong> App 可查過路費</li>
-        </ul>
-      </div>
-      <div class="driving-tip-card">
-        <h4>📱 導航</h4>
-        <ul>
-          <li>推薦 <strong>Google Maps</strong>（需行動數據）</li>
-          <li><strong>Navitime Japan</strong> 可離線，適合山區路段</li>
-          <li>輸入目的地建議用<strong>電話號碼</strong>或<strong>郵遞區號</strong></li>
-        </ul>
-      </div>
-      <div class="driving-tip-card">
-        <h4>🚨 緊急狀況</h4>
-        <ul>
-          <li>報警：<strong>110</strong> / 救護車火災：<strong>119</strong></li>
-          <li>JAF 道路救援：<strong>0570-00-8139</strong></li>
-          <li>發生事故先拍照，不移動車輛，等警察到場</li>
-          <li>取車時確認租車公司緊急聯絡電話並存入手機</li>
-        </ul>
-      </div>
-      <div class="driving-tip-card">
-        <h4>🚫 嚴禁事項</h4>
-        <ul>
-          <li><strong>飲酒駕車</strong>：血液酒精 0.03% 以上即違法</li>
-          <li><strong>手持手機</strong>：罰款 ¥18,000，記點</li>
-          <li><strong>超速 30 km/h 以上</strong>：可能被逮捕</li>
-          <li>全車乘客都必須繫安全帶（含後座）</li>
-        </ul>
-      </div>
-      <div class="driving-tip-card">
-        <h4>👶 嬰幼兒乘車規定</h4>
-        <ul>
-          <li><strong>6 歲未滿</strong>乘車原則上必須使用兒童安全座椅</li>
-          <li>租車時需事先預約嬰兒座椅、幼童座椅或增高墊</li>
-          <li>6 歲以上若身高未達約 <strong>150 cm</strong>，仍建議使用兒童座椅或增高墊</li>
-          <li>不要抱著嬰幼兒乘車，急煞或碰撞時無法有效保護</li>
-        </ul>
-      </div>
-      <div class="driving-tip-card">
-        <h4>📍 本次行程租車重點</h4>
-        <ul>
-          <li>熊本機場取車 → 阿蘇、天草、芦北方向行駛</li>
-          <li>天草公路多山路彎道，單線道會車需禮讓</li>
-          <li>福岡市區停車費高，建議停郊區轉地鐵</li>
-          <li>異地還車（熊本取→福岡還）需確認是否收異地費</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</div>  
-
-<!-- ══ 地點卡片 ══ -->
+<div class="add-field">
+<label>類別 *</label>
+<select id="add-category-select">
+<option value="">請選擇類別</option>
+</select>
+<input autocomplete="off" class="custom-choice-input" hidden="" id="add-category" placeholder="輸入新類別" type="text"/>
+</div>
+<div class="add-field">
+<label>子類別</label>
+<select id="add-sub-select">
+<option value="">請選擇子類別</option>
+</select>
+<input autocomplete="off" class="custom-choice-input" hidden="" id="add-sub" placeholder="輸入新子類別" type="text"/>
+</div>
+<div class="add-field">
+<label>營業時間</label>
+<input id="add-hours" placeholder="例：09:00-17:00，週三休" type="text"/>
+</div>
+<div class="add-field">
+<label>備註</label>
+<textarea id="add-note" placeholder="地址、電話、交通方式…" rows="2"></textarea>
+</div>
+<button class="btn-add-place" id="btn-save-place" type="submit">新增地點</button>
+<button class="btn-cancel-edit" hidden="" id="btn-cancel-edit" type="button">取消編輯</button>
+<span class="sync-badge" id="add-sync-status"></span>
+</form>
+<button class="btn-export" id="btn-export-csv">📥 匯出 CSV</button>
+</div>
+</div>
 <div class="cards-header">
-  <span class="cards-count" id="cards-count">載入中…</span>
-  <select class="cards-sort" id="sort-select">
-    <option value="default">預設排序</option>
-    <option value="region">依地區</option>
-    <option value="cat">依類別</option>
-    <option value="fav">最愛優先</option>
-  </select>
+<span class="cards-count" id="cards-count">載入中…</span>
+<select class="cards-sort" id="sort-select">
+<option value="default">預設排序</option>
+<option value="region">依地區</option>
+<option value="cat">依類別</option>
+<option value="fav">收藏優先</option>
+</select>
 </div>
 <div class="cards" id="cards"></div>
-
-<div class="tour-overlay" id="help-overlay" aria-hidden="true"><div class="tour-backdrop"></div></div>
-  <section class="tour-card" id="tour-card" role="dialog" aria-modal="true" aria-labelledby="tour-title">
-    <span class="tour-progress" id="tour-progress"></span>
-    <h2 id="tour-title"></h2>
-    <p id="tour-body"></p>
-    <div class="tour-actions">
-      <button id="tour-close" type="button">略過</button>
-      <button id="tour-prev" type="button">上一步</button>
-      <button class="tour-next" id="tour-next" type="button">下一步</button>
-    </div>
-  </section>
-
-<!-- ══ Bottom Nav ══ -->
-<nav class="bottom-nav">
-  <a href="travel.html" class="bottom-nav__item"><span>🏠</span><span>首頁</span></a>
-  <a href="index.html" class="bottom-nav__item active"><span>🔍</span><span>總覽</span></a>
-  <a href="itinerary.html" class="bottom-nav__item"><span>🗓</span><span>行程</span></a>
-  <a href="fukuoka.html" class="bottom-nav__item"><span>🌆</span><span>福岡</span></a>
+</section>
+<section class="os-view more-view" data-view="more" hidden>
+<header class="section-heading"><div><span>TRIP SYSTEMS</span><h1>旅程設定</h1></div><p>費用、車輛與自駕備忘集中管理。</p></header>
+<!-- ══ 住宿費用（預設折疊）══ -->
+<div class="cost-block" id="cost-block">
+<div class="cost-block__header" id="cost-toggle">
+<span class="cost-block__title">💴 住宿費用</span>
+<span class="cost-block__toggle">▼</span>
+</div>
+<div class="cost-block__body">
+<div class="cost-person-row">
+<label for="person-input">分攤人數</label>
+<input id="person-input" max="20" min="1" type="number" value="4"/>
+<span style="font-size:.75rem;opacity:.5;">人</span>
+</div>
+<div class="cost-entry-header">
+<span>項目名稱</span>
+<span style="text-align:right;width:100px;">金額 (TWD)</span>
+<span style="width:32px;"></span>
+</div>
+<div id="cost-entries"></div>
+<button class="btn-add-cost" id="btn-add-cost">＋ 新增費用項目</button>
+<div id="cost-summary"></div>
+<span class="sync-badge" id="cost-sync-status">⏳ 連線中…</span>
+</div>
+</div>
+<!-- ══ 租車資訊 ══ -->
+<div class="rental-block" id="rental-block">
+<div class="rental-block__header" id="rental-toggle">
+<span class="rental-block__title">🚗 租車資訊</span>
+<span class="rental-block__toggle">▼</span>
+</div>
+<div class="rental-block__body">
+<div class="rental-groups">
+<section class="rental-group" data-rental-group="carA">
+<div class="rental-group__head"><span class="rental-group__badge">13號</span><span class="rental-group__hint">獨立租車資料</span></div>
+<div class="rental-info-grid">
+<div class="rental-field"><label>取車日期</label><input id="r-carA-pickup-date" type="date"/></div>
+<div class="rental-field"><label>取車時間</label><input id="r-carA-pickup-time" type="time"/></div>
+<div class="rental-field"><label>還車日期</label><input id="r-carA-return-date" type="date"/></div>
+<div class="rental-field"><label>還車時間</label><input id="r-carA-return-time" type="time"/></div>
+<div class="rental-field"><label>租車地點／分店</label><input id="r-carA-rental-location" placeholder="例：Toyota Rent a Car 熊本站" type="text"/></div>
+<div class="rental-field"><label>取車地點</label><input id="r-carA-pickup-loc" placeholder="例：熊本站東口" type="text"/></div>
+<div class="rental-field"><label>還車地點</label><input id="r-carA-return-loc" placeholder="例：福岡機場店" type="text"/></div>
+<div class="rental-field"><label>租車公司</label><input id="r-carA-company" placeholder="例：Times" type="text"/></div>
+<div class="rental-field"><label>車型</label><input id="r-carA-car" placeholder="例：Toyota Aqua" type="text"/></div>
+<div class="rental-field"><label>費用 (TWD)</label><input id="r-carA-cost" min="0" placeholder="0" type="number"/></div>
+<div class="rental-field"><label>預訂編號</label><input id="r-carA-booking" placeholder="訂單號碼" type="text"/></div>
+</div>
+<button class="btn-add-place btn-save-rental" data-save-rental="carA" type="button">儲存 13號租車資訊</button>
+<div class="rental-itinerary-actions">
+<button class="rental-itinerary-action" data-add-rental="carA" data-rental-event="pickup" type="button">＋ 取車加入行程</button>
+<button class="rental-itinerary-action" data-add-rental="carA" data-rental-event="return" type="button">＋ 還車加入行程</button>
+</div>
+</section>
+<section class="rental-group rental-group--b" data-rental-group="carB">
+<div class="rental-group__head"><span class="rental-group__badge">15號</span><span class="rental-group__hint">獨立租車資料</span></div>
+<div class="rental-info-grid">
+<div class="rental-field"><label>取車日期</label><input id="r-carB-pickup-date" type="date"/></div>
+<div class="rental-field"><label>取車時間</label><input id="r-carB-pickup-time" type="time"/></div>
+<div class="rental-field"><label>還車日期</label><input id="r-carB-return-date" type="date"/></div>
+<div class="rental-field"><label>還車時間</label><input id="r-carB-return-time" type="time"/></div>
+<div class="rental-field"><label>租車地點／分店</label><input id="r-carB-rental-location" placeholder="例：Toyota Rent a Car 熊本站" type="text"/></div>
+<div class="rental-field"><label>取車地點</label><input id="r-carB-pickup-loc" placeholder="例：熊本站東口" type="text"/></div>
+<div class="rental-field"><label>還車地點</label><input id="r-carB-return-loc" placeholder="例：福岡機場店" type="text"/></div>
+<div class="rental-field"><label>租車公司</label><input id="r-carB-company" placeholder="例：Times" type="text"/></div>
+<div class="rental-field"><label>車型</label><input id="r-carB-car" placeholder="例：Toyota Aqua" type="text"/></div>
+<div class="rental-field"><label>費用 (TWD)</label><input id="r-carB-cost" min="0" placeholder="0" type="number"/></div>
+<div class="rental-field"><label>預訂編號</label><input id="r-carB-booking" placeholder="訂單號碼" type="text"/></div>
+</div>
+<button class="btn-add-place btn-save-rental" data-save-rental="carB" type="button">儲存 15號租車資訊</button>
+<div class="rental-itinerary-actions">
+<button class="rental-itinerary-action" data-add-rental="carB" data-rental-event="pickup" type="button">＋ 取車加入行程</button>
+<button class="rental-itinerary-action" data-add-rental="carB" data-rental-event="return" type="button">＋ 還車加入行程</button>
+</div>
+</section>
+</div>
+<span class="sync-badge" id="rental-sync-status"></span>
+</div>
+</div>
+<!-- 日本自駕注意事項 -->
+<div class="driving-section" id="driving-section">
+<div class="driving-header" id="driving-toggle">
+<h3>🗾 日本自駕注意事項</h3>
+<span class="driving-toggle-icon">▼</span>
+</div>
+<div class="driving-body">
+<div class="driving-tips-grid">
+<div class="driving-tip-card">
+<h4>📄 出發前必備文件</h4>
+<ul>
+<li>台灣駕照 + <strong>日本語譯本</strong>（台灣監理站辦理，需 2-3 工作天）</li>
+<li>護照正本</li>
+<li>租車確認書（印出或手機截圖）</li>
+<li>國際信用卡（租車押金用，部分需 Visa/Master）</li>
+</ul>
+</div>
+<div class="driving-tip-card">
+<h4>⚠️ 2026/9/1 生活道路新制</h4>
+<ul>
+<li>自 <strong>2026/9/1</strong> 起，日本「生活道路」在<strong>沒有另行速限標誌</strong>時，法定最高速度由 60 km/h 降為 <strong>30 km/h</strong></li>
+<li>生活道路可理解為住宅區、巷弄等主要供居民日常使用、通常<strong>沒有中央線或車道分隔</strong>的一般道路</li>
+<li>有中央線／車道劃分、以設施分隔往返方向的道路，以及汽車專用道路等，不套用這個 30 km/h 預設</li>
+<li><strong>現場有速限標誌時一律以標誌為準</strong>；導航若帶進窄巷，不要再沿用舊的 60 km/h 直覺</li>
+</ul>
+</div>
+<div class="driving-tip-card">
+<h4>🛣️ 行駛規則</h4>
+<ul>
+<li><strong>靠左行駛</strong>，方向盤在右側（與台灣相反）</li>
+<li>「止まれ」紅色倒三角標誌代表<strong>完全停止</strong>，不是只減速後滑行通過</li>
+<li><strong>平交道原則上也要先完全停止並確認安全</strong>，不是一定要看到「止まれ」標誌才停</li>
+<li>無號誌、無優先標示的路口要特別注意<strong>左方優先</strong>的判斷邏輯</li>
+<li>轉彎及行經斑馬線時優先注意行人；右轉需確認對向來車</li>
+<li>高速公路進出口在<strong>左側</strong></li>
+</ul>
+</div>
+<div class="driving-tip-card">
+<h4>🅿️ 停車</h4>
+<ul>
+<li>日本需分清楚<strong>「駐車禁止」</strong>與<strong>「駐停車禁止」</strong>，是否可短暫停靠要依現場標誌與實際停車狀態判斷</li>
+<li>不要用「白線就一定能停」這種方式判斷；觀光地建議直接使用正式停車場</li>
+<li>多為<strong>自動繳費機</strong>，可準備日幣硬幣或確認是否支援 IC／信用卡</li>
+<li>推薦 <strong>Times Park</strong> 或 <strong>Navitime</strong> App 找停車場；熱門景點假日先準備主要＋備用停車場</li>
+</ul>
+</div>
+<div class="driving-tip-card">
+<h4>⛽ 加油</h4>
+<ul>
+<li>一般車輛加 <strong>レギュラー（Regular）</strong></li>
+<li>自助加油：選油種 → 插卡/投現 → 拿油槍 → 加完按「返金」</li>
+<li>取車時確認油箱類型（汽油 or 柴油）</li>
+</ul>
+</div>
+<div class="driving-tip-card">
+<h4>🛣️ 高速公路 ETC</h4>
+<ul>
+<li>租車時建議加租 <strong>ETC 車載機</strong>（日本 ETC ≠ 台灣 ETC）</li>
+<li>沒有 ETC 走一般車道，準備日幣現金</li>
+<li>九州熊本→福岡約 ¥2,000-2,800</li>
+<li><strong>ドラぷら（Dra-pla）</strong> App 可查過路費</li>
+</ul>
+</div>
+<div class="driving-tip-card">
+<h4>📱 導航</h4>
+<ul>
+<li>推薦 <strong>Google Maps</strong>（需行動數據）</li>
+<li><strong>Navitime Japan</strong> 可離線，適合山區路段</li>
+<li>輸入目的地建議用<strong>電話號碼</strong>或<strong>郵遞區號</strong></li>
+</ul>
+</div>
+<div class="driving-tip-card">
+<h4>🚨 緊急狀況</h4>
+<ul>
+<li>報警：<strong>110</strong> / 救護車火災：<strong>119</strong></li>
+<li>JAF 道路救援：<strong>0570-00-8139</strong></li>
+<li>發生事故先拍照，不移動車輛，等警察到場</li>
+<li>取車時確認租車公司緊急聯絡電話並存入手機</li>
+</ul>
+</div>
+<div class="driving-tip-card">
+<h4>🚫 嚴禁事項</h4>
+<ul>
+<li><strong>飲酒駕車</strong>：血液酒精 0.03% 以上即違法</li>
+<li><strong>手持手機</strong>：罰款 ¥18,000，記點</li>
+<li>一般道路若<strong>超速達 30 km/h 以上</strong>，可能不再只是一般反則金處理，需特別避免沿用舊速限習慣</li>
+<li>全車乘客都必須繫安全帶（含後座）</li>
+</ul>
+</div>
+<div class="driving-tip-card">
+<h4>👶 嬰幼兒乘車規定</h4>
+<ul>
+<li><strong>6 歲未滿</strong>乘車原則上必須使用兒童安全座椅</li>
+<li>租車時需事先預約嬰兒座椅、幼童座椅或增高墊</li>
+<li>6 歲以上若身高未達約 <strong>150 cm</strong>，仍建議使用兒童座椅或增高墊</li>
+<li>不要抱著嬰幼兒乘車，急煞或碰撞時無法有效保護</li>
+</ul>
+</div>
+<div class="driving-tip-card">
+<h4>📍 本次行程租車重點</h4>
+<ul>
+<li>熊本機場取車 → 阿蘇、天草、芦北方向行駛</li>
+<li>天草公路多山路彎道，單線道會車需禮讓</li>
+<li>福岡市區停車費高，建議停郊區轉地鐵</li>
+<li>異地還車（熊本取→福岡還）需確認是否收異地費</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<div aria-hidden="true" class="tour-overlay" id="help-overlay"><div class="tour-backdrop"></div></div>
+<section aria-labelledby="tour-title" aria-modal="true" class="tour-card" id="tour-card" role="dialog">
+<span class="tour-progress" id="tour-progress"></span>
+<h2 id="tour-title"></h2>
+<p id="tour-body"></p>
+<div class="tour-actions">
+<button id="tour-close" type="button">略過</button>
+<button id="tour-prev" type="button">上一步</button>
+<button class="tour-next" id="tour-next" type="button">下一步</button>
+</div>
+</section>
+<nav class="bottom-nav" aria-label="主要導覽">
+<button class="bottom-nav__item active" type="button" data-view-target="dashboard"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect class="nav-icon__fill" x="3" y="3" width="8" height="8" rx="2"/><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></svg><span>旅程首頁</span></button>
+<a class="bottom-nav__item" href="itinerary.html"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect class="nav-icon__fill" x="3" y="5" width="18" height="16" rx="2"/><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/><path d="m8.5 15 2 2 5-5"/></svg><span>今日行程</span></a>
+<button class="bottom-nav__item" type="button" data-view-target="places"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path class="nav-icon__fill" d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>景點收藏</span></button>
+<button class="bottom-nav__item" type="button" data-view-target="more"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle class="nav-icon__fill" cx="9" cy="6" r="2.25"/><circle cx="9" cy="6" r="2.25"/><circle class="nav-icon__fill" cx="15" cy="12" r="2.25"/><circle cx="15" cy="12" r="2.25"/><circle class="nav-icon__fill" cx="7" cy="18" r="2.25"/><circle cx="7" cy="18" r="2.25"/></svg><span>行程管理</span></button>
 </nav>
-
 <script>
+(function(){
+  document.documentElement.classList.add('travel-os-ready');
+})();
+</script><script>
 const OVERVIEW_TOUR_STEPS = [
-  { target:'.quick-actions', title:'快速前往常用功能', body:'左側可進入每日行程表，右側可快速新增自訂地點。上方愛心按鈕會切換只看收藏清單。' },
-  { target:'.flight-board', title:'航班資訊看板', body:'每張航班卡會顯示航班號、去回程日期、起降機場、起飛抵達時間、機場報到開放與截止時間、線上報到時間、免費選位時段與登機門提醒。登機門通常以當日 STARLUX App 或機場看板為準。' },
-  { target:'.flight-board .flight-leg__actions', title:'航班快捷操作', body:'「管理行程／選位」會前往星宇航空官方頁面；「加入行程」會把該航班帶到行程表，航班也會和景點一樣依時間排序。' },
-  { target:'.search-bar', title:'搜尋與篩選景點', body:'可用名稱、地區或備註搜尋；下方下拉選單可用地區、類別、子類別縮小結果，例如餐廳、住宿、購物或釣點。' },
-  { target:'#add-section', title:'建立自己的地點', body:'展開後填入地區、類別、子類別、名稱、營業時間與備註。類別可直接重選，也能建立全新類別。' },
-  { target:'#cost-block', title:'住宿費用', body:'可記錄每筆住宿費用與旅伴人數，系統會整理總額與平均分攤，資料會同步保存。' },
-  { target:'#rental-block', title:'租車資訊', body:'租車資料依 13號與15號分開保存，可各自記錄租車公司、租車地點／分店、取還車日期與時間、取還車地點、車型、費用與訂單編號；「取車加入行程」與「還車加入行程」會先儲存最新資料，再帶到對應車輛的行程表。' },
-  { target:'#driving-section', title:'日本自駕注意事項', body:'這裡整理靠左行駛、速限、停車、加油、ETC、導航、緊急電話、罰則與嬰幼兒乘車規定，出發前可集中確認。' },
-  { target:'#cards', title:'景點卡片欄位與圖示', body:'卡片上方是類別與地區標籤，中段顯示名稱、營業時間與備註，底部顯示費用。自訂地點可按鉛筆圖示帶回表單修改，也能直接刪除。' },
-  { target:'.qa-btn--itinerary', title:'開始編排行程', body:'進入每日行程表後，可將項目設為全員同行、13號或15號。兩台車有各自的整日 Google Maps 路線，卡片上的單點 Google Maps 也完整保留。' },
-  { target:'#help-btn', title:'隨時重新查看', body:'之後可按右上角問號再次啟動這份互動導覽。' }
+  { target:'.now-command', title:'先看目前行程', body:'NOW 集中顯示時間、地點、車組與 Google Maps，現場不用先找行程表。' },
+  { target:'.next-command', title:'下一站保持可見', body:'NEXT 會顯示下一個行程與交通時間，方便提早判斷是否需要調整。' },
+  { target:'.crew-command', title:'今日用車狀態', body:'這裡快速顯示 13 號車、15 號車的車型與取車時間；「共同行程」是兩台車今天都要前往的站點數。' },
+  { target:'.bottom-nav', title:'四個主要入口', body:'旅程首頁、今日行程、景點收藏與行程管理涵蓋全部功能，名稱直接說明各區用途。' }
 ];
 let overviewTourIndex = 0;
 let overviewTourTarget = null;
@@ -1083,7 +1270,7 @@ document.getElementById('tour-next').addEventListener('click', () => {
   overviewTourIndex++;
   renderOverviewTourStep();
 });
-if (!localStorage.getItem('kyushu_overview_tour_seen_v6')) startOverviewTour();
+// 使用說明由右上角按鈕開啟，避免第一次進入時遮住現場資訊。
 
 // ════════════════════════════════════════
 //  子類別映射
@@ -1107,8 +1294,128 @@ let filterRegion = '';
 let filterCat = '';
 let filterSub = '';
 let editingPlace = null;
+let selectedGooglePlace = null;
+let placesAutocomplete = null;
+let manualNameMode = false;
+let placesUnavailable = false;
 
 function allPlaces(){ return [...PLACES, ...CLOUD_PLACES]; }
+
+function browserMapsKey(){
+  const key=String(window.TRAVEL_OS_MAPS_CONFIG?.GOOGLE_MAPS_BROWSER_KEY||'').trim();
+  return key && key!=='PUT_BROWSER_KEY_HERE' ? key : '';
+}
+
+function hasNumericPlaceLocation(place){
+  if(place?.latitude===null||place?.latitude===''||place?.longitude===null||place?.longitude==='') return false;
+  const latitude=Number(place?.latitude);
+  const longitude=Number(place?.longitude);
+  return Number.isFinite(latitude)&&latitude>=-90&&latitude<=90&&Number.isFinite(longitude)&&longitude>=-180&&longitude<=180;
+}
+
+function setManualNameMode(enabled, focus=false){
+  manualNameMode=enabled;
+  const host=document.getElementById('google-place-autocomplete');
+  const input=document.getElementById('add-name');
+  const toggle=document.getElementById('toggle-manual-name');
+  host.hidden=enabled;
+  input.hidden=!enabled;
+  input.required=enabled;
+  toggle.textContent=enabled ? '改用 Google 地點搜尋' : '找不到地點？手動輸入名稱';
+  if(focus) (enabled ? input : placesAutocomplete)?.focus();
+}
+
+function resetGooglePlaceSelection(showSearch=true){
+  selectedGooglePlace=null;
+  if(placesAutocomplete) placesAutocomplete.value='';
+  const selected=document.getElementById('google-place-selected');
+  selected.hidden=true;
+  selected.innerHTML='';
+  if(showSearch&&!manualNameMode) document.getElementById('google-place-autocomplete').hidden=false;
+}
+
+function showGooglePlaceSelection(place,{existing=false}={}){
+  const selected=document.getElementById('google-place-selected');
+  selected.hidden=false;
+  selected.innerHTML=`<strong>${escapeHTML(place.displayName)}</strong><span>${escapeHTML(place.googleAddress)}</span>${existing ? '<em>已連結 Google 地點</em>' : '<button type="button" id="clear-google-place">重新搜尋</button>'}`;
+  // Keep the focused Places field mounted after a mobile selection. Hiding
+  // it while the virtual keyboard is closing causes a large layout jump.
+  document.getElementById('google-place-autocomplete').hidden=existing;
+  selected.querySelector('#clear-google-place')?.addEventListener('click',()=>{
+    resetGooglePlaceSelection();
+    placesAutocomplete?.focus();
+  });
+}
+
+async function initGooglePlaces(){
+  const host=document.getElementById('google-place-autocomplete');
+  try{
+    const {PlaceAutocompleteElement}=await google.maps.importLibrary('places');
+    placesUnavailable=false;
+    placesAutocomplete=new PlaceAutocompleteElement({includedRegionCodes:['jp']});
+    placesAutocomplete.placeholder='輸入日本景點或店家名稱';
+    placesAutocomplete.setAttribute('aria-label','搜尋 Google 地點');
+    placesAutocomplete.addEventListener('gmp-select',async event=>{
+      const hint=document.getElementById('google-place-hint');
+      hint.textContent='正在取得地點資料…';
+      try{
+        const place=event.placePrediction.toPlace();
+        await place.fetchFields({fields:['id','displayName','formattedAddress','location']});
+        const latitude=typeof place.location?.lat==='function' ? place.location.lat() : Number(place.location?.lat);
+        const longitude=typeof place.location?.lng==='function' ? place.location.lng() : Number(place.location?.lng);
+        if(!place.id||!place.displayName||!Number.isFinite(latitude)||!Number.isFinite(longitude)) throw new Error('missing fields');
+        selectedGooglePlace={
+          googlePlaceId:String(place.id),
+          displayName:String(place.displayName),
+          googleAddress:String(place.formattedAddress||''),
+          latitude,
+          longitude
+        };
+        if(!editingPlace) document.getElementById('add-name').value=selectedGooglePlace.displayName;
+        showGooglePlaceSelection(selectedGooglePlace);
+        hint.textContent=editingPlace
+          ? '位置已選擇；儲存時只補上缺少的 Google 地址與座標，不會改動原名稱。'
+          : '已選擇 Google 地點。請補上地區、分類與其他旅程資訊。';
+      }catch(error){
+        console.error('Google Place Details 讀取失敗:',error);
+        resetGooglePlaceSelection();
+        hint.textContent='暫時無法取得地點資料，仍可使用下方欄位手動新增。';
+      }
+    });
+    placesAutocomplete.addEventListener('gmp-error',()=>{
+      document.getElementById('google-place-hint').textContent='Google 地點搜尋暫時無法使用，仍可手動新增。';
+    });
+    host.replaceChildren(placesAutocomplete);
+  }catch(error){
+    console.error('Places Library 載入失敗:',error);
+    placesUnavailable=true;
+    host.innerHTML='<span class="google-place-search__error">地點搜尋暫時無法使用</span>';
+    document.getElementById('google-place-hint').textContent='請直接使用下方原有欄位手動新增。';
+    setManualNameMode(true);
+  }
+}
+
+function loadGooglePlaces(){
+  const key=browserMapsKey();
+  if(!key){
+    placesUnavailable=true;
+    document.getElementById('google-place-autocomplete').innerHTML='<span class="google-place-search__error">尚未設定 Google 地點搜尋</span>';
+    document.getElementById('google-place-hint').textContent='目前仍可手動輸入景點名稱。';
+    setManualNameMode(true);
+    return;
+  }
+  const script=document.createElement('script');
+  script.src=`https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&loading=async&libraries=places&v=weekly&language=ja&region=JP&callback=initGooglePlaces`;
+  script.async=true;
+  script.onerror=()=>{
+    placesUnavailable=true;
+    document.getElementById('google-place-autocomplete').innerHTML='<span class="google-place-search__error">地點搜尋載入失敗</span>';
+    document.getElementById('google-place-hint').textContent='請改用手動輸入景點名稱。';
+    setManualNameMode(true);
+  };
+  document.head.appendChild(script);
+}
+window.initGooglePlaces=initGooglePlaces;
 function allCategories(){
   return [...new Set([...Object.keys(SUB_MAP), ...allPlaces().map(p=>p.category).filter(Boolean)])];
 }
@@ -1142,9 +1449,10 @@ const revObs = new IntersectionObserver(entries=>{
 let _favsCache = [];
 let _favsReady = false;
 
-// 收藏 icon 顯示常數：之後只改這裡，不要再到處搜尋替換
-const FAV_ICON_OFF = '❤️';
-const FAV_ICON_ON = '💖';
+// 共用收藏 SVG，避免按鈕狀態切換時退回 Emoji。
+function favoriteIcon(){
+  return '<svg class="favorite-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.7a5.5 5.5 0 0 0-7.8 0L12 5.8l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.5a5.5 5.5 0 0 0 0-7.8Z"/></svg>';
+}
 
 function getFavs(){
   return _favsCache;
@@ -1167,11 +1475,11 @@ async function toggleFav(id){
 
   if(exists){
     await window.__remove(favRef);
-    return FAV_ICON_OFF;
+    return false;
   }
 
   await window.__set(favRef, true);
-  return FAV_ICON_ON;
+  return true;
 }
 
 // ── 建卡片 ──
@@ -1179,20 +1487,22 @@ function buildCard(p){
   const el=document.createElement('article');
   el.className='card'; el.dataset.id=p.id;
   const q=encodeURIComponent(p.name+' '+p.region+' Japan');
+  const mapUrl=p.googlePlaceId
+    ? `https://www.google.com/maps/search/?api=1&query=${q}&query_place_id=${encodeURIComponent(p.googlePlaceId)}`
+    : `https://www.google.com/maps/search/?api=1&query=${q}`;
   const FISH_KW=['釣','路亞','釣具'];
-  const tags=(p.tags||[]).map(t=>`<span class="tag${FISH_KW.some(k=>String(t).includes(k))?' tag--fish':''}">${escapeHTML(t)}</span>`).join('');
   const isFav=getFavs().includes(String(p.id));
   const sub = p.subcategory||p.category||'';
-  const canEdit=p._src==='custom'&&p._key;
+  const tagValues=[...new Set([p.region,sub,...(p.tags||[])].map(value=>String(value||'').trim()).filter(Boolean))];
+  const tags=tagValues.map(t=>`<span class="tag${FISH_KW.some(k=>t.includes(k))?' tag--fish':''}">${escapeHTML(t)}</span>`).join('');
+  const canManage=Boolean(p._key&&(p._src==='custom'||p._src==='base'));
   el.innerHTML=`
     <div class="card__img-placeholder">${catEmoji(p.category, p.subcategory)}</div>
     <div class="card__body">
+      <div class="card__name">${escapeHTML(p.name)}</div>
       <div class="card__tags">
-        <span class="tag">${escapeHTML(p.region)}</span>
-        <span class="tag">${escapeHTML(sub)}</span>
         ${tags}
       </div>
-      <div class="card__name">${escapeHTML(p.name)}</div>
       ${p.hours?`<div class="card__hours">🕐 ${escapeHTML(p.hours)}</div>`:''}
       ${p.note?`<p class="card__note">${escapeHTML(p.note)}</p>`:''}
     </div>
@@ -1202,15 +1512,16 @@ function buildCard(p){
         <button
           class="card__btn card__fav ${isFav ? 'is-fav' : ''}"
           data-id="${escapeHTML(p.id)}"
+          aria-pressed="${isFav}"
           title="${isFav ? '取消收藏' : '加入收藏'}"
           aria-label="${isFav ? '取消收藏' : '加入收藏'}"
         >
-          ${isFav ? FAV_ICON_ON : FAV_ICON_OFF}
+          ${favoriteIcon()}
         </button>
         
         <a
           class="card__btn card__map"
-          href="https://www.google.com/maps/search/?api=1&query=${q}"
+          href="${escapeHTML(mapUrl)}"
           target="_blank"
           rel="noopener"
           title="開啟 Google Maps"
@@ -1234,7 +1545,7 @@ function buildCard(p){
             <circle class="gmap-icon__center" cx="18" cy="15.35" r="3.15"/>
           </svg>
         </a>
-        ${canEdit?`<button class="card__btn card__edit btn-edit-place" data-id="${escapeHTML(p.id)}" title="編輯地點" aria-label="編輯地點">
+        ${canManage?`<button class="card__btn card__edit btn-edit-place" data-id="${escapeHTML(p.id)}" title="編輯地點" aria-label="編輯地點">
           <svg class="card__edit-icon" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M12 20h9"/>
             <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/>
@@ -1248,16 +1559,16 @@ function buildCard(p){
       this.disabled = true;
     
       try{
-        const nextIcon = await toggleFav(p.id);
-    
-        this.textContent = nextIcon;
-    
-        if(nextIcon === FAV_ICON_ON){
+        const isNowFavorite = await toggleFav(p.id);
+
+        if(isNowFavorite){
           this.classList.add('is-fav');
+          this.setAttribute('aria-pressed', 'true');
           this.title = '取消收藏';
           this.setAttribute('aria-label', '取消收藏');
         }else{
           this.classList.remove('is-fav');
+          this.setAttribute('aria-pressed', 'false');
           this.title = '加入收藏';
           this.setAttribute('aria-label', '加入收藏');
         }
@@ -1271,12 +1582,20 @@ function buildCard(p){
   // edit
   el.querySelector('.btn-edit-place')?.addEventListener('click',()=>startEditPlace(p));
   // del
-  el.querySelector('.btn-del-place')?.addEventListener('click',function(){
-    if(!confirm('確定刪除「'+p.name+'」？'))return;
+  el.querySelector('.btn-del-place')?.addEventListener('click',async function(){
+    if(!confirm('確定刪除「'+p.name+'」？刪除後無法復原。'))return;
+    if(p._src==='base'&&!confirm('這是既有景點資料。請再次確認是否真的要刪除。'))return;
     const key=p._key;
-    if(key){
-      if(editingPlace?._key===key) resetPlaceForm();
-      window.__remove(window.__ref(window.__db,'custom_places/'+key));
+    if(!key)return;
+    this.disabled=true;
+    try{
+      if(editingPlace?._key===key&&editingPlace?._src===p._src) resetPlaceForm();
+      const sourceNode=p._src==='base'?'base_places':'custom_places';
+      await window.__remove(window.__ref(window.__db,sourceNode+'/'+key));
+    }catch(error){
+      console.error('刪除景點失敗:',error);
+      this.disabled=false;
+      alert('刪除失敗，資料沒有變更。請稍後再試。');
     }
   });
   revObs.observe(el);
@@ -1502,8 +1821,14 @@ function setAddCategoryValue(category,subcategory){
 
 function resetPlaceForm(){
   editingPlace=null;
+  manualNameMode=false;
+  resetGooglePlaceSelection();
+  document.getElementById('google-place-search').hidden=false;
   const form=document.getElementById('add-place-form');
   form.reset();
+  document.getElementById('toggle-manual-name').hidden=false;
+  setManualNameMode(placesUnavailable);
+  document.getElementById('google-place-hint').textContent='搜尋並選擇後會直接使用正式名稱，並保存地址與座標。';
   document.getElementById('add-category').hidden=true;
   document.getElementById('add-sub').hidden=true;
   document.getElementById('btn-save-place').textContent='新增地點';
@@ -1515,6 +1840,9 @@ function resetPlaceForm(){
 
 function startEditPlace(place){
   editingPlace={...place};
+  manualNameMode=false;
+  resetGooglePlaceSelection();
+  document.getElementById('google-place-search').hidden=false;
   document.getElementById('add-region').value=place.region||'';
   document.getElementById('add-name').value=place.name||'';
   document.getElementById('add-hours').value=place.hours||'';
@@ -1524,10 +1852,24 @@ function startEditPlace(place){
   document.getElementById('btn-save-place').textContent='儲存修改';
   document.getElementById('btn-cancel-edit').hidden=false;
   document.querySelector('#add-section .add-section__title').textContent='✎ 編輯地點';
+  const hasGoogleLocation=Boolean(place.googlePlaceId&&hasNumericPlaceLocation(place));
+  if(hasGoogleLocation){
+    showGooglePlaceSelection({displayName:place.name||'已連結地點',googleAddress:place.googleAddress||''},{existing:true});
+    setManualNameMode(true);
+    document.getElementById('toggle-manual-name').hidden=true;
+    document.getElementById('google-place-hint').textContent='此景點已有 Google 位置資料；原有名稱與分類仍可照常編輯。';
+  }else{
+    setManualNameMode(placesUnavailable);
+    document.getElementById('google-place-hint').textContent=placesUnavailable
+      ? 'Google 地點搜尋暫時無法使用；仍可照常編輯原有資料。'
+      : '搜尋並選擇正確地點，只會新增缺少的 Google 地址與座標，不會更改原名稱。';
+  }
   const section=document.getElementById('add-section');
   section.classList.add('open');
-  section.scrollIntoView({behavior:'smooth',block:'start'});
-  setTimeout(()=>document.getElementById('add-region').focus({preventScroll:true}),350);
+  section.scrollIntoView({behavior:'smooth',block:'nearest'});
+  // Avoid opening the mobile keyboard during the scroll. The user can tap
+  // the Google field when ready and the caret stays inside the viewport.
+  if(hasGoogleLocation) setTimeout(()=>document.getElementById('add-region').focus({preventScroll:true}),350);
 }
 
 // ════════════════════════════════════════
@@ -1555,9 +1897,16 @@ document.getElementById('sub-select').addEventListener('change',e=>{ filterSub=e
 document.getElementById('sort-select').addEventListener('change',render);
 
 // Fav toggle（topbar icon）
+function setFavoriteFilterState(active){
+  const button=document.getElementById('fav-btn');
+  button.classList.toggle('is-active',active);
+  button.setAttribute('aria-pressed',String(active));
+  button.setAttribute('aria-label',active?'顯示全部地點':'只看收藏');
+  button.title=active?'顯示全部地點':'只看收藏';
+}
   document.getElementById('fav-btn').addEventListener('click',()=>{
   favOnly = !favOnly;
-  document.getElementById('fav-btn').textContent = favOnly ? FAV_ICON_ON : FAV_ICON_OFF;
+  setFavoriteFilterState(favOnly);
   render();
 });
 
@@ -1594,6 +1943,15 @@ document.getElementById('add-sub-select').addEventListener('change',e=>{
   if(isCustom) input.focus();
 });
 document.getElementById('btn-cancel-edit').addEventListener('click',resetPlaceForm);
+document.getElementById('toggle-manual-name').addEventListener('click',()=>{
+  if(selectedGooglePlace) resetGooglePlaceSelection(false);
+  setManualNameMode(!manualNameMode,true);
+  document.getElementById('google-place-hint').textContent=manualNameMode
+    ? '手動輸入不會取得地址與座標；之後仍可再連結 Google 地點。'
+    : editingPlace
+      ? '搜尋並選擇正確地點，只會新增缺少的 Google 地址與座標，不會更改原名稱。'
+      : '搜尋並選擇後會直接使用正式名稱，並保存地址與座標。';
+});
 
 // 提交新增地點
 document.getElementById('add-place-form').addEventListener('submit',e=>{
@@ -1611,15 +1969,39 @@ document.getElementById('add-place-form').addEventListener('submit',e=>{
   const tags=original
     ? [...new Set(existingTags.map(tag=>tag===original.region ? region : tag).filter(Boolean).concat(region))]
     : [region];
-  const payload={
-    id:original?.id||Date.now(),region,category,subcategory:sub||category,name,hours,note,
-    twd:original?.twd??null,tags,fav:original?.fav??false,photo:original?.photo??null,
-    createdAt:original?.createdAt||new Date().toISOString(),
-    updatedAt:new Date().toISOString(),_src:'custom'
+  const googleFields={};
+  if(selectedGooglePlace){
+    for(const [field,value] of Object.entries({
+      googlePlaceId:selectedGooglePlace.googlePlaceId,
+      googleAddress:selectedGooglePlace.googleAddress,
+      latitude:selectedGooglePlace.latitude,
+      longitude:selectedGooglePlace.longitude
+    })){
+      if(!original||!Object.prototype.hasOwnProperty.call(original,field)) googleFields[field]=value;
+    }
+  }
+  const payload=original ? {} : {
+    id:Date.now(),region,category,subcategory:sub||category,name,hours,note,
+    twd:null,tags,fav:false,photo:null,
+    createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),_src:'custom',...googleFields
   };
+  if(original){
+    const editable={region,category,subcategory:sub,name,hours,note};
+    for(const [field,value] of Object.entries(editable)){
+      if(String(original[field]??'')!==String(value??'')) payload[field]=value;
+    }
+    if(region!==String(original.region||'')) payload.tags=tags;
+    Object.assign(payload,googleFields);
+    if(!Object.keys(payload).length){
+      status.textContent='沒有需要儲存的變更';
+      setTimeout(()=>status.textContent='',2500);
+      return;
+    }
+  }
   status.textContent=original?'⏳ 更新中…':'⏳ 儲存中…';
+  const sourceNode=original?._src==='base'?'base_places':'custom_places';
   const savePromise=original
-    ? window.__set(window.__ref(window.__db,'custom_places/'+original._key),payload)
+    ? window.__update(window.__ref(window.__db,sourceNode+'/'+original._key),payload)
     : window.__push(window.__ref(window.__db,'custom_places'),payload);
   savePromise.then(()=>{
     status.textContent=original?'✅ 已更新':'✅ 已儲存';
@@ -1652,13 +2034,20 @@ document.getElementById('rental-toggle').addEventListener('click',()=>{
 });
 
 // Theme
+function syncThemeControl(t){
+  const button=document.getElementById('theme-btn');
+  const next=t==='dark'?'淺色':'深色';
+  button.dataset.currentTheme=t;
+  button.setAttribute('aria-label',`切換為${next}模式`);
+  button.title=`切換為${next}模式`;
+}
 document.getElementById('theme-btn').addEventListener('click',()=>{
   const t=document.documentElement.dataset.theme==='dark'?'light':'dark';
   document.documentElement.dataset.theme=t;
-  document.getElementById('theme-btn').textContent=t==='dark'?'🌙':'☀️';
+  syncThemeControl(t);
   localStorage.setItem('kyushu_theme',t);
 });
-(()=>{ const t=localStorage.getItem('kyushu_theme')||'dark'; document.documentElement.dataset.theme=t; document.getElementById('theme-btn').textContent=t==='dark'?'🌙':'☀️'; })();
+(()=>{ const t=localStorage.getItem('kyushu_theme')||'dark'; document.documentElement.dataset.theme=t; syncThemeControl(t); })();
 
 // ════════════════════════════════════════
 //  住宿費用（Firebase）
@@ -1705,7 +2094,7 @@ document.getElementById('btn-add-cost').addEventListener('click',()=>{
 document.getElementById('person-input').addEventListener('change',renderCostSummary);
 
 // ════════════════════════════════════════
-//  租車資訊（Firebase）— 13號 / 15號獨立保存
+//  租車資訊（Firebase）, 13號 / 15號獨立保存
 // ════════════════════════════════════════
 const RENTAL_FIELDS=['pickup-date','pickup-time','return-date','return-time','rental-location','pickup-loc','return-loc','company','car','cost','booking'];
 const RENTAL_GROUPS={carA:'13號',carB:'15號'};
@@ -1950,6 +2339,8 @@ waitFirebase(() => {
 document.getElementById('driving-toggle').addEventListener('click', () => {
   document.getElementById('driving-section').classList.toggle('open');
 });
+loadGooglePlaces();
 </script>
+<script src="travel-os-ui.js?v=20260916a"></script>
 </body>
 </html>
