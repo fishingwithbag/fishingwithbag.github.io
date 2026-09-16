@@ -592,6 +592,10 @@ body.travel-os-page .modal__title { color: var(--os-ink); font-family: inherit; 
   .crew-command { grid-column: 1 / -1; }
   .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .search-bar { position: sticky; top: calc(68px + var(--os-safe-top)); grid-template-columns: minmax(260px, 1.2fr) minmax(360px, 1fr); padding: 14px; }
+  /* Keep an opened place editor below the sticky filters when edit scrolls
+     it into view. Without this offset, the Places field and region chips
+     occupy the same visual rows. */
+  .places-view .add-section { scroll-margin-top: calc(194px + var(--os-safe-top)); }
   .region-tags { grid-column: 1 / -1; }
   .selects-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .selects-row .filter-select:last-child { grid-column: auto; }

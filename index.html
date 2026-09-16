@@ -830,7 +830,7 @@ button:active,a:active{transform:translateY(1px)}
   .home-side{gap:10px!important}
 }
 
-</style><link href="travel-os.css?v=20260916a" rel="stylesheet"/></head>
+</style><link href="travel-os.css?v=20260916b" rel="stylesheet"/></head>
 <body class="travel-os-page" data-page="dashboard">
 <a class="skip-link" href="#os-workspace">跳到主要內容</a>
 <header class="topbar os-topbar">
@@ -1866,7 +1866,8 @@ function startEditPlace(place){
   }
   const section=document.getElementById('add-section');
   section.classList.add('open');
-  section.scrollIntoView({behavior:'smooth',block:'nearest'});
+  const desktopStickyFilters=window.matchMedia('(min-width: 700px)').matches;
+  section.scrollIntoView({behavior:'smooth',block:desktopStickyFilters?'start':'nearest'});
   // Avoid opening the mobile keyboard during the scroll. The user can tap
   // the Google field when ready and the caret stays inside the viewport.
   if(hasGoogleLocation) setTimeout(()=>document.getElementById('add-region').focus({preventScroll:true}),350);
