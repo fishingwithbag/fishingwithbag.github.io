@@ -38,6 +38,12 @@
     return Math.max(0, next);
   }
 
+  function calendarDaysBetween(fromDate, toDate) {
+    const from = Date.parse(`${fromDate}T00:00:00Z`);
+    const to = Date.parse(`${toDate}T00:00:00Z`);
+    return Math.round((to - from) / 86400000);
+  }
+
   function itemArray(raw, date) {
     const value = raw && raw[date];
     if (!value) return [];
@@ -151,15 +157,26 @@
       const items = itemArray(itinerary, day.date);
       const pair = activePair(items, day.date);
       const city = pair.current?.city || pair.current?.region || (Array.isArray(dayRegions[day.date]) ? dayRegions[day.date][0] : dayRegions[day.date]) || day.city;
-      document.getElementById('trip-progress-day').textContent = `DAY ${dayIndex + 1} / ${tripDays.length}`;
-      document.getElementById('trip-progress-label').textContent = now.date < tripDays[0].date ? '下一趟旅程' : now.date > tripDays[tripDays.length - 1].date ? '旅程已結束' : '旅程進行中';
+      const beforeTrip = now.date < tripDays[0].date;
+      const afterTrip = now.date > tripDays[tripDays.length - 1].date;
+      const daysUntilTrip = beforeTrip ? calendarDaysBetween(now.date, tripDays[0].date) : 0;
+      document.getElementById('dashboard-title').textContent = beforeTrip
+        ? `距離出遊還有 ${daysUntilTrip} 天。`
+        : afterTrip
+          ? '旅程已結束，回顧美好足跡。'
+          : '今天，從下一站開始。';
+      document.getElementById('trip-progress-day').textContent = beforeTrip ? '9/30 出發' : `DAY ${dayIndex + 1} / ${tripDays.length}`;
+      document.getElementById('trip-progress-label').textContent = beforeTrip ? '行前倒數' : afterTrip ? '旅程已結束' : '旅程進行中';
+      document.getElementById('dashboard-focus-label').textContent = beforeTrip ? 'FIRST' : afterTrip ? 'LAST' : 'NOW';
+      document.getElementById('dashboard-fleet-label').textContent = beforeTrip ? '首日用車' : afterTrip ? '末日用車' : '今日用車';
+      document.getElementById('dashboard-fleet-hint').textContent = `確認兩台租車的取車狀態，以及${beforeTrip ? '首日' : afterTrip ? '末日' : '今日'}需要一起行動的站點。`;
       document.getElementById('dashboard-date').textContent = `${day.date.replaceAll('-', '.')}  ${city || '九州'}`;
       document.getElementById('dashboard-city').textContent = city || '九州';
 
       const focus = document.getElementById('dashboard-now');
       if (!pair.current) {
         focus.classList.remove('skeleton-block');
-        focus.innerHTML = '<p class="dashboard-focus__time">DAY START</p><h2>今天還沒有行程</h2><p class="dashboard-focus__meta">從景點庫挑選，或直接新增一個行程。</p><div class="dashboard-actions"><a class="gmap-primary" href="index.html?view=places">打開景點庫</a><a class="focus-secondary" href="itinerary.html">新增</a></div>';
+        focus.innerHTML = `<p class="dashboard-focus__time">DAY START</p><h2>${beforeTrip ? '首日還沒有行程' : '今天還沒有行程'}</h2><p class="dashboard-focus__meta">從景點庫挑選，或直接新增一個行程。</p><div class="dashboard-actions"><a class="gmap-primary" href="index.html?view=places">打開景點庫</a><a class="focus-secondary" href="itinerary.html">新增</a></div>`;
       } else {
         focus.classList.remove('skeleton-block');
         focus.innerHTML = `<p class="dashboard-focus__time">${escapeValue(pair.current.start || '--:--')} - ${escapeValue(pair.current.end || '--:--')}</p><h2>${escapeValue(pair.current.name)}</h2><p class="dashboard-focus__meta"><span>${escapeValue(typeName(pair.current))}</span><span>${escapeValue(groupName(pair.current))}</span><span>${escapeValue(pair.current.city || pair.current.region || city || '')}</span></p><div class="dashboard-actions"><a class="gmap-primary" href="${escapeValue(mapsUrl(pair.current))}" target="_blank" rel="noopener">${mapsIcon()}<span>Google Maps</span></a><a class="focus-secondary" href="itinerary.html">詳情</a></div>`;
@@ -168,8 +185,9 @@
       const next = document.getElementById('dashboard-next');
       document.getElementById('dashboard-next-time').textContent = pair.next?.start || '--:--';
       next.innerHTML = pair.next
-        ? `<h3>${escapeValue(pair.next.name)}</h3><p>${escapeValue(legSummary(pair.current, pair.next))}　${escapeValue(groupName(pair.next))}</p>`
-        : '<h3>今天沒有下一站</h3><p>可以留白，也可以到今日行程加入安排。</p>';
+        ? `<h3>${escapeValue(pair.next.name)}</h3><p>${escapeValue(legSummary(pair.current, pair.next))}　${escapeValue(groupName(pair.next))}</p><div class="dashboard-next__actions"><button class="next-detail" type="button" data-detail-next>查看備註・編輯</button></div>`
+        : `<h3>${beforeTrip ? '首日沒有下一站' : '今天沒有下一站'}</h3><p>可以留白，也可以到行程管理加入安排。</p>`;
+      next.querySelector('[data-detail-next]')?.addEventListener('click', () => openDetail(pair.next, { date: day.date }));
 
       const fleet = document.getElementById('dashboard-fleet');
       fleet.innerHTML = ['carA', 'carB'].map((key, index) => {
@@ -178,7 +196,7 @@
         const pickup = [pickupDate, rental['pickup-time']].filter(Boolean).join(' ');
         const details = [rental.car || rental.company || '車輛尚未設定', pickup ? `${pickup} 取車` : '取車時間尚未設定'].join(' · ');
         return `<p>${index === 0 ? '13號車' : '15號車'}<small>${escapeValue(details)}</small></p>`;
-      }).join('') + `<p>共同行程<small>今天 ${items.filter(item => groupName(item) === '全員').length} 站</small></p>`;
+      }).join('') + `<p>共同行程<small>${beforeTrip ? '首日' : afterTrip ? '末日' : '今天'} ${items.filter(item => groupName(item) === '全員').length} 站</small></p>`;
 
       const warning = items.find((item, index) => index && minutes(item.start) < minutes(items[index - 1].end) + Number(items[index - 1].transitMin || 0));
       document.getElementById('dashboard-alert').textContent = warning ? `${warning.name} 的抵達時間可能衝突` : '沒有需要立即處理的提醒';
@@ -208,7 +226,7 @@
     return dialog;
   }
 
-  function openDetail(item) {
+  function openDetail(item, options = {}) {
     const dialog = detailDialog();
     document.getElementById('detail-sheet-title').textContent = item.name || '未命名行程';
     const parking = item.parking || {};
@@ -226,7 +244,15 @@
     document.getElementById('detail-sheet-body').innerHTML = rows.map(([label, value]) => `<div><span>${escapeValue(label)}</span><strong>${escapeValue(value)}</strong></div>`).join('');
     document.getElementById('detail-sheet-edit').onclick = () => {
       dialog.close();
-      document.querySelector(`.btn-edit[data-key="${CSS.escape(String(item._key || ''))}"]`)?.click();
+      const editButton = document.querySelector(`.btn-edit[data-key="${CSS.escape(String(item._key || ''))}"]`);
+      if (editButton) {
+        editButton.click();
+        return;
+      }
+      const target = new URL('itinerary.html', location.href);
+      if (options.date) target.searchParams.set('date', options.date);
+      if (item._key) target.searchParams.set('edit', item._key);
+      location.href = `${target.pathname.split('/').pop()}${target.search}`;
     };
     dialog.showModal();
   }
@@ -234,7 +260,11 @@
   function setupToday() {
     if (document.body.dataset.page !== 'today' || typeof renderDay !== 'function') return;
     const actual = tokyoNow();
-    const initialIndex = closestDayIndex(actual.date);
+    const requestedParams = new URLSearchParams(location.search);
+    const requestedDate = requestedParams.get('date');
+    const requestedDayIndex = requestedDate ? TRIP_DAYS.findIndex(day => day.date === requestedDate) : -1;
+    const initialIndex = requestedDayIndex >= 0 ? requestedDayIndex : closestDayIndex(actual.date);
+    let pendingEditKey = requestedParams.get('edit');
     if (typeof currentDay !== 'undefined') currentDay = initialIndex;
 
     const originalRenderDay = renderDay;
@@ -247,6 +277,7 @@
       const day = tripDays[currentDay] || { date, city: '' };
       const regions = getDayRegions(date);
       const city = pair.current?.city || pair.current?.region || regions[0] || day.city || '九州';
+      const focusStateLabel = actual.date === date ? 'NOW' : actual.date < date ? 'START' : 'LAST';
       document.getElementById('today-date-label').textContent = `${date.slice(5).replace('-', '/')}  ${new Intl.DateTimeFormat('zh-TW', { weekday: 'short', timeZone: 'Asia/Tokyo' }).format(new Date(`${date}T12:00:00+09:00`))}`;
       document.getElementById('today-city-label').textContent = city;
       document.getElementById('today-day-count').textContent = `DAY ${currentDay + 1} / ${TRIP_DAYS.length}`;
@@ -256,17 +287,30 @@
 
       const current = document.getElementById('today-now');
       if (!pair.current) {
-        current.innerHTML = '<div class="focus-label"><span>NOW</span><span>EMPTY</span></div><h2 class="focus-name">今天還沒有行程</h2><p class="focus-meta">從景點庫選擇地點，或手動新增。</p><div class="dashboard-actions"><a class="gmap-primary" href="index.html?view=places">打開景點庫</a><button class="focus-secondary" type="button" data-open-add>＋</button></div>';
+        current.innerHTML = `<div class="focus-label"><span>${focusStateLabel}</span><span>EMPTY</span></div><h2 class="focus-name">這天還沒有行程</h2><p class="focus-meta">從景點庫選擇地點，或手動新增。</p><div class="dashboard-actions"><a class="gmap-primary" href="index.html?view=places">打開景點庫</a><button class="focus-secondary" type="button" data-open-add>＋</button></div>`;
       } else {
-        current.innerHTML = `<div class="focus-label"><span>NOW</span><span>${escapeValue(pair.current.start || '--:--')}</span></div><h2 class="focus-name">${escapeValue(pair.current.name)}</h2><p class="focus-meta"><span>${escapeValue(pair.current.start || '--:--')} - ${escapeValue(pair.current.end || '--:--')}</span><span>${escapeValue(typeName(pair.current))}</span><span>${escapeValue(groupName(pair.current))}</span><span>${escapeValue(city)}</span></p><div class="dashboard-actions"><a class="gmap-primary" href="${escapeValue(mapsUrl(pair.current))}" target="_blank" rel="noopener">${mapsIcon()}<span>Google Maps</span></a><button class="focus-secondary" type="button" data-detail-current aria-label="查看詳情">•••</button></div>`;
+        current.innerHTML = `<div class="focus-label"><span>${focusStateLabel}</span><span>${escapeValue(pair.current.start || '--:--')}</span></div><h2 class="focus-name">${escapeValue(pair.current.name)}</h2><p class="focus-meta"><span>${escapeValue(pair.current.start || '--:--')} - ${escapeValue(pair.current.end || '--:--')}</span><span>${escapeValue(typeName(pair.current))}</span><span>${escapeValue(groupName(pair.current))}</span><span>${escapeValue(city)}</span></p><div class="dashboard-actions"><a class="gmap-primary" href="${escapeValue(mapsUrl(pair.current))}" target="_blank" rel="noopener">${mapsIcon()}<span>Google Maps</span></a><button class="focus-secondary" type="button" data-detail-current aria-label="查看詳情">•••</button></div>`;
         current.querySelector('[data-detail-current]').addEventListener('click', () => openDetail(pair.current));
       }
       current.querySelector('[data-open-add]')?.addEventListener('click', () => document.getElementById('btn-add-item')?.click());
 
       const next = document.getElementById('today-next');
       next.innerHTML = pair.next
-        ? `<div class="next-label"><span>NEXT</span><span>${escapeValue(pair.next.start || '--:--')}</span></div><div class="next-row"><h2>${escapeValue(pair.next.name)}</h2><p>${escapeValue(legSummary(pair.current, pair.next))}</p></div>`
-        : '<div class="next-label"><span>NEXT</span><span>DONE</span></div><div class="next-row"><h2>今天沒有下一站</h2><p>保留彈性</p></div>';
+        ? `<div class="next-label"><span>NEXT</span><span>${escapeValue(pair.next.start || '--:--')}</span></div><div class="next-row"><h2>${escapeValue(pair.next.name)}</h2><p>${escapeValue(legSummary(pair.current, pair.next))}</p></div><button class="next-detail" type="button" data-detail-next>查看備註・編輯</button>`
+        : '<div class="next-label"><span>NEXT</span><span>DONE</span></div><div class="next-row"><h2>這天沒有下一站</h2><p>保留彈性</p></div>';
+      next.querySelector('[data-detail-next]')?.addEventListener('click', () => openDetail(pair.next, { date }));
+
+      if (pendingEditKey) {
+        const requestedEdit = document.querySelector(`.btn-edit[data-key="${CSS.escape(String(pendingEditKey))}"]`);
+        if (requestedEdit) {
+          pendingEditKey = null;
+          const cleanUrl = new URL(location.href);
+          cleanUrl.searchParams.delete('date');
+          cleanUrl.searchParams.delete('edit');
+          history.replaceState(null, '', `${cleanUrl.pathname}${cleanUrl.search}`);
+          requestedEdit.click();
+        }
+      }
     };
 
     document.getElementById('today-manage-toggle')?.addEventListener('click', event => {
