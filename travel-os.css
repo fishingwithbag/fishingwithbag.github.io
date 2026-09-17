@@ -480,6 +480,63 @@ body.travel-os-page .btn-modal-save { border-radius: 12px; background: var(--os-
 .today-context .date-tab.active { border-color: var(--os-accent); color: var(--os-accent); }
 .today-context .collab-bar,
 .today-context .region-picker { display: none; }
+.today-context .region-picker {
+  align-items: stretch;
+  flex-direction: column;
+  padding: 8px;
+}
+.today-context .region-picker__trigger {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 7px 10px;
+  padding: 9px 10px;
+}
+.today-context .region-picker__label {
+  min-width: 0;
+  color: var(--os-muted);
+  font-size: .7rem;
+  font-weight: 750;
+  letter-spacing: .02em;
+  opacity: 1;
+}
+.today-context .region-picker__chevron {
+  align-self: center;
+  color: var(--os-muted);
+  font-size: .86rem;
+  line-height: 1;
+  transition: transform .18s ease;
+}
+.today-context .region-picker__trigger[aria-expanded="true"] .region-picker__chevron { transform: rotate(180deg); }
+.today-context .region-picker__chips {
+  grid-column: 1 / -1;
+  min-width: 0;
+  gap: 5px;
+}
+.today-context .region-chip {
+  min-width: 0;
+  padding: 4px 8px;
+  overflow: hidden;
+  font-size: .68rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.today-context .region-picker__menu {
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+}
+.today-context .region-option {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 7px 8px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
 .today-context .group-view { order: 2; gap: 7px; margin: 0 -12px; padding: 7px 12px; border-color: var(--os-line); background: var(--os-bg); }
 .today-context .group-view__btn { min-height: 38px; padding: 0 14px; border-color: var(--os-line); border-radius: 12px; background: var(--os-surface); color: var(--os-muted); }
 .today-context .group-view__btn.active { border-color: var(--os-accent); background: var(--os-accent); color: var(--os-accent-ink); }
