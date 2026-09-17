@@ -434,7 +434,7 @@ button:active,a:active{transform:translateY(1px)}
   .it-right .os-panel__head{padding:10px 12px!important}.it-right .os-panel__head h3{font-size:14px!important}.it-right .action-btn{min-height:40px!important;padding:8px 10px!important;font-size:11px!important}
 }
 
-</style><link href="travel-os.css?v=20260917b" rel="stylesheet"/></head>
+</style><link href="travel-os.css?v=20260917c" rel="stylesheet"/></head>
 <body class="travel-os-page" data-page="today">
 <a class="skip-link" href="#today-workspace">跳到主要內容</a>
 <header class="topbar os-topbar">
@@ -653,12 +653,15 @@ button:active,a:active{transform:translateY(1px)}
 </div>
 </div>
 <div aria-hidden="true" class="tour-overlay" id="help-overlay"><div class="tour-backdrop"></div></div>
-<section aria-labelledby="tour-title" aria-modal="true" class="tour-card" id="tour-card" role="dialog">
+<section aria-labelledby="tour-title" aria-modal="true" class="tour-card" id="tour-card" role="dialog" tabindex="-1">
 <span class="tour-progress" id="tour-progress"></span>
+<div aria-hidden="true" class="tour-meter"><span id="tour-meter-fill"></span></div>
+<label class="tour-topic">跳至說明主題<select aria-label="使用說明主題" id="tour-topic"></select></label>
 <h2 id="tour-title"></h2>
 <p id="tour-body"></p>
+<ul class="tour-points" id="tour-points"></ul>
 <div class="tour-actions">
-<button id="tour-close" type="button">略過</button>
+<button id="tour-close" type="button">關閉說明</button>
 <button id="tour-prev" type="button">上一步</button>
 <button class="tour-next" id="tour-next" type="button">下一步</button>
 </div>
@@ -2040,15 +2043,32 @@ document.querySelectorAll('[data-close-modal]').forEach(button => button.addEven
 document.getElementById('picker-overlay').addEventListener('click', event => { if (event.target.id === 'picker-overlay') event.target.classList.remove('open'); });
 
 const TOUR_STEPS = [
-  { target:'.today-heading', title:'今日行程的閱讀順序', body:'由上往下是日期與車組、目前行程、下一站、稍後行程；深色卡只保留現場最需要的操作。' },
-  { target:'#date-tabs', title:'選擇日期', body:'每一天保留自己的城市、景點、交通、餐廳與航班資料。' },
-  { target:'#group-view', title:'切換車組', body:'查看所有行程、13號或15號，兩組仍會共同看到全員行程。' },
-  { target:'#today-now', title:'目前行程', body:'NOW 是行動中的操作焦點，直接提供地點、時間、車組與 Google Maps，不是裝飾 Banner。' },
-  { target:'#today-next', title:'下一站', body:'NEXT 顯示下一個地點與目前行程設定的交通時間。' },
-  { target:'#today-manage-toggle', title:'管理完整行程', body:'管理內保留批次加入、手動新增、航班、租車、統計、路線與協作設定。' }
+  { section:'開始', target:'.bottom-nav', title:'每日行程在整個網站的位置', body:'每日行程負責日期、站點順序、時間、車組、備註與兩站之間的交通。', points:['旅程首頁負責快速摘要。','景點收藏負責先保存想去的地點。','每日行程負責把景點排進特定日期與時間。','行程管理負責費用、租車與自駕備忘。'] },
+  { section:'閱讀行程', target:'.today-heading', title:'先確認日期與當日主題', body:'標題會顯示目前選擇的日期、星期、主要城市或移動日。', points:['這裡的「今日」指目前選取的旅遊日，不是手機現在的日期。','下方依序是 NOW、NEXT 與稍後行程。','DAY 1 / 8 顯示這是旅程中的第幾天。'] },
+  { section:'閱讀行程', target:'#date-tabs', title:'切換不同旅遊日期', body:'每個日期都有自己的行程、城市與交通資料。', points:['按日期只會切換畫面，不會修改資料。','日期旁的城市摘要來自當日城市設定。','切換日期不會重新呼叫 Routes 或 Geocoding API。'] },
+  { section:'閱讀行程', target:'#group-view', title:'只看特定車組', body:'可查看所有行程、13 號車或 15 號車。', points:['「全員同行」會同時出現在兩個車組。','切換車組只改變顯示範圍，不會刪除其他組資料。','手機上可以直接在日期下方切換。'] },
+  { section:'協作設定', target:'.region-picker', requireTools:true, title:'設定當日城市', body:'今日城市可以複選，用來描述這一天會經過的主要地區。', points:['按城市即可加入或移除。','這不會修改景點本身的地區欄位。','城市設定會即時同步給其他協作者。'] },
+  { section:'現場使用', target:'#today-now', title:'NOW 顯示目前行程', body:'旅途中會依所選日期與時間顯示現在進行中的安排。', points:['Google Maps 按鈕負責真正導航。','詳情可查看完整備註與資料。','旅程尚未開始時，會先顯示當日第一站供準備。','沒有資料時可從景點庫加入或手動新增。'] },
+  { section:'現場使用', target:'#today-next', title:'NEXT 也能查看備註與編輯', body:'NEXT 顯示下一站及目前站到下一站的交通摘要。', points:['按「查看備註・編輯」可先查閱資料。','編輯會定位到正確的行程項目。','交通時間屬於目前站到下一站，不是下一站本身。'] },
+  { section:'編排行程', target:'.later-plan', title:'稍後行程是完整時間軸', body:'每張行程卡都保留查看備註、Google Maps、編輯與刪除功能。', points:['拖曳排序會調整站點順序。','修改時間、車組、類型與備註請按編輯。','刪除前會再次確認。','協作者正在編輯時，系統會暫時鎖定同一項目。'] },
+  { section:'交通路段', target:'.journey-leg, .later-plan', title:'設定開車或步行到下一站', body:'在行程編輯中設定「交通方式到下一站」，系統才會計算該路段。', points:['DRIVE 使用 Google Traffic-aware 建議時間。','WALK 使用步行路線。','畫面顯示時間、距離、Google Maps 與重新計算。','最後一站沒有下一站，所以不會顯示交通路段。'] },
+  { section:'交通路段', target:'.journey-leg, .later-plan', title:'座標與快取如何避免重複查詢', body:'系統優先使用已保存的座標，缺少時才用地址做一次 Geocoding fallback。', points:['重新整理、切換日期、切換車組都不會自動呼叫 API。','相同起點、終點與交通方式會直接讀 Firebase 快取。','只有資料變更、快取不存在或按重新計算時才查詢。','顯示「無法取得位置」時，可到景點收藏編輯並補選 Google 地點。'] },
+  { section:'管理行程', target:'.today-ops', requireTools:true, title:'新增、批次加入與清空', body:'手機請先按「管理」，電腦右側會直接顯示這些工具。', points:['從景點總覽加入：一次選擇多個已收藏景點。','手動新增行程：建立臨時站點或沒有收藏的安排。','加入航班與加入租車：建立專用類型的行程。','清空這天會刪除當日行程，使用前一定會要求確認。'] },
+  { section:'管理行程', target:'.route-bar', requireTools:true, title:'整天路線與協作狀態', body:'右側工具同時提供各車組的整天 Google Maps 路線與即時協作資訊。', points:['13 號與 15 號分別建立自己的整天導航連結。','選擇「我是誰」後，其他人會看到你的上線狀態與更新者名稱。','多人同時開頁面只讀 Firebase 快取，不會各自重算路線。','需要重新閱讀時，右上角「使用說明」隨時可以開啟。'] }
 ];
 let tourIndex = 0;
 let tourTarget = null;
+let tourToolsWereOpen = false;
+
+function populateTourTopics() {
+  const select = document.getElementById('tour-topic');
+  select.replaceChildren(...TOUR_STEPS.map((step, index) => {
+    const option = document.createElement('option');
+    option.value = String(index);
+    option.textContent = `${step.section}｜${step.title}`;
+    return option;
+  }));
+}
 
 function closeTour() {
   tourTarget?.classList.remove('tour-target');
@@ -2056,7 +2076,9 @@ function closeTour() {
   document.getElementById('help-overlay').classList.remove('open');
   document.getElementById('help-overlay').setAttribute('aria-hidden', 'true');
   document.getElementById('tour-card').classList.remove('open');
-  localStorage.setItem('kyushu_itinerary_tour_seen_v8', '1');
+  document.body.classList.toggle('show-today-tools', tourToolsWereOpen);
+  localStorage.setItem('kyushu_itinerary_tour_seen_v9', '1');
+  document.getElementById('help-btn').focus({ preventScroll:true });
 }
 
 function placeTourCard() {
@@ -2077,14 +2099,22 @@ function placeTourCard() {
 function renderTourStep() {
   tourTarget?.classList.remove('tour-target');
   const step = TOUR_STEPS[tourIndex];
+  document.body.classList.toggle('show-today-tools', tourToolsWereOpen || Boolean(step.requireTools));
   tourTarget = document.querySelector(step.target);
   if (tourTarget) {
     tourTarget.classList.add('tour-target');
     tourTarget.scrollIntoView({ behavior:'smooth', block:'nearest' });
   }
-  document.getElementById('tour-progress').textContent = `${tourIndex + 1} / ${TOUR_STEPS.length}`;
+  document.getElementById('tour-progress').textContent = `${step.section}｜${tourIndex + 1} / ${TOUR_STEPS.length}`;
+  document.getElementById('tour-meter-fill').style.width = `${((tourIndex + 1) / TOUR_STEPS.length) * 100}%`;
+  document.getElementById('tour-topic').value = String(tourIndex);
   document.getElementById('tour-title').textContent = step.title;
   document.getElementById('tour-body').textContent = step.body;
+  document.getElementById('tour-points').replaceChildren(...step.points.map(point => {
+    const item = document.createElement('li');
+    item.textContent = point;
+    return item;
+  }));
   document.getElementById('tour-prev').disabled = tourIndex === 0;
   document.getElementById('tour-next').textContent = tourIndex === TOUR_STEPS.length - 1 ? '完成' : '下一步';
   placeTourCard();
@@ -2094,20 +2124,26 @@ function renderTourStep() {
 
 function startTour() {
   tourIndex = 0;
+  tourToolsWereOpen = document.body.classList.contains('show-today-tools');
+  populateTourTopics();
   document.getElementById('help-overlay').classList.add('open');
   document.getElementById('help-overlay').setAttribute('aria-hidden', 'false');
   document.getElementById('tour-card').classList.add('open');
   renderTourStep();
+  document.getElementById('tour-card').focus({ preventScroll:true });
 }
 
 document.getElementById('help-btn').addEventListener('click', startTour);
 document.getElementById('tour-close').addEventListener('click', closeTour);
 document.getElementById('tour-prev').addEventListener('click', () => { if (tourIndex > 0) { tourIndex--; renderTourStep(); } });
+document.getElementById('tour-topic').addEventListener('change', event => { tourIndex = Number(event.target.value); renderTourStep(); });
 document.getElementById('tour-next').addEventListener('click', () => {
   if (tourIndex === TOUR_STEPS.length - 1) { closeTour(); return; }
   tourIndex++;
   renderTourStep();
 });
+document.getElementById('help-overlay').addEventListener('click', closeTour);
+document.addEventListener('keydown', event => { if (event.key === 'Escape' && document.getElementById('tour-card').classList.contains('open')) closeTour(); });
 renderRouteLinks([]);
 // 使用說明由右上角按鈕開啟，避免第一次進入時遮住 Today 首屏。
 

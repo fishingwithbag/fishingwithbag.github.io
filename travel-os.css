@@ -612,6 +612,14 @@ body.travel-os-page .tour-card {
 body.travel-os-page .tour-card h2 { margin: 7px 0; color: var(--os-ink); font-family: inherit; font-size: 1.25rem; }
 body.travel-os-page .tour-card p { margin: 0 0 14px; color: var(--os-muted); font-size: .94rem; line-height: 1.65; }
 body.travel-os-page .tour-progress { color: var(--os-accent); font-size: .74rem; font-weight: 800; }
+body.travel-os-page .tour-card:focus { outline: none; }
+body.travel-os-page .tour-meter { height: 3px; margin: 9px 0 12px; overflow: hidden; border-radius: 3px; background: var(--os-surface-2); }
+body.travel-os-page .tour-meter span { display: block; width: 0; height: 100%; border-radius: inherit; background: var(--os-accent); transition: width .18s ease; }
+body.travel-os-page .tour-topic { display: grid; gap: 5px; margin-bottom: 12px; color: var(--os-muted); font-size: .7rem; font-weight: 750; }
+body.travel-os-page .tour-topic select { width: 100%; min-height: 42px; padding: 8px 34px 8px 10px; border: 1px solid var(--os-line); border-radius: 10px; background: var(--os-surface-2); color: var(--os-ink); font: inherit; }
+body.travel-os-page .tour-points { display: grid; gap: 7px; margin: -4px 0 14px; padding: 0; list-style: none; }
+body.travel-os-page .tour-points li { position: relative; padding-left: 17px; color: var(--os-ink); font-size: .82rem; line-height: 1.55; }
+body.travel-os-page .tour-points li::before { content: ""; position: absolute; top: .58em; left: 2px; width: 6px; height: 6px; border-radius: 50%; background: var(--os-accent); }
 body.travel-os-page .tour-actions { background: var(--os-surface); }
 body.travel-os-page .tour-actions button { min-height: 42px; font-size: .84rem; font-weight: 750; }
 
