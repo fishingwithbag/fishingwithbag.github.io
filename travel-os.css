@@ -609,6 +609,16 @@ body.travel-os-page .tour-card {
   color: var(--os-ink);
   box-shadow: 0 24px 70px rgba(6, 16, 22, .28);
 }
+body.travel-os-page .tour-backdrop { background: transparent !important; }
+body.travel-os-page .tour-spotlight {
+  position: fixed;
+  z-index: 1;
+  border: 3px solid var(--os-accent);
+  border-radius: 14px;
+  background: transparent;
+  box-shadow: 0 0 0 100vmax rgba(4, 9, 12, .76), 0 0 0 6px color-mix(in srgb, var(--os-accent) 22%, transparent);
+  pointer-events: none;
+}
 body.travel-os-page .tour-card h2 { margin: 7px 0; color: var(--os-ink); font-family: inherit; font-size: 1.25rem; }
 body.travel-os-page .tour-card p { margin: 0 0 14px; color: var(--os-muted); font-size: .94rem; line-height: 1.65; }
 body.travel-os-page .tour-progress { color: var(--os-accent); font-size: .74rem; font-weight: 800; }

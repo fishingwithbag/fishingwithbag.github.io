@@ -830,7 +830,7 @@ button:active,a:active{transform:translateY(1px)}
   .home-side{gap:10px!important}
 }
 
-</style><link href="travel-os.css?v=20260917c" rel="stylesheet"/></head>
+</style><link href="travel-os.css?v=20260917e" rel="stylesheet"/></head>
 <body class="travel-os-page" data-page="dashboard">
 <a class="skip-link" href="#os-workspace">跳到主要內容</a>
 <header class="topbar os-topbar">
@@ -1181,7 +1181,7 @@ button:active,a:active{transform:translateY(1px)}
 </div>
 </section>
 </main>
-<div aria-hidden="true" class="tour-overlay" id="help-overlay"><div class="tour-backdrop"></div></div>
+<div aria-hidden="true" class="tour-overlay" id="help-overlay"><div class="tour-backdrop"></div><div class="tour-spotlight" hidden id="tour-spotlight"></div></div>
 <section aria-labelledby="tour-title" aria-modal="true" class="tour-card" id="tour-card" role="dialog" tabindex="-1">
 <span class="tour-progress" id="tour-progress"></span>
 <div aria-hidden="true" class="tour-meter"><span id="tour-meter-fill"></span></div>
@@ -1214,13 +1214,13 @@ const OVERVIEW_TOUR_STEPS = [
   { section:'旅程首頁', view:'dashboard', target:'.next-command', title:'NEXT 提前顯示下一站', body:'NEXT 讓使用者不用先打開完整時間軸，也能確認下一個安排。', points:['顯示下一站時間、名稱與交通摘要。','要查看備註或修改下一站，請進入每日行程。','沒有下一站時會顯示完成狀態，不代表資料遺失。'] },
   { section:'旅程首頁', view:'dashboard', target:'.crew-command', title:'今日用車與共同行程', body:'這區將 13 號車、15 號車與全員同行資訊放在一起。', points:['車輛資料來自行程管理中的租車資訊。','共同行程代表兩組今天都會參加的站點。','提醒列會指出尚未設定或需要確認的資訊。'] },
   { section:'旅程首頁', view:'dashboard', target:'.quick-actions', title:'兩個最快的操作入口', body:'首頁只保留旅行時最常用的捷徑。', points:['「打開每日行程」前往完整時間軸與導航。','「新增地點」直接前往景點收藏的新增流程。'] },
-  { section:'旅程首頁', view:'dashboard', target:'.flight-board', title:'航班資訊與加入行程', body:'航班區整理去回程時間、報到與選位資訊。', points:['「管理行程／選位」會開啟星宇航空官方網站。','「加入行程」會帶著航班資料前往每日行程。','航班與登機門仍需在出發前以航空公司資訊為準。'] },
+  { section:'旅程首頁', view:'dashboard', target:'.flight-board__head', title:'航班資訊與加入行程', body:'航班區整理去回程時間、報到與選位資訊。', points:['「管理行程／選位」會開啟星宇航空官方網站。','「加入行程」會帶著航班資料前往每日行程。','航班與登機門仍需在出發前以航空公司資訊為準。'] },
   { section:'景點收藏', view:'places', target:'.search-bar', title:'搜尋、篩選與只看收藏', body:'可以同時用關鍵字、地區、類別及子類別縮小景點範圍。', points:['搜尋支援名稱、地區與備註。','地區標籤與下拉選單會一起更新結果。','排序可依地區、類別或收藏優先。','右上角愛心可以快速切換成只看收藏。'] },
-  { section:'景點收藏', view:'places', target:'#add-section', title:'用 Google 地點或手動新增', body:'展開「新增地點」後，景點名稱欄同時就是 Google 地點搜尋。', points:['選擇 Google 結果後會保存正式名稱、地址、Place ID 與座標。','Google 搜尋無法使用時，按「找不到地點？」即可手動輸入。','地區、類別、子類別、營業時間及備註仍可自行補充。','舊景點可按編輯，再選擇 Google 地點補上座標，不必重新建立。'] },
-  { section:'景點收藏', view:'places', target:'#cards', title:'景點卡片的四個動作', body:'每張景點卡保留收藏、導航、編輯與刪除操作。', points:['愛心：加入或移除收藏。','Google Maps：開啟單點位置。','鉛筆：編輯既有資料，也能補上 Google 地點。','叉號：刪除前會要求確認，避免誤刪。'] },
-  { section:'行程管理', view:'more', target:'#cost-block', title:'住宿費用與分攤', body:'展開住宿費用後，可以新增費用項目並設定分攤人數。', points:['每個費用項目可輸入名稱與台幣金額。','總額與每人金額會自動計算。','資料會即時同步給其他協作者。'] },
-  { section:'行程管理', view:'more', target:'#rental-block', title:'分開管理 13 號與 15 號租車', body:'兩台車的日期、地點、公司、車型、費用與訂單編號各自保存。', points:['填完後要按對應車組的儲存按鈕。','「取車加入行程」與「還車加入行程」會建立對應的行程項目。','兩台車資料互不覆蓋。'] },
-  { section:'行程管理', view:'more', target:'#driving-section', title:'出發前閱讀日本自駕備忘', body:'這裡集中整理文件、行駛、停車、加油、ETC、導航與緊急狀況。', points:['展開後逐項確認，不需要另外建立行程。','實際交通規則與現場標誌仍優先。','每日行程頁右上角另有行程編排與交通功能的完整說明。'] }
+  { section:'景點收藏', view:'places', target:'.add-section__header', title:'用 Google 地點或手動新增', body:'展開「新增地點」後，景點名稱欄同時就是 Google 地點搜尋。', points:['選擇 Google 結果後會保存正式名稱、地址、Place ID 與座標。','Google 搜尋無法使用時，按「找不到地點？」即可手動輸入。','地區、類別、子類別、營業時間及備註仍可自行補充。','舊景點可按編輯，再選擇 Google 地點補上座標，不必重新建立。'] },
+  { section:'景點收藏', view:'places', target:'.cards-header', title:'景點卡片的四個動作', body:'每張景點卡保留收藏、導航、編輯與刪除操作。', points:['愛心：加入或移除收藏。','Google Maps：開啟單點位置。','鉛筆：編輯既有資料，也能補上 Google 地點。','叉號：刪除前會要求確認，避免誤刪。'] },
+  { section:'行程管理', view:'more', target:'.cost-block__header', title:'住宿費用與分攤', body:'展開住宿費用後，可以新增費用項目並設定分攤人數。', points:['每個費用項目可輸入名稱與台幣金額。','總額與每人金額會自動計算。','資料會即時同步給其他協作者。'] },
+  { section:'行程管理', view:'more', target:'.rental-block__header', title:'分開管理 13 號與 15 號租車', body:'兩台車的日期、地點、公司、車型、費用與訂單編號各自保存。', points:['填完後要按對應車組的儲存按鈕。','「取車加入行程」與「還車加入行程」會建立對應的行程項目。','兩台車資料互不覆蓋。'] },
+  { section:'行程管理', view:'more', target:'.driving-header', title:'出發前閱讀日本自駕備忘', body:'這裡集中整理文件、行駛、停車、加油、ETC、導航與緊急狀況。', points:['展開後逐項確認，不需要另外建立行程。','實際交通規則與現場標誌仍優先。','每日行程頁右上角另有行程編排與交通功能的完整說明。'] }
 ];
 let overviewTourIndex = 0;
 let overviewTourTarget = null;
@@ -1252,17 +1252,52 @@ function closeOverviewTour() {
 
 function placeOverviewTourCard() {
   const card = document.getElementById('tour-card');
+  const spotlight = document.getElementById('tour-spotlight');
   if (!overviewTourTarget) {
-    card.dataset.placement = 'bottom';
+    spotlight.hidden = true;
     return;
   }
-  const rect = overviewTourTarget.getBoundingClientRect();
+  const viewportWidth = document.documentElement.clientWidth;
   const viewportHeight = window.visualViewport?.height || window.innerHeight;
-  const cardHeight = Math.min(viewportHeight * 0.32, 280);
-  const bottomNavSpace = 92;
-  const spaceAbove = rect.top;
-  const spaceBelow = viewportHeight - rect.bottom - bottomNavSpace;
-  card.dataset.placement = spaceAbove >= cardHeight && spaceAbove >= spaceBelow ? 'top' : 'bottom';
+  const safe = viewportWidth < 768 ? 12 : 16;
+  const bottomSafe = viewportWidth < 768 ? 82 : safe;
+  const gap = 14;
+  const targetRect = overviewTourTarget.getBoundingClientRect();
+  const focusLeft = Math.max(4, targetRect.left - 7);
+  const focusTop = Math.max(4, targetRect.top - 7);
+  const focusRight = Math.min(viewportWidth - 4, targetRect.right + 7);
+  const focusBottom = Math.min(viewportHeight - 4, targetRect.bottom + 7);
+
+  Object.assign(spotlight.style, {
+    left:`${focusLeft}px`, top:`${focusTop}px`,
+    width:`${Math.max(0, focusRight - focusLeft)}px`,
+    height:`${Math.max(0, focusBottom - focusTop)}px`
+  });
+  spotlight.hidden = false;
+
+  Object.assign(card.style, { left:'12px', right:'12px', top:'12px', bottom:'auto', width:'auto', maxWidth:'460px', maxHeight:'min(60dvh, 480px)', margin:'0 auto' });
+  const naturalRect = card.getBoundingClientRect();
+  const naturalWidth = Math.min(naturalRect.width || 420, viewportWidth - safe * 2);
+  const naturalHeight = Math.min(naturalRect.height || 360, viewportHeight - safe - bottomSafe);
+  const regions = {
+    right:{ x:focusRight + gap, y:safe, width:Math.max(0, viewportWidth - focusRight - gap - safe), height:Math.max(0, viewportHeight - safe - bottomSafe) },
+    left:{ x:safe, y:safe, width:Math.max(0, focusLeft - gap - safe), height:Math.max(0, viewportHeight - safe - bottomSafe) },
+    below:{ x:safe, y:focusBottom + gap, width:Math.max(0, viewportWidth - safe * 2), height:Math.max(0, viewportHeight - focusBottom - gap - bottomSafe) },
+    above:{ x:safe, y:safe, width:Math.max(0, viewportWidth - safe * 2), height:Math.max(0, focusTop - gap - safe) }
+  };
+  const verticalOrder = targetRect.top + targetRect.height / 2 < viewportHeight / 2 ? ['below','above'] : ['above','below'];
+  const order = viewportWidth >= 768 ? ['right','left',...verticalOrder] : verticalOrder;
+  const candidates = order.map(name => regions[name]);
+  const region = candidates.find(item => item.width >= Math.min(naturalWidth, 300) && item.height >= 180)
+    || candidates.reduce((best, item) => item.width * item.height > best.width * best.height ? item : best, candidates[0]);
+  const cardWidth = Math.max(260, Math.min(naturalWidth, region.width));
+  const cardHeight = Math.min(naturalHeight, region.height);
+  const cardLeft = region.x + Math.max(0, (region.width - cardWidth) / 2);
+  const cardTop = region.y + Math.max(0, (region.height - cardHeight) / 2);
+  Object.assign(card.style, {
+    left:`${Math.max(safe, cardLeft)}px`, right:'auto', top:`${Math.max(safe, cardTop)}px`, bottom:'auto',
+    width:`${cardWidth}px`, maxWidth:`${Math.max(260, region.width)}px`, maxHeight:`${Math.max(160, region.height)}px`, margin:'0'
+  });
 }
 
 function renderOverviewTourStep() {
@@ -1271,8 +1306,10 @@ function renderOverviewTourStep() {
   activateOverviewTourView(step.view);
   overviewTourTarget = document.querySelector(step.target);
   if (overviewTourTarget) {
-    overviewTourTarget.classList.add('tour-target');
-    overviewTourTarget.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    const previousScrollBehavior = document.documentElement.style.scrollBehavior;
+    document.documentElement.style.scrollBehavior = 'auto';
+    overviewTourTarget.scrollIntoView({ behavior:'auto', block:'center', inline:'nearest' });
+    document.documentElement.style.scrollBehavior = previousScrollBehavior;
   }
   document.getElementById('tour-progress').textContent = `${step.section}｜${overviewTourIndex + 1} / ${OVERVIEW_TOUR_STEPS.length}`;
   document.getElementById('tour-meter-fill').style.width = `${((overviewTourIndex + 1) / OVERVIEW_TOUR_STEPS.length) * 100}%`;
@@ -1288,6 +1325,7 @@ function renderOverviewTourStep() {
   document.getElementById('tour-next').textContent = overviewTourIndex === OVERVIEW_TOUR_STEPS.length - 1 ? '完成' : '下一步';
   placeOverviewTourCard();
   requestAnimationFrame(placeOverviewTourCard);
+  setTimeout(placeOverviewTourCard, 80);
   setTimeout(placeOverviewTourCard, 260);
 }
 

@@ -434,7 +434,7 @@ button:active,a:active{transform:translateY(1px)}
   .it-right .os-panel__head{padding:10px 12px!important}.it-right .os-panel__head h3{font-size:14px!important}.it-right .action-btn{min-height:40px!important;padding:8px 10px!important;font-size:11px!important}
 }
 
-</style><link href="travel-os.css?v=20260917c" rel="stylesheet"/></head>
+</style><link href="travel-os.css?v=20260917e" rel="stylesheet"/></head>
 <body class="travel-os-page" data-page="today">
 <a class="skip-link" href="#today-workspace">跳到主要內容</a>
 <header class="topbar os-topbar">
@@ -652,7 +652,7 @@ button:active,a:active{transform:translateY(1px)}
 <button class="btn-modal-cancel" data-close-modal="picker-overlay" type="button">取消</button>
 </div>
 </div>
-<div aria-hidden="true" class="tour-overlay" id="help-overlay"><div class="tour-backdrop"></div></div>
+<div aria-hidden="true" class="tour-overlay" id="help-overlay"><div class="tour-backdrop"></div><div class="tour-spotlight" hidden id="tour-spotlight"></div></div>
 <section aria-labelledby="tour-title" aria-modal="true" class="tour-card" id="tour-card" role="dialog" tabindex="-1">
 <span class="tour-progress" id="tour-progress"></span>
 <div aria-hidden="true" class="tour-meter"><span id="tour-meter-fill"></span></div>
@@ -2050,10 +2050,10 @@ const TOUR_STEPS = [
   { section:'協作設定', target:'.region-picker', requireTools:true, title:'設定當日城市', body:'今日城市可以複選，用來描述這一天會經過的主要地區。', points:['按城市即可加入或移除。','這不會修改景點本身的地區欄位。','城市設定會即時同步給其他協作者。'] },
   { section:'現場使用', target:'#today-now', title:'NOW 顯示目前行程', body:'旅途中會依所選日期與時間顯示現在進行中的安排。', points:['Google Maps 按鈕負責真正導航。','詳情可查看完整備註與資料。','旅程尚未開始時，會先顯示當日第一站供準備。','沒有資料時可從景點庫加入或手動新增。'] },
   { section:'現場使用', target:'#today-next', title:'NEXT 也能查看備註與編輯', body:'NEXT 顯示下一站及目前站到下一站的交通摘要。', points:['按「查看備註・編輯」可先查閱資料。','編輯會定位到正確的行程項目。','交通時間屬於目前站到下一站，不是下一站本身。'] },
-  { section:'編排行程', target:'.later-plan', title:'稍後行程是完整時間軸', body:'每張行程卡都保留查看備註、Google Maps、編輯與刪除功能。', points:['拖曳排序會調整站點順序。','修改時間、車組、類型與備註請按編輯。','刪除前會再次確認。','協作者正在編輯時，系統會暫時鎖定同一項目。'] },
-  { section:'交通路段', target:'.journey-leg, .later-plan', title:'設定開車或步行到下一站', body:'在行程編輯中設定「交通方式到下一站」，系統才會計算該路段。', points:['DRIVE 使用 Google Traffic-aware 建議時間。','WALK 使用步行路線。','畫面顯示時間、距離、Google Maps 與重新計算。','最後一站沒有下一站，所以不會顯示交通路段。'] },
-  { section:'交通路段', target:'.journey-leg, .later-plan', title:'座標與快取如何避免重複查詢', body:'系統優先使用已保存的座標，缺少時才用地址做一次 Geocoding fallback。', points:['重新整理、切換日期、切換車組都不會自動呼叫 API。','相同起點、終點與交通方式會直接讀 Firebase 快取。','只有資料變更、快取不存在或按重新計算時才查詢。','顯示「無法取得位置」時，可到景點收藏編輯並補選 Google 地點。'] },
-  { section:'管理行程', target:'.today-ops', requireTools:true, title:'新增、批次加入與清空', body:'手機請先按「管理」，電腦右側會直接顯示這些工具。', points:['從景點總覽加入：一次選擇多個已收藏景點。','手動新增行程：建立臨時站點或沒有收藏的安排。','加入航班與加入租車：建立專用類型的行程。','清空這天會刪除當日行程，使用前一定會要求確認。'] },
+  { section:'編排行程', target:'.later-plan__head', title:'稍後行程是完整時間軸', body:'每張行程卡都保留查看備註、Google Maps、編輯與刪除功能。', points:['拖曳排序會調整站點順序。','修改時間、車組、類型與備註請按編輯。','刪除前會再次確認。','協作者正在編輯時，系統會暫時鎖定同一項目。'] },
+  { section:'交通路段', target:'.journey-leg, .later-plan__head', title:'設定開車或步行到下一站', body:'在行程編輯中設定「交通方式到下一站」，系統才會計算該路段。', points:['DRIVE 使用 Google Traffic-aware 建議時間。','WALK 使用步行路線。','畫面顯示時間、距離、Google Maps 與重新計算。','最後一站沒有下一站，所以不會顯示交通路段。'] },
+  { section:'交通路段', target:'.journey-leg, .later-plan__head', title:'座標與快取如何避免重複查詢', body:'系統優先使用已保存的座標，缺少時才用地址做一次 Geocoding fallback。', points:['重新整理、切換日期、切換車組都不會自動呼叫 API。','相同起點、終點與交通方式會直接讀 Firebase 快取。','只有資料變更、快取不存在或按重新計算時才查詢。','顯示「無法取得位置」時，可到景點收藏編輯並補選 Google 地點。'] },
+  { section:'管理行程', target:'.action-bar', requireTools:true, title:'新增、批次加入與清空', body:'手機請先按「管理」，電腦右側會直接顯示這些工具。', points:['從景點總覽加入：一次選擇多個已收藏景點。','手動新增行程：建立臨時站點或沒有收藏的安排。','加入航班與加入租車：建立專用類型的行程。','清空這天會刪除當日行程，使用前一定會要求確認。'] },
   { section:'管理行程', target:'.route-bar', requireTools:true, title:'整天路線與協作狀態', body:'右側工具同時提供各車組的整天 Google Maps 路線與即時協作資訊。', points:['13 號與 15 號分別建立自己的整天導航連結。','選擇「我是誰」後，其他人會看到你的上線狀態與更新者名稱。','多人同時開頁面只讀 Firebase 快取，不會各自重算路線。','需要重新閱讀時，右上角「使用說明」隨時可以開啟。'] }
 ];
 let tourIndex = 0;
@@ -2083,17 +2083,52 @@ function closeTour() {
 
 function placeTourCard() {
   const card = document.getElementById('tour-card');
+  const spotlight = document.getElementById('tour-spotlight');
   if (!tourTarget) {
-    card.dataset.placement = 'bottom';
+    spotlight.hidden = true;
     return;
   }
-  const rect = tourTarget.getBoundingClientRect();
+  const viewportWidth = document.documentElement.clientWidth;
   const viewportHeight = window.visualViewport?.height || window.innerHeight;
-  const cardHeight = Math.min(viewportHeight * 0.32, 280);
-  const bottomNavSpace = 92;
-  const spaceAbove = rect.top;
-  const spaceBelow = viewportHeight - rect.bottom - bottomNavSpace;
-  card.dataset.placement = spaceAbove >= cardHeight && spaceAbove >= spaceBelow ? 'top' : 'bottom';
+  const safe = viewportWidth < 768 ? 12 : 16;
+  const bottomSafe = viewportWidth < 768 ? 82 : safe;
+  const gap = 14;
+  const targetRect = tourTarget.getBoundingClientRect();
+  const focusLeft = Math.max(4, targetRect.left - 7);
+  const focusTop = Math.max(4, targetRect.top - 7);
+  const focusRight = Math.min(viewportWidth - 4, targetRect.right + 7);
+  const focusBottom = Math.min(viewportHeight - 4, targetRect.bottom + 7);
+
+  Object.assign(spotlight.style, {
+    left:`${focusLeft}px`, top:`${focusTop}px`,
+    width:`${Math.max(0, focusRight - focusLeft)}px`,
+    height:`${Math.max(0, focusBottom - focusTop)}px`
+  });
+  spotlight.hidden = false;
+
+  Object.assign(card.style, { left:'12px', right:'12px', top:'12px', bottom:'auto', width:'auto', maxWidth:'460px', maxHeight:'min(60dvh, 480px)', margin:'0 auto' });
+  const naturalRect = card.getBoundingClientRect();
+  const naturalWidth = Math.min(naturalRect.width || 420, viewportWidth - safe * 2);
+  const naturalHeight = Math.min(naturalRect.height || 360, viewportHeight - safe - bottomSafe);
+  const regions = {
+    right:{ x:focusRight + gap, y:safe, width:Math.max(0, viewportWidth - focusRight - gap - safe), height:Math.max(0, viewportHeight - safe - bottomSafe) },
+    left:{ x:safe, y:safe, width:Math.max(0, focusLeft - gap - safe), height:Math.max(0, viewportHeight - safe - bottomSafe) },
+    below:{ x:safe, y:focusBottom + gap, width:Math.max(0, viewportWidth - safe * 2), height:Math.max(0, viewportHeight - focusBottom - gap - bottomSafe) },
+    above:{ x:safe, y:safe, width:Math.max(0, viewportWidth - safe * 2), height:Math.max(0, focusTop - gap - safe) }
+  };
+  const verticalOrder = targetRect.top + targetRect.height / 2 < viewportHeight / 2 ? ['below','above'] : ['above','below'];
+  const order = viewportWidth >= 768 ? ['right','left',...verticalOrder] : verticalOrder;
+  const candidates = order.map(name => regions[name]);
+  const region = candidates.find(item => item.width >= Math.min(naturalWidth, 300) && item.height >= 180)
+    || candidates.reduce((best, item) => item.width * item.height > best.width * best.height ? item : best, candidates[0]);
+  const cardWidth = Math.max(260, Math.min(naturalWidth, region.width));
+  const cardHeight = Math.min(naturalHeight, region.height);
+  const cardLeft = region.x + Math.max(0, (region.width - cardWidth) / 2);
+  const cardTop = region.y + Math.max(0, (region.height - cardHeight) / 2);
+  Object.assign(card.style, {
+    left:`${Math.max(safe, cardLeft)}px`, right:'auto', top:`${Math.max(safe, cardTop)}px`, bottom:'auto',
+    width:`${cardWidth}px`, maxWidth:`${Math.max(260, region.width)}px`, maxHeight:`${Math.max(160, region.height)}px`, margin:'0'
+  });
 }
 
 function renderTourStep() {
@@ -2102,8 +2137,10 @@ function renderTourStep() {
   document.body.classList.toggle('show-today-tools', tourToolsWereOpen || Boolean(step.requireTools));
   tourTarget = document.querySelector(step.target);
   if (tourTarget) {
-    tourTarget.classList.add('tour-target');
-    tourTarget.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    const previousScrollBehavior = document.documentElement.style.scrollBehavior;
+    document.documentElement.style.scrollBehavior = 'auto';
+    tourTarget.scrollIntoView({ behavior:'auto', block:'center', inline:'nearest' });
+    document.documentElement.style.scrollBehavior = previousScrollBehavior;
   }
   document.getElementById('tour-progress').textContent = `${step.section}｜${tourIndex + 1} / ${TOUR_STEPS.length}`;
   document.getElementById('tour-meter-fill').style.width = `${((tourIndex + 1) / TOUR_STEPS.length) * 100}%`;
@@ -2119,6 +2156,7 @@ function renderTourStep() {
   document.getElementById('tour-next').textContent = tourIndex === TOUR_STEPS.length - 1 ? '完成' : '下一步';
   placeTourCard();
   requestAnimationFrame(placeTourCard);
+  setTimeout(placeTourCard, 80);
   setTimeout(placeTourCard, 260);
 }
 
