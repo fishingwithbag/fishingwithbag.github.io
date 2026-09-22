@@ -1,0 +1,42 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "base_places": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "custom_places": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "favs": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "cost_items": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "rental_info": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "day_regions": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "itinerary": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "collaborators_presence": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "edit_locks": {
+      ".read": true,
+      ".write": "auth != null"
+    }
+  }
+}

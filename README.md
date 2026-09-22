@@ -54,3 +54,13 @@ icons/
 ---
 
 Built for the road, not just for planning.
+
+## Firebase production 邊界
+
+這個 repository 是私人旅遊網站的 production source，固定使用 `gen-lang-client-0162948406`。`database.rules.json` 是這個網站自己的 production Rules，和公開的 Travel-OS OpenSource Rules 完全分開。
+
+- `.firebaserc` 固定指向私人 production project。
+- `firebase.json` 的 Database deploy 會先執行 `scripts/guard-private-firebase-deploy.mjs`。
+- 目標不是 `gen-lang-client-0162948406` 時直接拒絕部署。
+- `.firebaserc`、`firebase.json`、`database.rules.json` 必須已被 Git 追蹤且沒有未提交變更，才允許 production Rules deploy。
+- Travel-OS OpenSource repository 不得部署任何 Rules 到這個 project。
