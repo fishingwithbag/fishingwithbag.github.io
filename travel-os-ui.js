@@ -77,6 +77,47 @@
     return ({ spot: '景點', meal: '餐廳', stay: '住宿', transit: '交通', commute: '接送', flight: '航班', rental: '租車', other: '其他' })[item?.type] || item?.category || '行程';
   }
 
+  function parkingSpotUrl(spot, item) {
+    if (spot?.mapsUrl) return String(spot.mapsUrl);
+    if (!spot?.name) return '';
+    const area = item?.city || item?.region || '';
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${spot.name} ${area} Japan`)}`;
+  }
+
+  function focusParkingRows(item, viewGroup = 'all') {
+    const parking = item?.parking;
+    if (!parking || typeof parking !== 'object') return [];
+    const mode = parking.mode === 'split' ? 'split' : 'shared';
+    const itemGroup = item?.travelGroup === 'carA' || item?.travelGroup === 'carB' ? item.travelGroup : 'all';
+    const definitions = mode === 'shared'
+      ? [{ badge: '停車', spot: parking.shared?.primary }]
+      : (itemGroup === 'all'
+          ? (viewGroup === 'carA' || viewGroup === 'carB' ? [viewGroup] : ['carA', 'carB'])
+          : [itemGroup])
+        .map(group => ({ badge: group === 'carA' ? '13號' : '15號', spot: parking[group]?.primary }));
+
+    return definitions
+      .filter(({ spot }) => Boolean(spot?.name || spot?.mapsUrl))
+      .map(({ badge, spot }) => {
+        const meta = [];
+        if (Number(spot.walkMin) > 0) meta.push(`步行 ${Number(spot.walkMin)} 分`);
+        if (Number(spot.fee) > 0) meta.push(`¥${Number(spot.fee).toLocaleString()}`);
+        return {
+          badge,
+          name: String(spot.name || '開啟停車場導航'),
+          url: parkingSpotUrl(spot, item),
+          meta: meta.join(' · ')
+        };
+      });
+  }
+
+  function focusParkingHtml(item, viewGroup) {
+    const rows = focusParkingRows(item, viewGroup);
+    if (!rows.length) return '';
+    const icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M9 17V7h4.2a3.4 3.4 0 0 1 0 6.8H9m0-3.4h4.2"/></svg>';
+    return `<div class="focus-parking-list" aria-label="停車資訊">${rows.map(row => `<a class="focus-parking" href="${escapeValue(row.url)}" target="_blank" rel="noopener" aria-label="導航至${escapeValue(row.name)}">${icon}<span class="focus-parking__copy"><small>${escapeValue(row.badge)}</small><strong>${escapeValue(row.name)}</strong>${row.meta ? `<em>${escapeValue(row.meta)}</em>` : ''}</span><span class="focus-parking__arrow" aria-hidden="true">↗</span></a>`).join('')}</div>`;
+  }
+
   function mapsUrl(item) {
     if (!item) return '#';
     const flightNo = String(item.flightNo || '').toUpperCase().replace(/\s+/g, '');
@@ -92,11 +133,8 @@
       const rentalPoint = item.city || item.region || item.name;
       return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${rentalPoint} Japan`)}`;
     }
-    const parking = item.parking || {};
-    const preferred = parking.mode === 'split'
-      ? parking[item.travelGroup]?.primary?.mapsUrl
-      : parking.shared?.primary?.mapsUrl;
-    if (preferred) return preferred;
+    const preferredParking = focusParkingRows(item, item.travelGroup)[0];
+    if (preferredParking?.url) return preferredParking.url;
     const query = encodeURIComponent(`${item.name || ''} ${item.city || item.region || ''} Japan`);
     return item.googlePlaceId
       ? `https://www.google.com/maps/search/?api=1&query=${query}&query_place_id=${encodeURIComponent(item.googlePlaceId)}`
@@ -229,8 +267,10 @@
   function openDetail(item, options = {}) {
     const dialog = detailDialog();
     document.getElementById('detail-sheet-title').textContent = item.name || '未命名行程';
-    const parking = item.parking || {};
-    const activeParking = parking.mode === 'split' ? parking[item.travelGroup] : parking.shared;
+    const parkingRows = focusParkingRows(item, options.viewGroup || 'all');
+    const parkingSummary = parkingRows.length
+      ? parkingRows.map(row => `${row.badge === '停車' ? '' : `${row.badge}：`}${row.name}`).join('／')
+      : '未設定';
     const rows = [
       ['時間', `${item.start || '--:--'} - ${item.end || '--:--'}`],
       ['城市', item.city || item.region || '未設定'],
@@ -238,7 +278,7 @@
       ['營業', item.hours || '未設定'],
       ['到下一站', legSummary(item, null)],
       ['費用', item.cost ? `¥${Number(item.cost).toLocaleString()}` : '未設定'],
-      ['停車', activeParking?.primary?.name || '未設定'],
+      ['停車', parkingSummary],
       ['備註', item.note || '無']
     ];
     document.getElementById('detail-sheet-body').innerHTML = rows.map(([label, value]) => `<div><span>${escapeValue(label)}</span><strong>${escapeValue(value)}</strong></div>`).join('');
@@ -289,8 +329,8 @@
       if (!pair.current) {
         current.innerHTML = `<div class="focus-label"><span>${focusStateLabel}</span><span>EMPTY</span></div><h2 class="focus-name">這天還沒有行程</h2><p class="focus-meta">從景點庫選擇地點，或手動新增。</p><div class="dashboard-actions"><a class="gmap-primary" href="index.html?view=places">打開景點庫</a><button class="focus-secondary" type="button" data-open-add>＋</button></div>`;
       } else {
-        current.innerHTML = `<div class="focus-label"><span>${focusStateLabel}</span><span>${escapeValue(pair.current.start || '--:--')}</span></div><h2 class="focus-name">${escapeValue(pair.current.name)}</h2><p class="focus-meta"><span>${escapeValue(pair.current.start || '--:--')} - ${escapeValue(pair.current.end || '--:--')}</span><span>${escapeValue(typeName(pair.current))}</span><span>${escapeValue(groupName(pair.current))}</span><span>${escapeValue(city)}</span></p><div class="dashboard-actions"><a class="gmap-primary" href="${escapeValue(mapsUrl(pair.current))}" target="_blank" rel="noopener">${mapsIcon()}<span>Google Maps</span></a><button class="focus-secondary" type="button" data-detail-current aria-label="查看詳情">•••</button></div>`;
-        current.querySelector('[data-detail-current]').addEventListener('click', () => openDetail(pair.current));
+        current.innerHTML = `<div class="focus-label"><span>${focusStateLabel}</span><span>${escapeValue(pair.current.start || '--:--')}</span></div><h2 class="focus-name">${escapeValue(pair.current.name)}</h2><p class="focus-meta"><span>${escapeValue(pair.current.start || '--:--')} - ${escapeValue(pair.current.end || '--:--')}</span><span>${escapeValue(typeName(pair.current))}</span><span>${escapeValue(groupName(pair.current))}</span><span>${escapeValue(city)}</span></p>${focusParkingHtml(pair.current, groupView)}<div class="dashboard-actions"><a class="gmap-primary" href="${escapeValue(mapsUrl(pair.current))}" target="_blank" rel="noopener">${mapsIcon()}<span>Google Maps</span></a><button class="focus-secondary" type="button" data-detail-current aria-label="查看詳情">•••</button></div>`;
+        current.querySelector('[data-detail-current]').addEventListener('click', () => openDetail(pair.current, { date, viewGroup: groupView }));
       }
       current.querySelector('[data-open-add]')?.addEventListener('click', () => document.getElementById('btn-add-item')?.click());
 
