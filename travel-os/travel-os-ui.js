@@ -78,25 +78,34 @@
   }
 
   function parkingSpotUrl(spot, item) {
-    if (spot?.mapsUrl) return String(spot.mapsUrl);
+    if (spot?.mapsUrl) {
+      try {
+        const url = new URL(String(spot.mapsUrl));
+        if (url.protocol === 'https:') return url.href;
+      } catch (_) { /* Fall back to a search link below. */ }
+    }
     if (!spot?.name) return '';
     const area = item?.city || item?.region || '';
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${spot.name} ${area} Japan`)}`;
   }
 
-  function focusParkingRows(item, viewGroup = 'all') {
+  function focusParkingRows(item, viewGroup = 'all', includeBackup = false) {
     const parking = item?.parking;
     if (!parking || typeof parking !== 'object') return [];
     const mode = parking.mode === 'split' ? 'split' : 'shared';
     const itemGroup = item?.travelGroup === 'carA' || item?.travelGroup === 'carB' ? item.travelGroup : 'all';
     const definitions = mode === 'shared'
-      ? [{ badge: '停車', spot: parking.shared?.primary }]
+      ? [{ badge: '停車', set: parking.shared }]
       : (itemGroup === 'all'
           ? (viewGroup === 'carA' || viewGroup === 'carB' ? [viewGroup] : ['carA', 'carB'])
           : [itemGroup])
-        .map(group => ({ badge: group === 'carA' ? '13號' : '15號', spot: parking[group]?.primary }));
+        .map(group => ({ badge: group === 'carA' ? '13號' : '15號', set: parking[group] }));
 
     return definitions
+      .flatMap(({ badge, set }) => [
+        { badge, spot: set?.primary },
+        ...(includeBackup ? [{ badge: `${badge}備用`, spot: set?.backup }] : [])
+      ])
       .filter(({ spot }) => Boolean(spot?.name || spot?.mapsUrl))
       .map(({ badge, spot }) => {
         const meta = [];
@@ -108,7 +117,8 @@
           url: parkingSpotUrl(spot, item),
           meta: meta.join(' · ')
         };
-      });
+      })
+      .filter(row => Boolean(row.url));
   }
 
   function focusParkingHtml(item, viewGroup) {
@@ -118,7 +128,7 @@
     return `<div class="focus-parking-list" aria-label="停車資訊">${rows.map(row => `<a class="focus-parking" href="${escapeValue(row.url)}" target="_blank" rel="noopener" aria-label="導航至${escapeValue(row.name)}">${icon}<span class="focus-parking__copy"><small>${escapeValue(row.badge)}</small><strong>${escapeValue(row.name)}</strong>${row.meta ? `<em>${escapeValue(row.meta)}</em>` : ''}</span><span class="focus-parking__arrow" aria-hidden="true">↗</span></a>`).join('')}</div>`;
   }
 
-  function mapsUrl(item) {
+  function destinationMapsUrl(item) {
     if (!item) return '#';
     const flightNo = String(item.flightNo || '').toUpperCase().replace(/\s+/g, '');
     if (item.type === 'flight') {
@@ -133,12 +143,24 @@
       const rentalPoint = item.city || item.region || item.name;
       return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${rentalPoint} Japan`)}`;
     }
-    const preferredParking = focusParkingRows(item, item.travelGroup)[0];
-    if (preferredParking?.url) return preferredParking.url;
     const query = encodeURIComponent(`${item.name || ''} ${item.city || item.region || ''} Japan`);
     return item.googlePlaceId
       ? `https://www.google.com/maps/search/?api=1&query=${query}&query_place_id=${encodeURIComponent(item.googlePlaceId)}`
       : `https://www.google.com/maps/search/?api=1&query=${query}`;
+  }
+
+  function mapsUrl(item) {
+    if (!item || item.type === 'flight' || item.type === 'rental') return destinationMapsUrl(item);
+    return focusParkingRows(item, item.travelGroup)[0]?.url || destinationMapsUrl(item);
+  }
+
+  function nextInfoHtml(item, viewGroup = 'all') {
+    const note = String(item?.note || '').trim();
+    const parkingRows = focusParkingRows(item, viewGroup, true);
+    const parking = parkingRows.length
+      ? `<div class="next-parking" aria-label="下一站停車資訊"><span class="next-info-label">停車</span><div class="next-parking__list">${parkingRows.map(row => `<a href="${escapeValue(row.url)}" target="_blank" rel="noopener" aria-label="導航至${escapeValue(row.name)}"><strong>${escapeValue(row.badge)}</strong><span>${escapeValue(row.name)}${row.meta ? ` · ${escapeValue(row.meta)}` : ''}</span><span aria-hidden="true">↗</span></a>`).join('')}</div></div>`
+      : (['spot', 'meal', 'stay'].includes(item?.type) ? '<p class="next-parking-empty">停車資訊未設定</p>' : '');
+    return `${note ? `<p class="next-note"><span class="next-info-label">備註</span><span>${escapeValue(note)}</span></p>` : ''}${parking}`;
   }
 
   function legSummary(item, nextItem) {
@@ -223,7 +245,7 @@
       const next = document.getElementById('dashboard-next');
       document.getElementById('dashboard-next-time').textContent = pair.next?.start || '--:--';
       next.innerHTML = pair.next
-        ? `<h3>${escapeValue(pair.next.name)}</h3><p>${escapeValue(legSummary(pair.current, pair.next))}　${escapeValue(groupName(pair.next))}</p><div class="dashboard-next__actions"><button class="next-detail" type="button" data-detail-next>查看備註・編輯</button></div>`
+        ? `<h3>${escapeValue(pair.next.name)}</h3><p>前往下一站：${escapeValue(legSummary(pair.current, pair.next))} · ${escapeValue(groupName(pair.next))}</p>${nextInfoHtml(pair.next)}<div class="dashboard-next__actions next-actions"><a class="next-maps" aria-label="在 Google Maps 開啟下一站" href="${escapeValue(destinationMapsUrl(pair.next))}" target="_blank" rel="noopener">${mapsIcon()}<span>Google Maps</span></a><button class="next-detail" type="button" data-detail-next>詳情・編輯</button></div>`
         : `<h3>${beforeTrip ? '首日沒有下一站' : '今天沒有下一站'}</h3><p>可以留白，也可以到行程管理加入安排。</p>`;
       next.querySelector('[data-detail-next]')?.addEventListener('click', () => openDetail(pair.next, { date: day.date }));
 
@@ -336,7 +358,7 @@
 
       const next = document.getElementById('today-next');
       next.innerHTML = pair.next
-        ? `<div class="next-label"><span>NEXT</span><span>${escapeValue(pair.next.start || '--:--')}</span></div><div class="next-row"><h2>${escapeValue(pair.next.name)}</h2><p>${escapeValue(legSummary(pair.current, pair.next))}</p></div><button class="next-detail" type="button" data-detail-next>查看備註・編輯</button>`
+        ? `<div class="next-label"><span>NEXT</span><span>${escapeValue(pair.next.start || '--:--')}</span></div><div class="next-row"><h2>${escapeValue(pair.next.name)}</h2><p>前往下一站：${escapeValue(legSummary(pair.current, pair.next))}</p></div>${nextInfoHtml(pair.next, groupView)}<div class="next-actions"><a class="next-maps" aria-label="在 Google Maps 開啟下一站" href="${escapeValue(destinationMapsUrl(pair.next))}" target="_blank" rel="noopener">${mapsIcon()}<span>Google Maps</span></a><button class="next-detail" type="button" data-detail-next>詳情・編輯</button></div>`
         : '<div class="next-label"><span>NEXT</span><span>DONE</span></div><div class="next-row"><h2>這天沒有下一站</h2><p>保留彈性</p></div>';
       next.querySelector('[data-detail-next]')?.addEventListener('click', () => openDetail(pair.next, { date, viewGroup: groupView }));
 

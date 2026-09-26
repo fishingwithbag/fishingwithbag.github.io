@@ -434,7 +434,7 @@ button:active,a:active{transform:translateY(1px)}
   .it-right .os-panel__head{padding:10px 12px!important}.it-right .os-panel__head h3{font-size:14px!important}.it-right .action-btn{min-height:40px!important;padding:8px 10px!important;font-size:11px!important}
 }
 
-</style><link href="travel-os.css?v=20260922a" rel="stylesheet"/></head>
+</style><link href="travel-os.css?v=20260926a" rel="stylesheet"/></head>
 <body class="travel-os-page" data-page="today">
 <a class="skip-link" href="#today-workspace">跳到主要內容</a>
 <header class="topbar os-topbar">
@@ -2049,7 +2049,7 @@ const TOUR_STEPS = [
   { section:'閱讀行程', target:'#group-view', title:'只看特定車組', body:'可查看所有行程、13 號車或 15 號車。', points:['「全員同行」會同時出現在兩個車組。','切換車組只改變顯示範圍，不會刪除其他組資料。','手機上可以直接在日期下方切換。'] },
   { section:'協作設定', target:'.region-picker', requireTools:true, title:'設定當日城市', body:'今日城市可以複選，用來描述這一天會經過的主要地區。', points:['按城市即可加入或移除。','這不會修改景點本身的地區欄位。','城市設定會即時同步給其他協作者。'] },
   { section:'現場使用', target:'#today-now', title:'NOW 顯示目前行程', body:'旅途中會依所選日期與時間顯示現在進行中的安排。', points:['Google Maps 按鈕負責真正導航。','詳情可查看完整備註與資料。','旅程尚未開始時，會先顯示當日第一站供準備。','沒有資料時可從景點庫加入或手動新增。'] },
-  { section:'現場使用', target:'#today-next', title:'NEXT 也能查看備註與編輯', body:'NEXT 顯示下一站及目前站到下一站的交通摘要。', points:['按「查看備註・編輯」可先查閱資料。','編輯會定位到正確的行程項目。','交通時間屬於目前站到下一站，不是下一站本身。'] },
+  { section:'現場使用', target:'#today-next', title:'NEXT 直接顯示下一站資訊', body:'NEXT 直接顯示備註、停車資訊及下一站地圖；交通摘要屬於目前站到下一站。', points:['備註和主要／備用停車場可在卡片直接查看。','按「Google Maps」開啟下一站目的地，停車場連結則分別導航。','按「詳情・編輯」可修改這一站。'] },
   { section:'編排行程', target:'.later-plan__head', title:'稍後行程是完整時間軸', body:'每張行程卡都保留查看備註、Google Maps、編輯與刪除功能。', points:['拖曳排序會調整站點順序。','修改時間、車組、類型與備註請按編輯。','刪除前會再次確認。','協作者正在編輯時，系統會暫時鎖定同一項目。'] },
   { section:'交通路段', target:'.journey-leg, .later-plan__head', title:'設定開車或步行到下一站', body:'在行程編輯中設定「交通方式到下一站」，系統才會計算該路段。', points:['DRIVE 使用 Google Traffic-aware 建議時間。','WALK 使用步行路線。','畫面顯示時間、距離、Google Maps 與重新計算。','最後一站沒有下一站，所以不會顯示交通路段。'] },
   { section:'交通路段', target:'.journey-leg, .later-plan__head', title:'座標與快取如何避免重複查詢', body:'系統優先使用已保存的座標，缺少時才用地址做一次 Geocoding fallback。', points:['重新整理、切換日期、切換車組都不會自動呼叫 API。','相同起點、終點與交通方式會直接讀 Firebase 快取。','只有資料變更、快取不存在或按重新計算時才查詢。','顯示「無法取得位置」時，可到景點收藏編輯並補選 Google 地點。'] },
@@ -2266,6 +2266,6 @@ window.addEventListener('pagehide', () => {
   releaseItineraryLock();
 });
 </script>
-<script src="travel-os-ui.js?v=20260922a"></script>
+<script src="travel-os-ui.js?v=20260926a"></script>
 </body>
 </html>
