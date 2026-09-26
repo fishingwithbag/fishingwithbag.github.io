@@ -38,6 +38,12 @@
     return Math.max(0, next);
   }
 
+  function calendarDaysBetween(fromDate, toDate) {
+    const from = Date.parse(`${fromDate}T00:00:00Z`);
+    const to = Date.parse(`${toDate}T00:00:00Z`);
+    return Math.round((to - from) / 86400000);
+  }
+
   function itemArray(raw, date) {
     const value = raw && raw[date];
     if (!value) return [];
@@ -71,7 +77,58 @@
     return ({ spot: '景點', meal: '餐廳', stay: '住宿', transit: '交通', commute: '接送', flight: '航班', rental: '租車', other: '其他' })[item?.type] || item?.category || '行程';
   }
 
-  function mapsUrl(item) {
+  function parkingSpotUrl(spot, item) {
+    if (spot?.mapsUrl) {
+      try {
+        const url = new URL(String(spot.mapsUrl));
+        if (url.protocol === 'https:') return url.href;
+      } catch (_) { /* Fall back to a search link below. */ }
+    }
+    if (!spot?.name) return '';
+    const area = item?.city || item?.region || '';
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${spot.name} ${area} Japan`)}`;
+  }
+
+  function focusParkingRows(item, viewGroup = 'all', includeBackup = false) {
+    const parking = item?.parking;
+    if (!parking || typeof parking !== 'object') return [];
+    const mode = parking.mode === 'split' ? 'split' : 'shared';
+    const itemGroup = item?.travelGroup === 'carA' || item?.travelGroup === 'carB' ? item.travelGroup : 'all';
+    const definitions = mode === 'shared'
+      ? [{ badge: '停車', set: parking.shared }]
+      : (itemGroup === 'all'
+          ? (viewGroup === 'carA' || viewGroup === 'carB' ? [viewGroup] : ['carA', 'carB'])
+          : [itemGroup])
+        .map(group => ({ badge: group === 'carA' ? '13號' : '15號', set: parking[group] }));
+
+    return definitions
+      .flatMap(({ badge, set }) => [
+        { badge, spot: set?.primary },
+        ...(includeBackup ? [{ badge: `${badge}備用`, spot: set?.backup }] : [])
+      ])
+      .filter(({ spot }) => Boolean(spot?.name || spot?.mapsUrl))
+      .map(({ badge, spot }) => {
+        const meta = [];
+        if (Number(spot.walkMin) > 0) meta.push(`步行 ${Number(spot.walkMin)} 分`);
+        if (Number(spot.fee) > 0) meta.push(`¥${Number(spot.fee).toLocaleString()}`);
+        return {
+          badge,
+          name: String(spot.name || '開啟停車場導航'),
+          url: parkingSpotUrl(spot, item),
+          meta: meta.join(' · ')
+        };
+      })
+      .filter(row => Boolean(row.url));
+  }
+
+  function focusParkingHtml(item, viewGroup) {
+    const rows = focusParkingRows(item, viewGroup);
+    if (!rows.length) return '';
+    const icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M9 17V7h4.2a3.4 3.4 0 0 1 0 6.8H9m0-3.4h4.2"/></svg>';
+    return `<div class="focus-parking-list" aria-label="停車資訊">${rows.map(row => `<a class="focus-parking" href="${escapeValue(row.url)}" target="_blank" rel="noopener" aria-label="導航至${escapeValue(row.name)}">${icon}<span class="focus-parking__copy"><small>${escapeValue(row.badge)}</small><strong>${escapeValue(row.name)}</strong>${row.meta ? `<em>${escapeValue(row.meta)}</em>` : ''}</span><span class="focus-parking__arrow" aria-hidden="true">↗</span></a>`).join('')}</div>`;
+  }
+
+  function destinationMapsUrl(item) {
     if (!item) return '#';
     const flightNo = String(item.flightNo || '').toUpperCase().replace(/\s+/g, '');
     if (item.type === 'flight') {
@@ -86,15 +143,24 @@
       const rentalPoint = item.city || item.region || item.name;
       return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${rentalPoint} Japan`)}`;
     }
-    const parking = item.parking || {};
-    const preferred = parking.mode === 'split'
-      ? parking[item.travelGroup]?.primary?.mapsUrl
-      : parking.shared?.primary?.mapsUrl;
-    if (preferred) return preferred;
     const query = encodeURIComponent(`${item.name || ''} ${item.city || item.region || ''} Japan`);
     return item.googlePlaceId
       ? `https://www.google.com/maps/search/?api=1&query=${query}&query_place_id=${encodeURIComponent(item.googlePlaceId)}`
       : `https://www.google.com/maps/search/?api=1&query=${query}`;
+  }
+
+  function mapsUrl(item) {
+    if (!item || item.type === 'flight' || item.type === 'rental') return destinationMapsUrl(item);
+    return focusParkingRows(item, item.travelGroup)[0]?.url || destinationMapsUrl(item);
+  }
+
+  function nextInfoHtml(item, viewGroup = 'all') {
+    const note = String(item?.note || '').trim();
+    const parkingRows = focusParkingRows(item, viewGroup, true);
+    const parking = parkingRows.length
+      ? `<div class="next-parking" aria-label="下一站停車資訊"><span class="next-info-label">停車</span><div class="next-parking__list">${parkingRows.map(row => `<a href="${escapeValue(row.url)}" target="_blank" rel="noopener" aria-label="導航至${escapeValue(row.name)}"><strong>${escapeValue(row.badge)}</strong><span>${escapeValue(row.name)}${row.meta ? ` · ${escapeValue(row.meta)}` : ''}</span><span aria-hidden="true">↗</span></a>`).join('')}</div></div>`
+      : (['spot', 'meal', 'stay'].includes(item?.type) ? '<p class="next-parking-empty">停車資訊未設定</p>' : '');
+    return `${note ? `<p class="next-note"><span class="next-info-label">備註</span><span>${escapeValue(note)}</span></p>` : ''}${parking}`;
   }
 
   function legSummary(item, nextItem) {
@@ -151,15 +217,26 @@
       const items = itemArray(itinerary, day.date);
       const pair = activePair(items, day.date);
       const city = pair.current?.city || pair.current?.region || (Array.isArray(dayRegions[day.date]) ? dayRegions[day.date][0] : dayRegions[day.date]) || day.city;
-      document.getElementById('trip-progress-day').textContent = `DAY ${dayIndex + 1} / ${tripDays.length}`;
-      document.getElementById('trip-progress-label').textContent = now.date < tripDays[0].date ? '下一趟旅程' : now.date > tripDays[tripDays.length - 1].date ? '旅程已結束' : '旅程進行中';
+      const beforeTrip = now.date < tripDays[0].date;
+      const afterTrip = now.date > tripDays[tripDays.length - 1].date;
+      const daysUntilTrip = beforeTrip ? calendarDaysBetween(now.date, tripDays[0].date) : 0;
+      document.getElementById('dashboard-title').textContent = beforeTrip
+        ? `距離出遊還有 ${daysUntilTrip} 天。`
+        : afterTrip
+          ? '旅程已結束，回顧美好足跡。'
+          : '今天，從下一站開始。';
+      document.getElementById('trip-progress-day').textContent = beforeTrip ? '9/30 出發' : `DAY ${dayIndex + 1} / ${tripDays.length}`;
+      document.getElementById('trip-progress-label').textContent = beforeTrip ? '行前倒數' : afterTrip ? '旅程已結束' : '旅程進行中';
+      document.getElementById('dashboard-focus-label').textContent = beforeTrip ? 'FIRST' : afterTrip ? 'LAST' : 'NOW';
+      document.getElementById('dashboard-fleet-label').textContent = beforeTrip ? '首日用車' : afterTrip ? '末日用車' : '今日用車';
+      document.getElementById('dashboard-fleet-hint').textContent = `確認兩台租車的取車狀態，以及${beforeTrip ? '首日' : afterTrip ? '末日' : '今日'}需要一起行動的站點。`;
       document.getElementById('dashboard-date').textContent = `${day.date.replaceAll('-', '.')}  ${city || '九州'}`;
       document.getElementById('dashboard-city').textContent = city || '九州';
 
       const focus = document.getElementById('dashboard-now');
       if (!pair.current) {
         focus.classList.remove('skeleton-block');
-        focus.innerHTML = '<p class="dashboard-focus__time">DAY START</p><h2>今天還沒有行程</h2><p class="dashboard-focus__meta">從景點庫挑選，或直接新增一個行程。</p><div class="dashboard-actions"><a class="gmap-primary" href="index.html?view=places">打開景點庫</a><a class="focus-secondary" href="itinerary.html">新增</a></div>';
+        focus.innerHTML = `<p class="dashboard-focus__time">DAY START</p><h2>${beforeTrip ? '首日還沒有行程' : '今天還沒有行程'}</h2><p class="dashboard-focus__meta">從景點庫挑選，或直接新增一個行程。</p><div class="dashboard-actions"><a class="gmap-primary" href="index.html?view=places">打開景點庫</a><a class="focus-secondary" href="itinerary.html">新增</a></div>`;
       } else {
         focus.classList.remove('skeleton-block');
         focus.innerHTML = `<p class="dashboard-focus__time">${escapeValue(pair.current.start || '--:--')} - ${escapeValue(pair.current.end || '--:--')}</p><h2>${escapeValue(pair.current.name)}</h2><p class="dashboard-focus__meta"><span>${escapeValue(typeName(pair.current))}</span><span>${escapeValue(groupName(pair.current))}</span><span>${escapeValue(pair.current.city || pair.current.region || city || '')}</span></p><div class="dashboard-actions"><a class="gmap-primary" href="${escapeValue(mapsUrl(pair.current))}" target="_blank" rel="noopener">${mapsIcon()}<span>Google Maps</span></a><a class="focus-secondary" href="itinerary.html">詳情</a></div>`;
@@ -168,8 +245,9 @@
       const next = document.getElementById('dashboard-next');
       document.getElementById('dashboard-next-time').textContent = pair.next?.start || '--:--';
       next.innerHTML = pair.next
-        ? `<h3>${escapeValue(pair.next.name)}</h3><p>${escapeValue(legSummary(pair.current, pair.next))}　${escapeValue(groupName(pair.next))}</p>`
-        : '<h3>今天沒有下一站</h3><p>可以留白，也可以到今日行程加入安排。</p>';
+        ? `<h3>${escapeValue(pair.next.name)}</h3><p>前往下一站：${escapeValue(legSummary(pair.current, pair.next))} · ${escapeValue(groupName(pair.next))}</p>${nextInfoHtml(pair.next)}<div class="dashboard-next__actions next-actions"><a class="next-maps" aria-label="在 Google Maps 開啟下一站" href="${escapeValue(destinationMapsUrl(pair.next))}" target="_blank" rel="noopener">${mapsIcon()}<span>Google Maps</span></a><button class="next-detail" type="button" data-detail-next>詳情・編輯</button></div>`
+        : `<h3>${beforeTrip ? '首日沒有下一站' : '今天沒有下一站'}</h3><p>可以留白，也可以到行程管理加入安排。</p>`;
+      next.querySelector('[data-detail-next]')?.addEventListener('click', () => openDetail(pair.next, { date: day.date }));
 
       const fleet = document.getElementById('dashboard-fleet');
       fleet.innerHTML = ['carA', 'carB'].map((key, index) => {
@@ -178,7 +256,7 @@
         const pickup = [pickupDate, rental['pickup-time']].filter(Boolean).join(' ');
         const details = [rental.car || rental.company || '車輛尚未設定', pickup ? `${pickup} 取車` : '取車時間尚未設定'].join(' · ');
         return `<p>${index === 0 ? '13號車' : '15號車'}<small>${escapeValue(details)}</small></p>`;
-      }).join('') + `<p>共同行程<small>今天 ${items.filter(item => groupName(item) === '全員').length} 站</small></p>`;
+      }).join('') + `<p>共同行程<small>${beforeTrip ? '首日' : afterTrip ? '末日' : '今天'} ${items.filter(item => groupName(item) === '全員').length} 站</small></p>`;
 
       const warning = items.find((item, index) => index && minutes(item.start) < minutes(items[index - 1].end) + Number(items[index - 1].transitMin || 0));
       document.getElementById('dashboard-alert').textContent = warning ? `${warning.name} 的抵達時間可能衝突` : '沒有需要立即處理的提醒';
@@ -208,11 +286,13 @@
     return dialog;
   }
 
-  function openDetail(item) {
+  function openDetail(item, options = {}) {
     const dialog = detailDialog();
     document.getElementById('detail-sheet-title').textContent = item.name || '未命名行程';
-    const parking = item.parking || {};
-    const activeParking = parking.mode === 'split' ? parking[item.travelGroup] : parking.shared;
+    const parkingRows = focusParkingRows(item, options.viewGroup || 'all');
+    const parkingSummary = parkingRows.length
+      ? parkingRows.map(row => `${row.badge === '停車' ? '' : `${row.badge}：`}${row.name}`).join('／')
+      : '未設定';
     const rows = [
       ['時間', `${item.start || '--:--'} - ${item.end || '--:--'}`],
       ['城市', item.city || item.region || '未設定'],
@@ -220,13 +300,21 @@
       ['營業', item.hours || '未設定'],
       ['到下一站', legSummary(item, null)],
       ['費用', item.cost ? `¥${Number(item.cost).toLocaleString()}` : '未設定'],
-      ['停車', activeParking?.primary?.name || '未設定'],
+      ['停車', parkingSummary],
       ['備註', item.note || '無']
     ];
     document.getElementById('detail-sheet-body').innerHTML = rows.map(([label, value]) => `<div><span>${escapeValue(label)}</span><strong>${escapeValue(value)}</strong></div>`).join('');
     document.getElementById('detail-sheet-edit').onclick = () => {
       dialog.close();
-      document.querySelector(`.btn-edit[data-key="${CSS.escape(String(item._key || ''))}"]`)?.click();
+      const editButton = document.querySelector(`.btn-edit[data-key="${CSS.escape(String(item._key || ''))}"]`);
+      if (editButton) {
+        editButton.click();
+        return;
+      }
+      const target = new URL('itinerary.html', location.href);
+      if (options.date) target.searchParams.set('date', options.date);
+      if (item._key) target.searchParams.set('edit', item._key);
+      location.href = `${target.pathname.split('/').pop()}${target.search}`;
     };
     dialog.showModal();
   }
@@ -234,7 +322,11 @@
   function setupToday() {
     if (document.body.dataset.page !== 'today' || typeof renderDay !== 'function') return;
     const actual = tokyoNow();
-    const initialIndex = closestDayIndex(actual.date);
+    const requestedParams = new URLSearchParams(location.search);
+    const requestedDate = requestedParams.get('date');
+    const requestedDayIndex = requestedDate ? TRIP_DAYS.findIndex(day => day.date === requestedDate) : -1;
+    const initialIndex = requestedDayIndex >= 0 ? requestedDayIndex : closestDayIndex(actual.date);
+    let pendingEditKey = requestedParams.get('edit');
     if (typeof currentDay !== 'undefined') currentDay = initialIndex;
 
     const originalRenderDay = renderDay;
@@ -247,6 +339,7 @@
       const day = tripDays[currentDay] || { date, city: '' };
       const regions = getDayRegions(date);
       const city = pair.current?.city || pair.current?.region || regions[0] || day.city || '九州';
+      const focusStateLabel = actual.date === date ? 'NOW' : actual.date < date ? 'START' : 'LAST';
       document.getElementById('today-date-label').textContent = `${date.slice(5).replace('-', '/')}  ${new Intl.DateTimeFormat('zh-TW', { weekday: 'short', timeZone: 'Asia/Tokyo' }).format(new Date(`${date}T12:00:00+09:00`))}`;
       document.getElementById('today-city-label').textContent = city;
       document.getElementById('today-day-count').textContent = `DAY ${currentDay + 1} / ${TRIP_DAYS.length}`;
@@ -256,17 +349,30 @@
 
       const current = document.getElementById('today-now');
       if (!pair.current) {
-        current.innerHTML = '<div class="focus-label"><span>NOW</span><span>EMPTY</span></div><h2 class="focus-name">今天還沒有行程</h2><p class="focus-meta">從景點庫選擇地點，或手動新增。</p><div class="dashboard-actions"><a class="gmap-primary" href="index.html?view=places">打開景點庫</a><button class="focus-secondary" type="button" data-open-add>＋</button></div>';
+        current.innerHTML = `<div class="focus-label"><span>${focusStateLabel}</span><span>EMPTY</span></div><h2 class="focus-name">這天還沒有行程</h2><p class="focus-meta">從景點庫選擇地點，或手動新增。</p><div class="dashboard-actions"><a class="gmap-primary" href="index.html?view=places">打開景點庫</a><button class="focus-secondary" type="button" data-open-add>＋</button></div>`;
       } else {
-        current.innerHTML = `<div class="focus-label"><span>NOW</span><span>${escapeValue(pair.current.start || '--:--')}</span></div><h2 class="focus-name">${escapeValue(pair.current.name)}</h2><p class="focus-meta"><span>${escapeValue(pair.current.start || '--:--')} - ${escapeValue(pair.current.end || '--:--')}</span><span>${escapeValue(typeName(pair.current))}</span><span>${escapeValue(groupName(pair.current))}</span><span>${escapeValue(city)}</span></p><div class="dashboard-actions"><a class="gmap-primary" href="${escapeValue(mapsUrl(pair.current))}" target="_blank" rel="noopener">${mapsIcon()}<span>Google Maps</span></a><button class="focus-secondary" type="button" data-detail-current aria-label="查看詳情">•••</button></div>`;
-        current.querySelector('[data-detail-current]').addEventListener('click', () => openDetail(pair.current));
+        current.innerHTML = `<div class="focus-label"><span>${focusStateLabel}</span><span>${escapeValue(pair.current.start || '--:--')}</span></div><h2 class="focus-name">${escapeValue(pair.current.name)}</h2><p class="focus-meta"><span>${escapeValue(pair.current.start || '--:--')} - ${escapeValue(pair.current.end || '--:--')}</span><span>${escapeValue(typeName(pair.current))}</span><span>${escapeValue(groupName(pair.current))}</span><span>${escapeValue(city)}</span></p>${focusParkingHtml(pair.current, groupView)}<div class="dashboard-actions"><a class="gmap-primary" href="${escapeValue(mapsUrl(pair.current))}" target="_blank" rel="noopener">${mapsIcon()}<span>Google Maps</span></a><button class="focus-secondary" type="button" data-detail-current aria-label="查看詳情">•••</button></div>`;
+        current.querySelector('[data-detail-current]').addEventListener('click', () => openDetail(pair.current, { date, viewGroup: groupView }));
       }
       current.querySelector('[data-open-add]')?.addEventListener('click', () => document.getElementById('btn-add-item')?.click());
 
       const next = document.getElementById('today-next');
       next.innerHTML = pair.next
-        ? `<div class="next-label"><span>NEXT</span><span>${escapeValue(pair.next.start || '--:--')}</span></div><div class="next-row"><h2>${escapeValue(pair.next.name)}</h2><p>${escapeValue(legSummary(pair.current, pair.next))}</p></div>`
-        : '<div class="next-label"><span>NEXT</span><span>DONE</span></div><div class="next-row"><h2>今天沒有下一站</h2><p>保留彈性</p></div>';
+        ? `<div class="next-label"><span>NEXT</span><span>${escapeValue(pair.next.start || '--:--')}</span></div><div class="next-row"><h2>${escapeValue(pair.next.name)}</h2><p>前往下一站：${escapeValue(legSummary(pair.current, pair.next))}</p></div>${nextInfoHtml(pair.next, groupView)}<div class="next-actions"><a class="next-maps" aria-label="在 Google Maps 開啟下一站" href="${escapeValue(destinationMapsUrl(pair.next))}" target="_blank" rel="noopener">${mapsIcon()}<span>Google Maps</span></a><button class="next-detail" type="button" data-detail-next>詳情・編輯</button></div>`
+        : '<div class="next-label"><span>NEXT</span><span>DONE</span></div><div class="next-row"><h2>這天沒有下一站</h2><p>保留彈性</p></div>';
+      next.querySelector('[data-detail-next]')?.addEventListener('click', () => openDetail(pair.next, { date, viewGroup: groupView }));
+
+      if (pendingEditKey) {
+        const requestedEdit = document.querySelector(`.btn-edit[data-key="${CSS.escape(String(pendingEditKey))}"]`);
+        if (requestedEdit) {
+          pendingEditKey = null;
+          const cleanUrl = new URL(location.href);
+          cleanUrl.searchParams.delete('date');
+          cleanUrl.searchParams.delete('edit');
+          history.replaceState(null, '', `${cleanUrl.pathname}${cleanUrl.search}`);
+          requestedEdit.click();
+        }
+      }
     };
 
     document.getElementById('today-manage-toggle')?.addEventListener('click', event => {
